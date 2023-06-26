@@ -11,11 +11,13 @@ import dao.PhotographyStudiosDAO;
 import dao.RentalProductDAO;
 import dto.DressPhotoCombo;
 import dto.Location;
+import dto.OrderDetail;
 import dto.PhotographyStudio;
 import dto.Profile;
 import dto.RentalProduct;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
@@ -82,12 +84,98 @@ public class DispatcherServlet extends HttpServlet {
                 List<PhotographyStudio> listStudio = photoDAO.getAllPhotographyStudio();
                 List<DressPhotoCombo> listCombo = dressPhotoComboDAO.getAllDressPhotoCombo();
 
-                if (listLocation.size() > 0 && listProduct.size() > 0 && listStudio.size() > 0) {
-                    request.setAttribute("LIST_LOCATION", listLocation);
-                    request.setAttribute("LIST_PRODUCT", listProduct);
-                    request.setAttribute("LIST_STUDIO", listStudio);
-                    request.setAttribute("LIST_COMBO", listCombo);
+                List<OrderDetail> listOrder = new ArrayList<>();
+
+                // add location into list order
+                for (Location location : listLocation) {
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setName(location.getName());
+                    orderDetail.setDescription(location.getDescription());
+                    orderDetail.setPrice(location.getPrice());
+                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
+                    orderDetail.setActive(location.isActive());
+                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
+                    orderDetail.setItemId(location.getId()); // Map locationId to itemId
+                    orderDetail.setItemType("location"); // Set the itemType as "location"
+                    orderDetail.setImage(location.getImage());
+
+                    listOrder.add(orderDetail);
                 }
+
+                // product
+                for (PhotographyStudio studio : listStudio) {
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setName(studio.getName());
+                    orderDetail.setDescription(studio.getDescription());
+                    orderDetail.setPrice(studio.getPrice());
+                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
+                    orderDetail.setActive(studio.isActive());
+                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
+                    orderDetail.setItemId(studio.getId()); // Map locationId to itemId
+                    orderDetail.setItemType("studio"); // Set the itemType as "location"
+                    orderDetail.setImage(studio.getImage());
+
+                    listOrder.add(orderDetail);
+                }
+
+                // studio               
+                for (RentalProduct product : listProduct) {
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setName(product.getName());
+                    orderDetail.setDescription(product.getDescription());
+                    orderDetail.setPrice(product.getPrice());
+                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
+                    orderDetail.setActive(product.isActive());
+                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
+                    orderDetail.setItemId(product.getId()); // Map locationId to itemId
+                    orderDetail.setItemType("rental_product"); // Set the itemType as "location"
+                    orderDetail.setImage(product.getImage());
+                    listOrder.add(orderDetail);
+                }
+
+                // combo               
+                for (DressPhotoCombo combo : listCombo) {
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setName(combo.getComboName());
+                    orderDetail.setDescription(combo.getComboDescription());
+                    orderDetail.setPrice(combo.getPrice());
+                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
+                    orderDetail.setActive(combo.isActive());
+                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
+                    orderDetail.setItemId(combo.getId()); // Map locationId to itemId
+                    orderDetail.setItemType("combo"); // Set the itemType as "location"
+                    orderDetail.setImage(combo.getImage());
+
+                    listOrder.add(orderDetail);
+                }
+
+                // Set the number of entities per page
+                int entitiesPerPage = 6;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listOrder.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = getCurrentPage(request, "page", totalPages);
+
+                // Retrieve the sublist of entities based on the current page number
+//                List<Location> locationPage = getPageEntities(listLocation, currentPage, entitiesPerPage);
+//                List<RentalProduct> productPage = getPageEntities(listProduct, currentPage, entitiesPerPage);
+//                List<DressPhotoCombo> dessertPage = getPageEntities(listCombo, currentPage, entitiesPerPage);
+//                List<PhotographyStudio> studioPage = getPageEntities(listStudio, currentPage, entitiesPerPage);
+//
+//                request.setAttribute("LIST_LOCATION", locationPage);
+//                request.setAttribute("LIST_PRODUCT", productPage);
+//                request.setAttribute("LIST_COMBO", dessertPage);
+//                request.setAttribute("LIST_STUDIO", studioPage);
+
+                List<OrderDetail> listOrderDetailPage = getPageEntities(listOrder, currentPage, entitiesPerPage);
+                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
+
             }
             if ("Login".equals(action)) {
                 url = LOGIN_SERVLET;
@@ -130,6 +218,26 @@ public class DispatcherServlet extends HttpServlet {
             RequestDispatcher dispatcher = request.getRequestDispatcher(url);
             dispatcher.forward(request, response);
         }
+    }
+
+    private int getCurrentPage(HttpServletRequest request, String paramName, int totalPages) {
+        int currentPage = 1; // Default to the first page
+        String pageParam = request.getParameter(paramName);
+        if (pageParam != null && !pageParam.isEmpty()) {
+            currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) {
+                currentPage = 1;
+            } else if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+        }
+        return currentPage;
+    }
+
+    private <T> List<T> getPageEntities(List<T> entityList, int currentPage, int entitiesPerPage) {
+        int startIndex = (currentPage - 1) * entitiesPerPage;
+        int endIndex = Math.min(startIndex + entitiesPerPage, entityList.size());
+        return entityList.subList(startIndex, endIndex);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

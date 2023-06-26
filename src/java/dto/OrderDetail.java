@@ -13,6 +13,7 @@ public class OrderDetail implements Serializable {
     private int orderId;
     private int itemId;
     private String itemType;
+    private String image;
 
     // Constructors, getters, and setters
     public OrderDetail() {
@@ -57,6 +58,27 @@ public class OrderDetail implements Serializable {
         this.description = description;
         this.price = price;
         this.orderDate = orderDate;
+    }
+
+    public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate, boolean active, int orderId, int itemId, String itemType, String image) {
+        this.orderDetailId = orderDetailId;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.orderDate = orderDate;
+        this.active = active;
+        this.orderId = orderId;
+        this.itemId = itemId;
+        this.itemType = itemType;
+        this.image = image;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public int getItemId() {

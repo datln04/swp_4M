@@ -67,7 +67,7 @@ public class PhotoScheduleDAO implements Serializable {
             if (conn != null) {
                 String sql = "select schedule_id, user_id, location_id, studio_id,schedule_date,status\n"
                         + "from photo_schedules\n"
-                        + "where user_id = ? and status = 'confirm'";
+                        + "where user_id = ? and status = 'pending'";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, userId);
@@ -104,7 +104,7 @@ public class PhotoScheduleDAO implements Serializable {
             if (conn != null) {
                 String sql = "select schedule_id,user_id,location_id,schedule_date,status\n"
                         + "from photo_schedules\n"
-                        + "where studio_id = ? and status = 'confirm'";
+                        + "where studio_id = ? and status = 'pending'";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, studioId);
@@ -171,7 +171,7 @@ public class PhotoScheduleDAO implements Serializable {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
                 String sql = "update photo_schedules\n"
-                        + "set status = 'complete'\n"
+                        + "set status = 'confirm'\n"
                         + "where schedule_id = ?";
 
                 pst = conn.prepareStatement(sql);

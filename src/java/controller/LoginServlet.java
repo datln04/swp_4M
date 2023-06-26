@@ -91,6 +91,9 @@ public class LoginServlet extends HttpServlet {
 
                     //get list staff role
                     List<Role> listRole = roleDAO.getStaffRole();
+                    for (Role role : listRole) {
+                        System.out.println("---------------role: " + role.getRoleName());
+                    }
 
                     // manage user
                     List<Profile> listUser = dao.getAllProfile();

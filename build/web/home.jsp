@@ -187,6 +187,19 @@
                 padding: 1%;
             }
 
+            .pagination{
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .pagination a {
+                margin: 0 10px;
+            }
+
+            .pagination span {
+                margin: 0 10px;
+            }
+
 
         </style>
         <link 
@@ -248,6 +261,7 @@
                         </div>
                     </a>
                 </c:forEach>
+
                 <c:forEach items="${requestScope.LIST_STUDIO}" var="data">
                     <c:url var="detail" value="detail.jsp">
                         <c:param name="id" value="${data.id}" />
@@ -271,6 +285,7 @@
                         </div>
                     </a>
                 </c:forEach>
+
                 <c:forEach items="${requestScope.LIST_PRODUCT}" var="data">
                     <c:url var="detail" value="detail.jsp">
                         <c:param name="id" value="${data.id}" />
@@ -294,6 +309,7 @@
                         </div>
                     </a>
                 </c:forEach>
+
                 <c:forEach items="${requestScope.LIST_COMBO}" var="data">
                     <c:url var="detail" value="detail.jsp">
                         <c:param name="id" value="${data.id}" />
@@ -317,9 +333,65 @@
                         </div>
                     </a>
                 </c:forEach>
+
+                <c:forEach items="${requestScope.LIST_ORDER_PAGING}" var="data">
+                    <c:url var="detail" value="detail.jsp">
+                        <c:param name="id" value="${data.itemId}" />
+                        <c:param name="name" value="${data.name}" />
+                        <c:param name="description" value="${data.description}" />
+                        <c:param name="price" value="${data.price}" />
+                        <c:param name="image" value="${data.image}" />
+                    </c:url>
+                    <a href="${detail}" >
+                        <div class="card">
+                            <div class="card-image">
+                                <img src="${data.image}" alt="Image">
+                            </div>
+                            <div class="card-content">
+                                <h3>${data.name}</h3>
+                                <p>${data.description}</p>
+                                <p>Price For Rent: $ ${data.price}</p>
+                                <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
+                                <input type="submit" value="Add To Card" name="btAction" class="button" />
+                            </div>
+                        </div>
+                    </a>
+                </c:forEach>
             </div>  
         </div>
+        <!-- Paging navigation -->
+        <c:if test="${requestScope.totalPages > 1}">
+            <div class="pagination">
+                <c:choose>
+                    <c:when test="${requestScope.currentPage > 1}">
+                        <a href="?page=${requestScope.currentPage - 1}">Previous</a>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="disabled">Previous</span>
+                    </c:otherwise>
+                </c:choose>
 
+                <c:forEach begin="1" end="${requestScope.totalPages}" var="page">
+                    <c:choose>
+                        <c:when test="${requestScope.currentPage eq page}">
+                            <span class="current">${page}</span>
+                        </c:when>
+                        <c:otherwise>
+                            <a href="?page=${page}">${page}</a>
+                        </c:otherwise>
+                    </c:choose>
+                </c:forEach>
+
+                <c:choose>
+                    <c:when test="${requestScope.currentPage < requestScope.totalPages}">
+                        <a href="?page=${requestScope.currentPage + 1}">Next</a>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="disabled">Next</span>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </c:if>
         <!-- pop-up booking photo schedule -->
         <div id="popup" class="popup">
             <c:set var="totalPrice" value="0" />

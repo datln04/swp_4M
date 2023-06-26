@@ -34,7 +34,7 @@ public class RoleDAO implements Serializable {
             if (conn != null) {
                 String sql = "select role_id,role_name\n"
                         + "from roles\n"
-                        + "where role_name != 'user' and role_name != 'admin'";
+                        + "where role_id != 1 and role_id != 2";
 
                 pst = conn.prepareStatement(sql);
                 rs = pst.executeQuery();

@@ -291,7 +291,7 @@
                         </tr>
                         <c:forEach items="${sessionScope.LIST_ORDER_ADMIN}" var="order" varStatus="count">
                             <th style="border: none;">${count.index + 1}</th>
-                            <c:forEach items="${order.list}" var="orderItem" >
+                                <c:forEach items="${order.list}" var="orderItem" >
                                 <tr>                       
                                     <td>${orderItem.name}</td>
                                     <td>${orderItem.description}</td>
@@ -446,6 +446,8 @@
                     document.getElementById('userId').style.display = 'none';
                     document.getElementById('roleNameText').style.display = 'none';
                 } else {
+                    document.getElementById('userId').style.display = 'block';
+                    document.getElementById('roleNameText').style.display = 'block';
                     document.getElementById('userId').value = userId;
                 }
 

@@ -139,7 +139,7 @@ public class OrderDAO implements Serializable {
             if (conn != null) {
                 String sql = "select order_id,profile_id,order_date,status\n"
                         + "from orders\n"
-                        + "where status = 'confirm' or status = 'complete'";
+                        + "where status = 'pending'";
 
                 pst = conn.prepareStatement(sql);
 
