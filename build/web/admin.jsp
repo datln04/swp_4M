@@ -377,9 +377,10 @@
         <div id="popupAccount" class="popup">
             <div id="popupContent" class="popup-content">
                 <span class="close" onclick="closePopup()">&times;</span>
-                <h2>Update Location</h2>
+                <h2>Update Account</h2>
                 <form action="DispatcherServlet" method="POST">
-                    <input type="hidden" id="accountId" name="accountId" required="true">                        
+                    <input type="hidden" id="accountId" name="accountId">                        
+                    <input type="hidden" id="isUser" name="isUser">                        
 
                     <p for="userName">User Name:</p>
                     <input type="text" id="userName" name="userName" required="true"/>
@@ -414,7 +415,7 @@
         <div id="popup" class="popup">
             <div id="popupContent" class="popup-content">
                 <span class="close" onclick="closePopup()">&times;</span>
-                <h2>Update Location</h2>
+                <h2>Update Card</h2>
                 <form action="DispatcherServlet" method="POST">
                     <input type="hidden" id="orderDetailId" name="orderDetailId">
 
@@ -497,10 +498,12 @@
 
                 if (roleName === 'user') {
                     document.getElementById('userId').style.display = 'none';
+                    document.getElementById('isUser').value = 'true';
                     document.getElementById('roleNameText').style.display = 'none';
                 } else {
                     document.getElementById('userId').style.display = 'block';
                     document.getElementById('roleNameText').style.display = 'block';
+                    document.getElementById('isUser').value = '';
                     document.getElementById('userId').value = userId;
                 }
 
@@ -525,7 +528,6 @@
 
             function openPopupDeleteOrder(id) {
                 document.getElementById('orderId').value = id;
-                console.log('id: ', id)
                 document.getElementById('popupDeleteOrder').style.display = 'block';
             }
 

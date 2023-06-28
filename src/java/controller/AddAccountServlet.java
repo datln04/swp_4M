@@ -69,7 +69,7 @@ public class AddAccountServlet extends HttpServlet {
                 List<Profile> staff = new ArrayList<>();
 
                 for (Profile user : listUser) {
-                    if (user.getUserName().equals("user")) {
+                    if (user.getRoleName().equals("user")) {
                         users.add(user);
                     } else {
                         staff.add(user);

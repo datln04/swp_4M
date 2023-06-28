@@ -6,6 +6,7 @@
 package controller;
 
 import dao.AccountDAO;
+import dao.DressPhotoComboDAO;
 import dao.LocationDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
@@ -14,6 +15,7 @@ import dao.PhotographyStudiosDAO;
 import dao.RentalProductDAO;
 import dao.RoleDAO;
 import dao.studioStaffDAO;
+import dto.DressPhotoCombo;
 import dto.Location;
 import dto.Order;
 import dto.OrderDetail;
@@ -83,6 +85,7 @@ public class LoginServlet extends HttpServlet {
         RoleDAO roleDAO = new RoleDAO();
 //        studioStaffDAO studioStaffDAO = new studioStaffDAO();
         RentalProductDAO rentalProductDAO = new RentalProductDAO();
+        DressPhotoComboDAO comboDAO = new DressPhotoComboDAO();
 
         HttpSession session = request.getSession();
 
@@ -102,7 +105,7 @@ public class LoginServlet extends HttpServlet {
                     List<Profile> staff = new ArrayList<>();
 
                     for (Profile user : listUser) {
-                        if (user.getUserName().equals("user")) {
+                        if (user.getRoleName().equals("user")) {
                             users.add(user);
                         } else {
                             staff.add(user);
@@ -198,6 +201,8 @@ public class LoginServlet extends HttpServlet {
                                     listPhotoScheduleItem.add(photoScheduleItem);
                                 }
                             }
+                            
+                           
                             session.setAttribute("LIST_CARR_ITEM", listPhotoScheduleItem);
                             session.setAttribute("CART_ITEM", listPhotoScheduleItem.size());
                         }
@@ -208,6 +213,12 @@ public class LoginServlet extends HttpServlet {
 
                     List<PhotographyStudio> listStudio = studioDAO.getAllPhotographyStudio();
                     session.setAttribute("LIST_STUDIO", listStudio);
+                    
+                    List<RentalProduct> rentalProducts = rentalProductDAO.getAllRentalProduct();
+                    session.setAttribute("LIST_PRODUCT", rentalProducts);
+                    
+                    List<DressPhotoCombo> combos = comboDAO.getAllDressPhotoCombo();
+                    session.setAttribute("LIST_COMBO", combos);
 
                 } else if (RENTAL_STAFF_ROLE.equals(result.getRoleName())) {
                     url = RENTAL_STAFF_PAGE;

@@ -53,7 +53,9 @@ public class EditAccountServlet extends HttpServlet {
         String email = request.getParameter("email");
         String phoneNumber = request.getParameter("phoneNumber");
         String address = request.getParameter("address");
-        String roleId = request.getParameter("roleId");
+        
+        String isUser = request.getParameter("isUser");
+        String roleId = isUser.isEmpty() ? request.getParameter("roleId") : "2";
 
         AccountDAO dao = new AccountDAO();
         HttpSession session = request.getSession();
@@ -71,7 +73,7 @@ public class EditAccountServlet extends HttpServlet {
                     List<Profile> staff = new ArrayList<>();
 
                     for (Profile user : listUser) {
-                        if (user.getUserName().equals("user")) {
+                        if (user.getRoleName().equals("user")) {
                             users.add(user);
                         } else {
                             staff.add(user);

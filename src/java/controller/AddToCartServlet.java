@@ -5,6 +5,7 @@
  */
 package controller;
 
+import dao.DressPhotoComboDAO;
 import dao.LocationDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
@@ -16,32 +17,33 @@ import dto.OrderDetail;
 import dto.OrderItem;
 import dto.PhotoSchedule;
 import dto.PhotographyStudio;
+import dto.Profile;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.time.Period;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Utilities;
 
 /**
  *
  * @author ptd
  */
-@WebServlet(name = "DeleteCardItemServlet", urlPatterns = {"/DeleteCardItemServlet"})
-public class DeleteCardItemServlet extends HttpServlet {
+@WebServlet(name = "AddToCartServlet", urlPatterns = {"/AddToCartServlet"})
+public class AddToCartServlet extends HttpServlet {
 
-    public final String CART_PAGE = "cart.jsp";
-    public final String HOME_PAGE = "DispatcherServlet?btAction=Home";
     public final String ERROR_PAGE = "error.jsp";
+    public final String CART_PAGE = "cart.jsp";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -56,54 +58,59 @@ public class DeleteCardItemServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String orderId = request.getParameter("orderId");
-        String orderDetailId = request.getParameter("orderDetailId");
+        String itemId = request.getParameter("itemId");
+        String itemType = request.getParameter("itemType");
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        String price = request.getParameter("price");
+        
         String url = ERROR_PAGE;
 
-        OrderDAO orderDAO = new OrderDAO();
-        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-        PhotoScheduleDAO scheduleDAO = new PhotoScheduleDAO();
+        // create booking schedule - create order for card - order detail
+        PhotoScheduleDAO photoDAO = new PhotoScheduleDAO();
         LocationDAO locationDAO = new LocationDAO();
         PhotographyStudiosDAO studioDAO = new PhotographyStudiosDAO();
-
-        HttpSession session = request.getSession();
+        OrderDAO orderDAO = new OrderDAO();
+        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
 
         try {
-            if (session != null) {
+            HttpSession session = request.getSession();
+            Profile profile = (Profile) session.getAttribute("USER");
+            if (session != null && profile != null) {
+                String time = OffsetDateTime
+                        .now(ZoneOffset.UTC)
+                        .minus(Period.ofYears(1))
+                        .toString(); // get orderbyProfileId
+                Order orderExist = orderDAO.getOrderByProfileId(profile.getProfileId());
+                int orderId = 0;
+                if (orderExist != null) {
+                    orderId = orderExist.getOrderId();
+                } else {
+                    // add order and order Detail
+                    boolean orderResult = orderDAO.insertOrder(new Order(profile.getProfileId(), time, "create")); // see it
 
-                // get order Id and orderDetailRemove 
-                Order existOrder = orderDAO.getOrderById(Integer.parseInt(orderId));
-
-                if (existOrder != null) {
-                    // from orderId -> get order detail available 
-                    List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(existOrder.getOrderId());
-
-                    // filter orderDetailRemove include in list available 
-                    for (OrderDetail orderDetail : listOrderDetail) {
-                        if (orderDetail.getOrderDetailId() == Integer.parseInt(orderDetailId)) {
-
-                            // remove schedule
-                            boolean resultSchedule = scheduleDAO.deleteScheduleById(orderDetail.getItemId());
-
-                            // remove order detail
-                            boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-                            
-                            if (resultSchedule || result) {
-                                url = CART_PAGE;
-                            }
-                        }
+                    // get last order to add order detail
+                    if (orderResult) {
+                        Order order = orderDAO.getLastOrder();
+                        orderId = order.getOrderId();
                     }
+                }
 
-                    // get list again
-                    List<OrderDetail> listDetail = orderDetailDAO.getOrderDetailByOrderId(existOrder.getOrderId());
-                    if (listDetail.size() > 0) {
-                        // pass list to view
+                if (orderId > 0) {
+
+                    // add insert order detail
+                    OrderDetail orderDetail = new OrderDetail(0, name,description,Double.parseDouble(price), time, orderId, Integer.parseInt(itemId), itemType);
+                    boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
+
+                    if (resultOrderDetail) {
+                        List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
+
                         List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
 
-                        for (OrderDetail detail : listDetail) {
+                        for (OrderDetail detail : listOrderDetailByOrder) {
                             //item_id and item_type --> add schedule photo
                             if (detail.getItemType().equals("photo_schedule")) {
-                                PhotoSchedule photoSchedule = scheduleDAO.getPhotoScheduleById(detail.getItemId());
+                                PhotoSchedule photoSchedule = photoDAO.getPhotoScheduleById(detail.getItemId());
 
                                 // get item
                                 Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
@@ -114,8 +121,8 @@ public class DeleteCardItemServlet extends HttpServlet {
                                 List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
 
                                 // add item into list
-                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), existOrder.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule"));
-                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), existOrder.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule"));
+                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
+                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
 
                                 // add list into item photo schedule    
                                 photoScheduleItem.setList(listScheduleOrderDetail);
@@ -123,34 +130,31 @@ public class DeleteCardItemServlet extends HttpServlet {
                             } else {
                                 OrderItem photoScheduleItem = new OrderItem();
                                 List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
+                                
+                                
                                 listScheduleOrderDetail.add(detail);
                                 // add list into item photo schedule    
                                 photoScheduleItem.setList(listScheduleOrderDetail);
                                 listPhotoScheduleItem.add(photoScheduleItem);
                             }
                         }
+                        url = CART_PAGE;
                         session.setAttribute("LIST_CARR_ITEM", listPhotoScheduleItem);
                         session.setAttribute("CART_ITEM", listPhotoScheduleItem.size());
-                    } else {
-                        // order is empty -> delete order
-                        boolean result = orderDAO.removeOrderById(existOrder.getOrderId());
-                        if (result) {
-                            session.setAttribute("LIST_CARR_ITEM", null);
-                            session.setAttribute("CART_ITEM", null);
-                            url = HOME_PAGE;
-                        }
                     }
-
                 }
 
+            }else{
+                url = "login.jsp";
             }
         } catch (NamingException ex) {
-            log("DeleteCartItemServlet_NamingException: " + ex.getMessage());
+            log("BookScheduleServlet_NamingException: " + ex.getMessage());
         } catch (SQLException ex) {
-            log("DeleteCartItemServlet_SQLException " + ex.getMessage());
+            log("BookScheduleServlet_SQLException " + ex.getMessage());
         } finally {
-            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-            dispatcher.forward(request, response);
+//            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+//            dispatcher.forward(request, response);
+            response.sendRedirect(url);
         }
     }
 

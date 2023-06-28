@@ -63,6 +63,8 @@ public class DispatcherServlet extends HttpServlet {
     
     public final String UPDATE_SCHEDULE_SERVLET = "UpdateScheduleServlet";
     public final String PAYMENT_SERVLET = "PaymentServlet";
+    
+    public final String ADD_TO_CART_SERVLET = "AddToCartServlet";
 
     public final String HOME_PAGE = "home.jsp";
 
@@ -163,6 +165,9 @@ public class DispatcherServlet extends HttpServlet {
             }
             else if ("Payment".equals(action)) {
                 url = PAYMENT_SERVLET;
+            }
+            else if ("Add To Card".equals(action)) {
+                url = ADD_TO_CART_SERVLET;
             }
         } catch (NamingException ex) {
             log("DispatcherServlet_NamingException: " + ex.getMessage());

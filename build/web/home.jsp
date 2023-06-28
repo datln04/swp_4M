@@ -238,101 +238,6 @@
             </div>
 
             <div class="card-container">
-                <c:forEach items="${requestScope.LIST_LOCATION}" var="data">
-                    <c:url var="detail" value="detail.jsp">
-                        <c:param name="id" value="${data.id}" />
-                        <c:param name="name" value="${data.name}" />
-                        <c:param name="description" value="${data.description}" />
-                        <c:param name="price" value="${data.price}" />
-                        <c:param name="image" value="${data.image}" />
-                    </c:url>
-                    <a href="${detail}" >
-                        <div class="card">
-                            <div class="card-image">
-                                <img src="${data.image}" alt="Image">
-                            </div>
-                            <div class="card-content">
-                                <h3>${data.name}</h3>
-                                <p>${data.description}</p>
-                                <p>Price For Rent: $ ${data.price}</p>
-                                <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
-                                <input type="submit" value="Add To Card" name="btAction" class="button" />
-                            </div>
-                        </div>
-                    </a>
-                </c:forEach>
-
-                <c:forEach items="${requestScope.LIST_STUDIO}" var="data">
-                    <c:url var="detail" value="detail.jsp">
-                        <c:param name="id" value="${data.id}" />
-                        <c:param name="name" value="${data.name}" />
-                        <c:param name="description" value="${data.description}" />
-                        <c:param name="price" value="${data.price}" />
-                        <c:param name="image" value="${data.image}" />
-                    </c:url>
-                    <a href="${detail}" >
-                        <div class="card">
-                            <div class="card-image">
-                                <img src="${data.image}" alt="Image">
-                            </div>
-                            <div class="card-content">
-                                <h3>${data.name}</h3>
-                                <p>${data.description}</p>
-                                <p>Price For Rent: $ ${data.price}</p>
-                                <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
-                                <input type="submit" value="Add To Card" name="btAction" class="button" />
-                            </div>
-                        </div>
-                    </a>
-                </c:forEach>
-
-                <c:forEach items="${requestScope.LIST_PRODUCT}" var="data">
-                    <c:url var="detail" value="detail.jsp">
-                        <c:param name="id" value="${data.id}" />
-                        <c:param name="name" value="${data.name}" />
-                        <c:param name="description" value="${data.description}" />
-                        <c:param name="price" value="${data.price}" />
-                        <c:param name="image" value="${data.image}" />
-                    </c:url>
-                    <a href="${detail}" >
-                        <div class="card">
-                            <div class="card-image">
-                                <img src="${data.image}" alt="Image">
-                            </div>
-                            <div class="card-content">
-                                <h3>${data.name}</h3>
-                                <p>${data.description}</p>
-                                <p>Price For Rent: $ ${data.price}</p>
-                                <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
-                                <input type="submit" value="Add To Card" name="btAction" class="button" />
-                            </div>
-                        </div>
-                    </a>
-                </c:forEach>
-
-                <c:forEach items="${requestScope.LIST_COMBO}" var="data">
-                    <c:url var="detail" value="detail.jsp">
-                        <c:param name="id" value="${data.id}" />
-                        <c:param name="name" value="${data.comboName}" />
-                        <c:param name="description" value="${data.comboDescription}" />
-                        <c:param name="price" value="${data.price}" />
-                        <c:param name="image" value="${data.image}" />
-                    </c:url>
-                    <a href="${detail}" >
-                        <div class="card">
-                            <div class="card-image">
-                                <img src="${data.image}" alt="Image">
-                            </div>
-                            <div class="card-content">
-                                <h3>${data.comboName}</h3>
-                                <p>${data.comboDescription}</p>
-                                <p>Price For Rent: $ ${data.price}</p>
-                                <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
-                                <input type="submit" value="Add To Card" name="btAction" class="button" />
-                            </div>
-                        </div>
-                    </a>
-                </c:forEach>
 
                 <c:forEach items="${requestScope.LIST_ORDER_PAGING}" var="data">
                     <c:url var="detail" value="detail.jsp">
@@ -352,7 +257,14 @@
                                 <p>${data.description}</p>
                                 <p>Price For Rent: $ ${data.price}</p>
                                 <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
-                                <input type="submit" value="Add To Card" name="btAction" class="button" />
+                                <form action="DispatcherServlet" method="POST">
+                                    <input type="hidden" name="itemId" value="${data.itemId}"/>
+                                    <input type="hidden" name="itemType" value="${data.itemType}"/>
+                                    <input type="hidden" name="name" value="${data.name}"/>
+                                    <input type="hidden" name="description" value="${data.description}"/>
+                                    <input type="hidden" name="price" value="${data.price}"/>
+                                    <input type="submit" value="Add To Card" name="btAction" class="button" />
+                                </form>
                             </div>
                         </div>
                     </a>

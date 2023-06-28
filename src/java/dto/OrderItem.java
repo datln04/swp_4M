@@ -51,5 +51,9 @@ public class OrderItem implements Serializable{
     public int getOrderDetailId(int index){
         return list.get(index).getOrderDetailId();
     }
-   
+    
+    public String getOrderDetailItemType(int index){
+        return list.get(index).getItemType();
+    }
+    
 }

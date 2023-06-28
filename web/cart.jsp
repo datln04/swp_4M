@@ -187,22 +187,38 @@
                     </tr>
                     <c:forEach items="${sessionScope.LIST_CARR_ITEM}" var="cart" varStatus="count">
                         <c:set var="idOrder" value="${cart.getOrderId()}" />
+                        <c:set var="typeofItem" value=""/>
+                        <c:set var="idofItem" value=""/>
+                        <c:set var="orderDetailIdofItem" value=""/>
                         <th style="border: none;">${count.index + 1}</th>
                             <c:forEach items="${cart.list}" var="item" >
+                                <c:set var="typeofItem" value="${item.itemType}"/>
                                 <c:set var="totalPriceCart" value="${totalPriceCart + item.price}" />
+                                <c:set var="idofItem" value="${item.itemId}"/>
+                                <c:set var="orderDetailIdofItem" value="${item.orderDetailId}"/>
                             <tr>                       
                                 <td>${item.name}</td>
                                 <td>${item.description}</td>
                                 <td>${item.orderDate}</td>
-                                <td>$ ${item.price}</td>      
+                                <td>$ ${item.price}</td>
+                                <c:if test="${item.itemType ne 'photo_schedule'}" >
+                                    <td style="border-bottom: none; text-align: center">
+                                        <button class="button" onclick="openPopupUpdate('${item.itemType}')">Change</button>
+                                        <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}')">Delete Item</button>                                                                 
+                                    </td>
+                                </c:if>
                             </tr>
                         </c:forEach>
                         <th style="border-bottom: none"></th>
                         <th style="border-bottom: none"></th>
-                        <th style="border-bottom: none; text-align: center">
-                            <button class="button" onclick="openPopup('${cart.getOrderId()}', '${cart.getItemTypeId(count.index)}')">Change</button>
-                            <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${cart.getOrderId()}', '${cart.getOrderDetailId(count.index)}')">Delete Item</button>                                                                 
-                        </th>
+                        <th style="border-bottom: none"></th>
+                        <th style="border-bottom: none"></th>
+                            <c:if test="${typeofItem eq 'photo_schedule'}" >
+                            <th style="border-bottom: none; text-align: center">
+                                <button class="button" onclick="openPopup('${cart.getOrderId()}', '${idofItem}')">Change</button>
+                                <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${cart.getOrderId()}', '${orderDetailIdofItem}')">Delete Item</button>                                                                 
+                            </th>
+                        </c:if>
                         <tr style="border-top: 1px solid black"></tr>
                     </c:forEach>
                 </table>
@@ -255,6 +271,45 @@
                 </div>
             </div>
 
+            <!-- pop-up item -->
+            <div id="popupUpdate" class="popup">
+
+                <div id="popupContent" class="popup-content">
+                    <span class="close" onclick="closePopup()">&times;</span>
+                    <input type="hidden" name="type" id="type"/>
+                    <h2>Update Item</h2>
+
+                    <div class="card-container">
+                        <c:forEach items="${requestScope.LIST_ORDER_PAGING}" var="data">
+                            <form action="DispatcherServlet" method="POST">
+
+                                <div class="card">
+                                    <div class="card-image">
+                                        <img src="${data.image}" alt="Image">
+                                    </div>
+                                    <div class="card-content">
+                                        <h3>${data.name}</h3>
+                                        <p>${data.description}</p>
+                                        <p>Price For Rent: $ ${data.price}</p>
+                                        <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
+                                        <form action="DispatcherServlet" method="POST">
+                                            <input type="hidden" name="itemId" value="${data.itemId}"/>
+                                            <input type="hidden" name="itemType" value="${data.itemType}"/>
+                                            <input type="hidden" name="name" value="${data.name}"/>
+                                            <input type="hidden" name="description" value="${data.description}"/>
+                                            <input type="hidden" name="price" value="${data.price}"/>
+                                            <input type="submit" value="Add To Card" name="btAction" class="button" />
+                                        </form>
+                                    </div>
+                                </div>
+                            </form>
+                        </c:forEach>
+                    </div>  
+                    <input type="submit" value="Update Booking Schedule" name="btAction" class="button button-update mt-3"/>
+
+                </div>
+            </div>
+
             <div id="popupDelete" class="popup">
                 <div id="popupContent" class="popup-content">
                     <span class="close" onclick="closePopup()">&times;</span>
@@ -282,13 +337,9 @@
                 document.getElementById('txtOrderId').value = orderId;
                 document.getElementById('txtItemId').value = itemId;
 
-                console.log(orderId);
-                console.log(itemId);
-                console.log(document.getElementById('txtOrderId').value);
-                console.log(document.getElementById('txtItemId').value);
-
                 document.getElementById('popup').style.display = 'block';
             }
+
 
             function openPopupDelete(orderId, orderDetailId) {
                 document.getElementById('orderId').value = orderId;
@@ -300,6 +351,7 @@
             function closePopup() {
                 document.getElementById('popup').style.display = 'none';
                 document.getElementById('popupDelete').style.display = 'none';
+                document.getElementById('popupUpdate').style.display = 'none';
             }
 
             function updateTotalPrice(selectElement) {
@@ -332,6 +384,11 @@
                 var currentDateString = currentDate.toISOString().slice(0, 16); // Format: "YYYY-MM-DDTHH:MM"
                 timeRangeInput.value = currentDateString;
             });
+
+            function openPopupUpdate(itemType) {
+                document.getElementById('type').value = itemType;
+                document.getElementById('popupUpdate').style.display = 'block';
+            }
 
         </script>
     </body>
