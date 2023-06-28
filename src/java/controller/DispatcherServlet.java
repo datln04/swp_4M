@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Contant;
+import util.PaginationHelper;
 
 /**
  *
@@ -46,10 +48,21 @@ public class DispatcherServlet extends HttpServlet {
     public final String EDIT_ACCOUNT_SERVLET = "EditAccountServlet";
     public final String UPDATE_ORDER_ADMIN_SERVLET = "UpdateOrderAdminServlet";
     public final String DELETE_ORDER_SERVLET = "DeleteOrderServlet";
+
     public final String COMFIRM_SCHEDULE_SERVLET = "ConfirmScheduleServlet";
+    public final String COMFIRM_PRODUCT_SERVLET = "ConfirmProductServlet";
 
     public final String UPDATE_LOCATION_SERVLET = "UpdateLocationServlet";
     public final String DELETE_LOCATION_SERVLET = "DeleteLocationServlet";
+
+    public final String UPDATE_PRODUCT_SERVLET = "UpdateProductServlet";
+    public final String DELETE_PRODUCT_SERVLET = "DeleteProductServlet";
+
+    public final String ADD_ACCOUNT_SERVLET = "AddAccountServlet";
+    public final String REGISTER_ACCOUNT_SERVLET = "RegisterAccountServlet";
+    
+    public final String UPDATE_SCHEDULE_SERVLET = "UpdateScheduleServlet";
+    public final String PAYMENT_SERVLET = "PaymentServlet";
 
     public final String HOME_PAGE = "home.jsp";
 
@@ -69,8 +82,6 @@ public class DispatcherServlet extends HttpServlet {
         String action = request.getParameter("btAction");
         String url = HOME_PAGE;
 
-        HttpSession session = request.getSession();
-        Profile profile = (Profile) session.getAttribute("USER");
         LocationDAO locationDAO = new LocationDAO();
         RentalProductDAO rentalDAO = new RentalProductDAO();
         PhotographyStudiosDAO photoDAO = new PhotographyStudiosDAO();
@@ -84,93 +95,19 @@ public class DispatcherServlet extends HttpServlet {
                 List<PhotographyStudio> listStudio = photoDAO.getAllPhotographyStudio();
                 List<DressPhotoCombo> listCombo = dressPhotoComboDAO.getAllDressPhotoCombo();
 
-                List<OrderDetail> listOrder = new ArrayList<>();
-
-                // add location into list order
-                for (Location location : listLocation) {
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setName(location.getName());
-                    orderDetail.setDescription(location.getDescription());
-                    orderDetail.setPrice(location.getPrice());
-                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
-                    orderDetail.setActive(location.isActive());
-                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
-                    orderDetail.setItemId(location.getId()); // Map locationId to itemId
-                    orderDetail.setItemType("location"); // Set the itemType as "location"
-                    orderDetail.setImage(location.getImage());
-
-                    listOrder.add(orderDetail);
-                }
-
-                // product
-                for (PhotographyStudio studio : listStudio) {
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setName(studio.getName());
-                    orderDetail.setDescription(studio.getDescription());
-                    orderDetail.setPrice(studio.getPrice());
-                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
-                    orderDetail.setActive(studio.isActive());
-                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
-                    orderDetail.setItemId(studio.getId()); // Map locationId to itemId
-                    orderDetail.setItemType("studio"); // Set the itemType as "location"
-                    orderDetail.setImage(studio.getImage());
-
-                    listOrder.add(orderDetail);
-                }
-
-                // studio               
-                for (RentalProduct product : listProduct) {
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setName(product.getName());
-                    orderDetail.setDescription(product.getDescription());
-                    orderDetail.setPrice(product.getPrice());
-                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
-                    orderDetail.setActive(product.isActive());
-                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
-                    orderDetail.setItemId(product.getId()); // Map locationId to itemId
-                    orderDetail.setItemType("rental_product"); // Set the itemType as "location"
-                    orderDetail.setImage(product.getImage());
-                    listOrder.add(orderDetail);
-                }
-
-                // combo               
-                for (DressPhotoCombo combo : listCombo) {
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setName(combo.getComboName());
-                    orderDetail.setDescription(combo.getComboDescription());
-                    orderDetail.setPrice(combo.getPrice());
-                    orderDetail.setOrderDate(""); // Set the order date as per your requirements
-                    orderDetail.setActive(combo.isActive());
-                    orderDetail.setOrderId(0); // Assuming orderId is not available for now
-                    orderDetail.setItemId(combo.getId()); // Map locationId to itemId
-                    orderDetail.setItemType("combo"); // Set the itemType as "location"
-                    orderDetail.setImage(combo.getImage());
-
-                    listOrder.add(orderDetail);
-                }
+                List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
 
                 // Set the number of entities per page
-                int entitiesPerPage = 6;
+                int entitiesPerPage = Contant.PAGE_SIZE;
 
                 // Calculate the total pages for all lists combined
                 int totalEntities = listOrder.size();
                 int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
 
                 // Retrieve the current page number from the request parameters
-                int currentPage = getCurrentPage(request, "page", totalPages);
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
 
-                // Retrieve the sublist of entities based on the current page number
-//                List<Location> locationPage = getPageEntities(listLocation, currentPage, entitiesPerPage);
-//                List<RentalProduct> productPage = getPageEntities(listProduct, currentPage, entitiesPerPage);
-//                List<DressPhotoCombo> dessertPage = getPageEntities(listCombo, currentPage, entitiesPerPage);
-//                List<PhotographyStudio> studioPage = getPageEntities(listStudio, currentPage, entitiesPerPage);
-//
-//                request.setAttribute("LIST_LOCATION", locationPage);
-//                request.setAttribute("LIST_PRODUCT", productPage);
-//                request.setAttribute("LIST_COMBO", dessertPage);
-//                request.setAttribute("LIST_STUDIO", studioPage);
-
-                List<OrderDetail> listOrderDetailPage = getPageEntities(listOrder, currentPage, entitiesPerPage);
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
                 request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
 
                 request.setAttribute("totalPages", totalPages);
@@ -209,6 +146,23 @@ public class DispatcherServlet extends HttpServlet {
                 url = DELETE_ORDER_SERVLET;
             } else if ("Confirm Schedule".equals(action)) {
                 url = COMFIRM_SCHEDULE_SERVLET;
+            } else if ("UpdateProduct".equals(action)) {
+                url = UPDATE_PRODUCT_SERVLET;
+            } else if ("DeleteProduct".equals(action)) {
+                url = DELETE_PRODUCT_SERVLET;
+            } else if ("Confirm Rent".equals(action)) {
+                url = COMFIRM_PRODUCT_SERVLET;
+            } else if ("Add Account".equals(action)) {
+                url = ADD_ACCOUNT_SERVLET;
+            }
+            else if ("Register".equals(action)) {
+                url = REGISTER_ACCOUNT_SERVLET;
+            }
+            else if ("Update Booking Schedule".equals(action)) {
+                url = UPDATE_SCHEDULE_SERVLET;
+            }
+            else if ("Payment".equals(action)) {
+                url = PAYMENT_SERVLET;
             }
         } catch (NamingException ex) {
             log("DispatcherServlet_NamingException: " + ex.getMessage());
@@ -218,26 +172,6 @@ public class DispatcherServlet extends HttpServlet {
             RequestDispatcher dispatcher = request.getRequestDispatcher(url);
             dispatcher.forward(request, response);
         }
-    }
-
-    private int getCurrentPage(HttpServletRequest request, String paramName, int totalPages) {
-        int currentPage = 1; // Default to the first page
-        String pageParam = request.getParameter(paramName);
-        if (pageParam != null && !pageParam.isEmpty()) {
-            currentPage = Integer.parseInt(pageParam);
-            if (currentPage < 1) {
-                currentPage = 1;
-            } else if (currentPage > totalPages) {
-                currentPage = totalPages;
-            }
-        }
-        return currentPage;
-    }
-
-    private <T> List<T> getPageEntities(List<T> entityList, int currentPage, int entitiesPerPage) {
-        int startIndex = (currentPage - 1) * entitiesPerPage;
-        int endIndex = Math.min(startIndex + entitiesPerPage, entityList.size());
-        return entityList.subList(startIndex, endIndex);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -252,6 +186,7 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         processRequest(request, response);
     }
 
@@ -266,8 +201,11 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         processRequest(request, response);
     }
+
+    
 
     /**
      * Returns a short description of the servlet.

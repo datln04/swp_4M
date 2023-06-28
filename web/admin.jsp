@@ -193,6 +193,7 @@
                     <button class="tablinks active" onclick="openTab(event, 'Tab1')">Staff</button>
                     <button class="tablinks" onclick="openTab(event, 'Tab2')">User</button>
                     <button class="tablinks" onclick="openTab(event, 'Tab3')">Cart</button>
+                    <button class="tablinks" onclick="openTab(event, 'Tab4')">Add Account</button>
 
                 </div>
 
@@ -317,6 +318,58 @@
                     </table>
 
                 </c:if>
+            </div>
+
+            <div id="Tab4" class="tabcontent">
+                <h3>Staff</h3>
+                <table>
+                    <tr>                                       
+                        <th>User Name</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>                      
+                        <th>Email</th>  
+                        <th>Phone Number</th>  
+                        <th>Address</th>           
+                        <th>Role Name</th>           
+                        <th style="text-align: center">Actions</th>
+
+                    </tr>
+                    <tbody>
+                    <form action="DispatcherServlet" method="POST"> 
+                        <tr>                       
+                            <td>
+                                <input type="text" name="txtUserName" value="${param.txtUserName}"/>
+                            </td>
+                            <td>
+                                <input type="text" name="txtFistName" value="${param.txtFistName}"/>
+                            </td>
+                            <td>
+                                <input type="text" name="txtLastName" value="${param.txtLastName}"/>
+                            </td>
+                            <td>
+                                <input type="text" name="txtEmail" value="${param.txtEmail}"/>
+                            </td>
+                            <td>
+                                <input type="text" name="txtPhone" value="${param.txtPhone}"/>
+                            </td>      
+                            <td>
+                                <input type="text" name="txtAddress" value="${param.txtAddress}"/>
+                            </td>      
+                            <td>
+                                <select name="roleId">
+                                    <c:forEach items="${sessionScope.LIST_STAFF_ROLE}" var="r">
+                                        <option value="${r.roleId}">${r.roleName}</option>
+                                    </c:forEach>
+                                </select>
+                            </td>      
+
+                            <td class="actions" style="text-align: center">
+                                <input type="submit" name="btAction" value="Add Account" class="btn btn-secondary"/>
+                            </td>
+                        </tr>
+                        </form>
+                    </tbody>
+                </table>
             </div>
         </div>
 

@@ -100,7 +100,7 @@ public class RentalProductDAO implements Serializable {
 
         return list;
     }
-    
+
     public List<RentalProduct> getFilterRentalProduct(int min, int max) throws NamingException, SQLException {
         List<RentalProduct> list = new ArrayList<>();
         try {
@@ -111,10 +111,10 @@ public class RentalProductDAO implements Serializable {
                         + "where price > ? and price < ? and is_active = 1";
 
                 pst = conn.prepareStatement(sql);
-                
+
                 pst.setInt(1, min);
                 pst.setInt(2, max);
-                
+
                 rs = pst.executeQuery();
                 while (rs.next()) {
                     int id = rs.getInt("product_id");
@@ -140,5 +140,67 @@ public class RentalProductDAO implements Serializable {
         }
 
         return list;
+    }
+
+    public boolean updateRentalProduct(RentalProduct rentalProduct) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update rental_products\n"
+                        + "set product_name = ?, description = ?, price =?, image = ?\n"
+                        + "where product_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, rentalProduct.getName());
+                pst.setString(2, rentalProduct.getDescription());
+                pst.setFloat(3, (float) rentalProduct.getPrice());
+                pst.setString(4, rentalProduct.getImage());
+                pst.setInt(5, rentalProduct.getId());
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+    
+    public boolean deleteRentalProduct(int productId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update rental_products\n"
+                        + "set is_active = 0\n"
+                        + "where product_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, productId);
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
     }
 }

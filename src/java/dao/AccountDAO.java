@@ -102,7 +102,7 @@ public class AccountDAO implements Serializable {
 
         return false;
     }
-    
+
     public boolean updateProfileByAdmin(Profile profile, int roleId) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -191,7 +191,7 @@ public class AccountDAO implements Serializable {
                     boolean active = rs.getBoolean("is_active");
                     String roleName = rs.getString("role_name");
 
-                    list.add(new Profile(profileId, firstName, lastName, email, phoneNumber, address, roleName, active, userName,userId));
+                    list.add(new Profile(profileId, firstName, lastName, email, phoneNumber, address, roleName, active, userName, userId));
                 }
             }
         } finally {
@@ -207,5 +207,55 @@ public class AccountDAO implements Serializable {
         }
 
         return list;
+    }
+
+    public boolean insertProfifle(Profile profile) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "insert profiles(address,email,first_name,is_active,last_name,password,phone_number,user_id,user_name)\n"
+                        + "values (?,?,?,1,?,?,?,?,?)";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, profile.getAddress());
+                pst.setString(2, profile.getEmail());
+                pst.setString(3, profile.getFirstName());
+                pst.setString(4, profile.getLastName());
+                pst.setString(5, profile.getPassword());
+                pst.setString(6, profile.getPhoneNumber());
+                pst.setInt(7, profile.getUserId());
+                pst.setString(8, profile.getUserName());
+                
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+//                    int profileId = rs.getInt("profile_id");
+//                    String firstName = rs.getString("first_name");
+//                    String lastName = rs.getString("last_name");
+//                    String email = rs.getString("email");
+//                    String phoneNumber = rs.getString("phone_number");
+//                    String address = rs.getString("address");
+//                    int userId = rs.getInt("user_id");
+//                    String userName = rs.getString("user_name");
+//                    boolean active = rs.getBoolean("is_active");
+//                    String roleName = rs.getString("role_name");
+//
+//                    list.add(new Profile(profileId, firstName, lastName, email, phoneNumber, address, roleName, active, userName, userId));
+                    return true;
+                }
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
     }
 }

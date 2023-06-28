@@ -11,6 +11,7 @@ import dao.PhotographyStudiosDAO;
 import dao.RentalProductDAO;
 import dto.DressPhotoCombo;
 import dto.Location;
+import dto.OrderDetail;
 import dto.PhotographyStudio;
 import dto.RentalProduct;
 import java.io.IOException;
@@ -24,6 +25,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import util.Contant;
+import util.PaginationHelper;
 
 /**
  *
@@ -49,22 +52,40 @@ public class SearchServlet extends HttpServlet {
 
         String searchText = request.getParameter("txtSearch");
         String url = ERROR_PAGE;
-        
+
         LocationDAO locationDAO = new LocationDAO();
         RentalProductDAO rentalDAO = new RentalProductDAO();
         PhotographyStudiosDAO photoDAO = new PhotographyStudiosDAO();
         DressPhotoComboDAO dressPhotoComboDAO = new DressPhotoComboDAO();
-        
+
         try {
             List<Location> listLocation = locationDAO.getSearchLocation(searchText);
             List<RentalProduct> listProduct = rentalDAO.getSearchRentalProduct(searchText);
             List<PhotographyStudio> listStudio = photoDAO.getSearchPhotographyStudio(searchText);
             List<DressPhotoCombo> listCombo = dressPhotoComboDAO.getSearchCombo(searchText);
-            
-            request.setAttribute("LIST_LOCATION", listLocation);
-            request.setAttribute("LIST_PRODUCT", listProduct);
-            request.setAttribute("LIST_STUDIO", listStudio);
-            request.setAttribute("LIST_COMBO", listCombo);
+
+            List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
+
+            // Set the number of entities per page
+            int entitiesPerPage = Contant.PAGE_SIZE;
+
+            // Calculate the total pages for all lists combined
+            int totalEntities = listOrder.size();
+            int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+            // Retrieve the current page number from the request parameters
+            int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+            List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+            request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("currentPage", currentPage);
+
+//            request.setAttribute("LIST_LOCATION", listLocation);
+//            request.setAttribute("LIST_PRODUCT", listProduct);
+//            request.setAttribute("LIST_STUDIO", listStudio);
+//            request.setAttribute("LIST_COMBO", listCombo);
             url = "home.jsp";
 
         } catch (NamingException ex) {

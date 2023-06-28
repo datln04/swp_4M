@@ -89,7 +89,7 @@ public class OrderDetailDAO implements Serializable {
                     double price = rs.getFloat("price");
                     boolean active = rs.getBoolean("is_active");
 
-                    list.add(new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderId,itemId, itemType));
+                    list.add(new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderId, itemId, itemType));
                 }
 
             }
@@ -131,11 +131,11 @@ public class OrderDetailDAO implements Serializable {
                     String description = rs.getString("description");
                     double price = rs.getFloat("price");
                     boolean active = rs.getBoolean("is_active");
-                    
-                     String itemType = rs.getString("item_type"); 
-                     int itemId = rs.getInt("item_id");
 
-                    return new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderId,itemId, itemType);
+                    String itemType = rs.getString("item_type");
+                    int itemId = rs.getInt("item_id");
+
+                    return new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderId, itemId, itemType);
                 }
             }
         } finally {
@@ -198,11 +198,11 @@ public class OrderDetailDAO implements Serializable {
                     String description = rs.getString("description");
                     double price = rs.getFloat("price");
                     boolean active = rs.getBoolean("is_active");
-                    
-                     String itemType = rs.getString("item_type"); 
-                     int itemId = rs.getInt("item_id");
 
-                    list.add(new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderID,itemId, itemType));
+                    String itemType = rs.getString("item_type");
+                    int itemId = rs.getInt("item_id");
+
+                    list.add(new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderID, itemId, itemType));
                 }
             }
         } finally {
@@ -247,7 +247,7 @@ public class OrderDetailDAO implements Serializable {
         }
         return false;
     }
-    
+
     public boolean deleteOrderDetailById(int orderDetailId) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -274,5 +274,45 @@ public class OrderDetailDAO implements Serializable {
             }
         }
         return false;
+    }
+
+    public List<OrderDetail> getOrderDetailByItemType(String itemType) throws NamingException, SQLException {
+        List<OrderDetail> list = new ArrayList();
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select order_detail_id, od.order_id, item_id, item_type, name, description, price, od.order_date, is_active\n"
+                        + "from order_detail od left join orders o on od.order_id = o.order_id\n"
+                        + "where is_active = 1 and o.status = 'pending' and item_type = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, itemType);
+
+                rs = pst.executeQuery();
+
+                while (rs.next()) {
+                    int orderDetalId = rs.getInt("order_detail_id");
+                    int orderID = rs.getInt("order_id");
+
+                    String orderDate = rs.getString("order_date");
+                    String name = rs.getString("name");
+                    String description = rs.getString("description");
+                    double price = rs.getFloat("price");
+                    boolean active = rs.getBoolean("is_active");
+
+                    int itemId = rs.getInt("item_id");
+
+                    list.add(new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderID, itemId, itemType));
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return list;
     }
 }

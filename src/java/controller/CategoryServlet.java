@@ -11,11 +11,13 @@ import dao.PhotographyStudiosDAO;
 import dao.RentalProductDAO;
 import dto.DressPhotoCombo;
 import dto.Location;
+import dto.OrderDetail;
 import dto.PhotographyStudio;
 import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,6 +28,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import util.Contant;
+import util.PaginationHelper;
 
 /**
  *
@@ -69,18 +73,116 @@ public class CategoryServlet extends HttpServlet {
             List<PhotographyStudio> listStudio = photoDAO.getAllPhotographyStudio();
             List<DressPhotoCombo> listCombo = dressPhotoComboDAO.getAllDressPhotoCombo();
             if ("location".equals(value)) {
-                request.setAttribute("LIST_LOCATION", listLocation);
+                // Set the number of entities per page
+                int entitiesPerPage = Contant.PAGE_SIZE;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listLocation.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                List<OrderDetail> listOrder = new ArrayList<>();
+                for (Location location : listLocation) {
+                    OrderDetail orderDetail = PaginationHelper.mapLoationToOrderDetail(location);
+
+                    listOrder.add(orderDetail);
+                }
+
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
             } else if ("product".equals(value)) {
-                request.setAttribute("LIST_PRODUCT", listProduct);
+                // Set the number of entities per page
+                int entitiesPerPage = Contant.PAGE_SIZE;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listProduct.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                List<OrderDetail> listOrder = new ArrayList<>();
+                for (RentalProduct product : listProduct) {
+                    OrderDetail orderDetail = PaginationHelper.mapProductToOrderDetail(product);
+
+                    listOrder.add(orderDetail);
+                }
+
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
+
             } else if ("studio".equals(value)) {
-                request.setAttribute("LIST_STUDIO", listStudio);
+                // Set the number of entities per page
+                int entitiesPerPage = Contant.PAGE_SIZE;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listStudio.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                List<OrderDetail> listOrder = new ArrayList<>();
+                for (PhotographyStudio studio : listStudio) {
+                    OrderDetail orderDetail = PaginationHelper.mapStudioToOrderDetail(studio);
+
+                    listOrder.add(orderDetail);
+                }
+
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
             } else if ("combo".equals(value)) {
-                request.setAttribute("LIST_COMBO", listCombo);
+                // Set the number of entities per page
+                int entitiesPerPage = Contant.PAGE_SIZE;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listCombo.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                List<OrderDetail> listOrder = new ArrayList<>();
+                for (DressPhotoCombo combo : listCombo) {
+                    OrderDetail orderDetail = PaginationHelper.mapComboToOrderDetail(combo);
+
+                    listOrder.add(orderDetail);
+                }
+
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
             } else {
-                request.setAttribute("LIST_LOCATION", listLocation);
-                request.setAttribute("LIST_PRODUCT", listProduct);
-                request.setAttribute("LIST_STUDIO", listStudio);
-                request.setAttribute("LIST_COMBO", listCombo);
+                List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
+
+                // Set the number of entities per page
+                int entitiesPerPage = Contant.PAGE_SIZE;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listOrder.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
             }
         } catch (NamingException ex) {
             log("DispatcherServlet_NamingException: " + ex.getMessage());

@@ -33,7 +33,7 @@ public class OrderDAO implements Serializable {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
                 String sql = "insert dbo.orders(profile_id,order_date,status)\n"
-                        + "values (?, ?, 'pending')";
+                        + "values (?, ?, 'create')";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, order.getProfileId());
@@ -60,13 +60,11 @@ public class OrderDAO implements Serializable {
     }
 
     public Order getLastOrder() throws NamingException, SQLException {
-
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
                 String sql = "select top 1 order_id,profile_id,order_date,status\n"
                         + "from orders\n"
-                        + "where status = 'pending'\n"
                         + "order by order_id desc";
 
                 pst = conn.prepareStatement(sql);
@@ -195,7 +193,62 @@ public class OrderDAO implements Serializable {
         }
         return false;
     }
-    
+
+    public boolean removeOrderById(int orderId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "delete orders\n"
+                        + "where order_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, orderId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return false;
+    }
+
+    public boolean confirmOrderById(int orderId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update orders\n"
+                        + "set status = 'confirm'\n"
+                        + "where order_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, orderId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return false;
+    }
+
     public Order getOrderByProfileId(int profileId) throws NamingException, SQLException {
 
         try {
@@ -203,7 +256,7 @@ public class OrderDAO implements Serializable {
             if (conn != null) {
                 String sql = "select order_id,profile_id,order_date,status\n"
                         + "from orders\n"
-                        + "where status = 'pending' and profile_id = ?";
+                        + "where status = 'create' and profile_id = ?";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, profileId);
@@ -220,6 +273,43 @@ public class OrderDAO implements Serializable {
             }
         } finally {
 
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return null;
+    }
+
+    public Order getOrderById(int orderId) throws NamingException, SQLException {
+
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select order_id,profile_id,order_date,status\n"
+                        + "from orders\n"
+                        + "where status = 'create' and order_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, orderId);
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    String orderDate = rs.getString("order_date");
+                    String status = rs.getString("status");
+                    int profileId = rs.getInt("profile_id");
+
+                    return new Order(orderId, profileId, orderDate, status);
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
             if (pst != null) {
                 pst.close();
             }

@@ -15,7 +15,7 @@ public class Order implements Serializable {
     public Order() {
     }
 
-    public Order(int orderId, int userId, String orderDate, String status) {
+    public Order(int orderId, int profileId, String orderDate, String status) {
         this.orderId = orderId;
         this.profileId = profileId;
         this.orderDate = orderDate;
@@ -23,7 +23,6 @@ public class Order implements Serializable {
     }
 
     public Order(int profileId, String orderDate, String status) {
-
         this.profileId = profileId;
         this.orderDate = orderDate;
         this.status = status;

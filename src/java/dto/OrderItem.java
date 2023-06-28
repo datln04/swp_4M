@@ -44,4 +44,12 @@ public class OrderItem implements Serializable{
         return list.get(0).getOrderDetailId();
     }
     
+    public int getItemTypeId(int index){
+        return list.get(index).getItemId();
+    }
+    
+    public int getOrderDetailId(int index){
+        return list.get(index).getOrderDetailId();
+    }
+   
 }

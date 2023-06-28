@@ -60,5 +60,39 @@ public class RoleDAO implements Serializable {
 
         return list;
     }
+    
+    public List<Role> getRoles() throws NamingException, SQLException {
+        List<Role> list = new ArrayList<>();
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select role_id,role_name\n"
+                        + "from roles\n"
+                        + "where role_id != 1";
+
+                pst = conn.prepareStatement(sql);
+                rs = pst.executeQuery();
+
+                while (rs.next()) {
+                    int roleId = rs.getInt("role_id");
+                    String roleName =rs.getString("role_name");
+                    
+                    list.add(new Role(roleId, roleName));
+                }
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return list;
+    }
 
 }

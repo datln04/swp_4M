@@ -250,8 +250,9 @@
                         <th style="border-bottom: none"></th>
 
                         <th style="border-bottom: none; text-align: center">
-                            <form>
-                                <input type="hidden" name="scheduleId" value="${schedule.getOrderDetailId()}"/>
+                            <form action="DispatcherServlet" method="POST">
+                                <input type="hidden" name="orderId" value="${schedule.orderId}"/>
+                                <input type="hidden" name="scheduleId" value="${schedule.orderDetailId}"/>
                                 <input type="submit" class="button btn-primary btn-delete-all-item" value="Confirm Schedule" name="btAction"/>  
                             </form>
                                                                                            
@@ -323,7 +324,6 @@
                             <input type="submit" value="DeleteLocation" name="btAction" class="button button-delete" />
                         </form>
                     </div>
-
                 </div>
             </div>
 

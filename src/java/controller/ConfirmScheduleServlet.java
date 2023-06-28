@@ -6,6 +6,8 @@
 package controller;
 
 import dao.LocationDAO;
+import dao.OrderDAO;
+import dao.OrderDetailDAO;
 import dao.PhotoScheduleDAO;
 import dao.PhotographyStudiosDAO;
 import dao.studioStaffDAO;
@@ -53,37 +55,44 @@ public class ConfirmScheduleServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
 
         String scheduleId = request.getParameter("scheduleId");
+        String orderId = request.getParameter("orderId");
         String url = ERROR_PAGE;
 
         PhotoScheduleDAO scheduleDAO = new PhotoScheduleDAO();
         LocationDAO locationDAO = new LocationDAO();
         PhotographyStudiosDAO studioDAO = new PhotographyStudiosDAO();
-        studioStaffDAO studioStaffDAO = new studioStaffDAO();
         HttpSession session = request.getSession();
+        OrderDAO orderDAO = new OrderDAO();
+        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
 
         try {
             if (!scheduleId.isEmpty() && session != null) {
-                Profile profile = (Profile) session.getAttribute("USER");
                 boolean result = scheduleDAO.confirmScheduleByScheduleId(Integer.parseInt(scheduleId));
                 if (result) {
-                    // get studio of staff
-                    int studioId = studioStaffDAO.getStudioIdByProfileId(profile.getProfileId());
 
-                    //get photo schedule by studio
-                    List<PhotoSchedule> photoScheduleList = scheduleDAO.getPhotoScheduleByStudioId(studioId);
-                    List<OrderItem> listPhotoScheItem = new ArrayList<>();
-                    // get booking photo schedule
-                    for (PhotoSchedule photoSchedule : photoScheduleList) {
-                        Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
-                        PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
+                    // set order is confirm;
+                    boolean orderResult = orderDAO.confirmOrderById(Integer.parseInt(orderId));
 
-                        OrderDetail detailLocation = new OrderDetail(photoSchedule.getScheduleId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), location.getId(), "location");
-                        OrderDetail detailStudio = new OrderDetail(photoSchedule.getScheduleId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), studio.getId(), "studio");
+                    if (orderResult) {
+                        List<OrderItem> listPhotoScheItem = new ArrayList<>();
 
-                        OrderItem photoScheItem = new OrderItem();
-                        photoScheItem.getList().add(detailLocation);
-                        photoScheItem.getList().add(detailStudio);
-                        listPhotoScheItem.add(photoScheItem);
+                        // flow: get order detail with type is rental_schedule and order is pending
+                        List<OrderDetail> listSchedulePending = orderDetailDAO.getOrderDetailByItemType("photo_schedule");
+                        // from order_detail we get location and studio 
+                        for (OrderDetail orderDetail : listSchedulePending) {
+                            PhotoSchedule photoSchedule = scheduleDAO.getPhotoScheduleById(orderDetail.getItemId());
+                            Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
+                            PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
+
+                            OrderDetail detailLocation = new OrderDetail(photoSchedule.getScheduleId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), location.getId(), "location");
+                            OrderDetail detailStudio = new OrderDetail(photoSchedule.getScheduleId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), studio.getId(), "studio");
+
+                            OrderItem photoScheItem = new OrderItem();
+                            photoScheItem.getList().add(detailLocation);
+                            photoScheItem.getList().add(detailStudio);
+                            listPhotoScheItem.add(photoScheItem);
+
+                        }
                         session.setAttribute("LIST_PHOTO_SCHEDULE_STAFF", listPhotoScheItem);
 
                     }
@@ -91,9 +100,7 @@ public class ConfirmScheduleServlet extends HttpServlet {
                     // get location for manage
                     List<Location> listLocation = locationDAO.getAllLocation();
                     session.setAttribute("LOCATIONS", listLocation);
-                    
-                    session.setAttribute("LIST_PHOTO_SCHEDULE_STAFF", listPhotoScheItem);
-                    
+
                     url = PHOTO_HOME_PAGE;
                 }
             }

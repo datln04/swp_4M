@@ -401,23 +401,21 @@
                 <form action="DispatcherServlet" method="POST">
                     <label for="locationImage">Select location:</label>
                     <select name="location" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true">
-                        <option value="" selected disabled hidden></option>
-                        <c:forEach items="${requestScope.LIST_LOCATION}" var="l">
+                        <c:forEach items="${sessionScope.LIST_LOCATION}" var="l">
                             <option value="${l.id}" data-price="${l.price}">${l.name}</option>
                         </c:forEach>
                     </select>
                     <br/> 
                     <label for="studioName">Select Studio:</label>
                     <select name="studio" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true">
-                        <option value="" selected disabled hidden></option>
-                        <c:forEach items="${requestScope.LIST_STUDIO}" var="s">
+                        <c:forEach items="${sessionScope.LIST_STUDIO}" var="s">
                             <option value="${s.id}" data-price="${s.price}">${s.name}</option>
                         </c:forEach>
                     </select>
                     <br/> 
                     <label for="locationDescription">Select Time range</label>
 
-                    <input type="datetime-local" name="timeRange" class="ml-5" required="true">
+                    <input type="datetime-local" name="timeRange" class="ml-5" required="true" id="timeRangeInput">
                     <br/> 
                     <br/> 
                     <label for="locationPrice">Price:</label>
@@ -450,13 +448,32 @@
                             var locationValue = document.querySelector('select[name="location"]').value;
                             var studioValue = document.querySelector('select[name="studio"]').value;
 
-                            var locationPrice = parseInt(selectElement.options[selectElement.selectedIndex].getAttribute("data-price"));
+                            var locationPrice = parseInt(document.querySelector('select[name="location"] option:checked').getAttribute("data-price"));
                             var studioPrice = parseInt(document.querySelector('select[name="studio"] option:checked').getAttribute("data-price"));
 
                             var totalPrice = locationPrice + studioPrice;
-//                            var totalPrice = locationPrice;
                             document.getElementById("totalPrice").value = totalPrice;
                         }
+
+                        // Set default price on page load
+                        window.addEventListener("DOMContentLoaded", function () {
+                            var locationSelect = document.querySelector('select[name="location"]');
+                            var locationPrice = parseInt(locationSelect.options[locationSelect.selectedIndex].getAttribute("data-price"));
+
+                            var studioSelect = document.querySelector('select[name="studio"]');
+                            var studioPrice = parseInt(studioSelect.options[studioSelect.selectedIndex].getAttribute("data-price"));
+
+                            var totalPrice = locationPrice + studioPrice;
+                            document.getElementById("totalPrice").value = totalPrice;
+                        });
+
+                        // Set default value to current date and time
+                        window.addEventListener("DOMContentLoaded", function () {
+                            var timeRangeInput = document.getElementById("timeRangeInput");
+                            var currentDate = new Date();
+                            var currentDateString = currentDate.toISOString().slice(0, 16); // Format: "YYYY-MM-DDTHH:MM"
+                            timeRangeInput.value = currentDateString;
+                        });
 
         </script>
 

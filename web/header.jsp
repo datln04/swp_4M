@@ -104,7 +104,7 @@
                 </c:if>
                 <c:if test="${sessionScope.USER == null}">
                     <a href="login.jsp">Login - </a>
-                    <a href="#">Register</a>
+                    <a href="register.jsp">Register</a>
                 </c:if>          
                 <c:if test="${sessionScope.USER != null and sessionScope.USER.roleName eq 'user'}">
                     <a class="" href="cart.jsp">

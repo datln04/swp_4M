@@ -164,7 +164,6 @@ public class PhotoScheduleDAO implements Serializable {
         return 0;
 
     }
-    
 
     public boolean confirmScheduleByScheduleId(int scheduleId) throws NamingException, SQLException {
         try {
@@ -194,5 +193,146 @@ public class PhotoScheduleDAO implements Serializable {
         }
 
         return false;
+    }
+
+    public boolean updatePhotoScheduleById(int scheduleId, int locationId, int studioId, String orderDate) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update photo_schedules\n"
+                        + "set location_id = ?, studio_id = ?, schedule_date = ?\n"
+                        + "where schedule_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, locationId);
+                pst.setInt(2, studioId);
+                pst.setString(3, orderDate);
+                pst.setInt(4, scheduleId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+
+    public boolean deleteScheduleById(int scheduleId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "delete photo_schedules\n"
+                        + "where schedule_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, scheduleId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+
+    public PhotoSchedule getPhotoScheduleById(int scheduleId) throws NamingException, SQLException {
+
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select schedule_id,user_id,location_id,studio_id,schedule_date,status\n"
+                        + "from photo_schedules\n"
+                        + "where schedule_id = ? and status = 'pending'";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, scheduleId);
+
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    int userID = rs.getInt("user_id");
+                    int locationId = rs.getInt("location_id");
+                    int studioId = rs.getInt("studio_id");
+                    String scheduleDate = rs.getString("schedule_date");
+                    String status = rs.getString("status");
+
+                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status);
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return null;
+    }
+
+    public PhotoSchedule getLastPhotoSchedule() throws NamingException, SQLException {
+
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select top 1 schedule_id,user_id,location_id,studio_id,schedule_date,status\n"
+                        + "from photo_schedules\n"
+                        + "where status = 'pending'\n"
+                        + "order by schedule_id desc";
+
+                pst = conn.prepareStatement(sql);
+
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    int scheduleId = rs.getInt("schedule_id");
+                    int userID = rs.getInt("user_id");
+                    int locationId = rs.getInt("location_id");
+                    int studioId = rs.getInt("studio_id");
+                    String scheduleDate = rs.getString("schedule_date");
+                    String status = rs.getString("status");
+
+                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status);
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return null;
     }
 }

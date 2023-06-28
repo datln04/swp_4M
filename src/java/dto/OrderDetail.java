@@ -72,6 +72,13 @@ public class OrderDetail implements Serializable {
         this.itemType = itemType;
         this.image = image;
     }
+    
+     public OrderDetail(String orderDate, int orderId, int itemId, String itemType) {            
+        this.orderDate = orderDate;
+        this.orderId = orderId;
+        this.itemId = itemId;
+        this.itemType = itemType;
+    }
 
     public String getImage() {
         return image;

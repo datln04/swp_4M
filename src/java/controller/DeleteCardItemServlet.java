@@ -5,11 +5,21 @@
  */
 package controller;
 
+import dao.LocationDAO;
+import dao.OrderDAO;
 import dao.OrderDetailDAO;
+import dao.PhotoScheduleDAO;
+import dao.PhotographyStudiosDAO;
+import dto.Location;
+import dto.Order;
 import dto.OrderDetail;
+import dto.OrderItem;
+import dto.PhotoSchedule;
+import dto.PhotographyStudio;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +40,7 @@ import javax.servlet.http.HttpSession;
 public class DeleteCardItemServlet extends HttpServlet {
 
     public final String CART_PAGE = "cart.jsp";
+    public final String HOME_PAGE = "DispatcherServlet?btAction=Home";
     public final String ERROR_PAGE = "error.jsp";
 
     /**
@@ -45,25 +56,94 @@ public class DeleteCardItemServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String orderDetailId = request.getParameter("txtOrderDetailId");
+        String orderId = request.getParameter("orderId");
+        String orderDetailId = request.getParameter("orderDetailId");
         String url = ERROR_PAGE;
 
-        OrderDetailDAO dao = new OrderDetailDAO();
+        OrderDAO orderDAO = new OrderDAO();
+        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
+        PhotoScheduleDAO scheduleDAO = new PhotoScheduleDAO();
+        LocationDAO locationDAO = new LocationDAO();
+        PhotographyStudiosDAO studioDAO = new PhotographyStudiosDAO();
+
         HttpSession session = request.getSession();
 
         try {
             if (session != null) {
-                List<OrderDetail> list = (List<OrderDetail>) session.getAttribute("LIST_ORDER_DETAIL");
-                if (list != null && list.size() > 0 && !orderDetailId.isEmpty()) {
-                    boolean result = dao.deleteOrderDetail(Integer.parseInt(orderDetailId));
-                    if(result){
-                        list.remove(dao.getOrderDetailById(Integer.parseInt(orderDetailId)));
-                        session.setAttribute("LIST_ORDER_DETAIL", list);
-                        url = CART_PAGE;
+
+                // get order Id and orderDetailRemove 
+                Order existOrder = orderDAO.getOrderById(Integer.parseInt(orderId));
+
+                if (existOrder != null) {
+                    // from orderId -> get order detail available 
+                    List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(existOrder.getOrderId());
+
+                    // filter orderDetailRemove include in list available 
+                    for (OrderDetail orderDetail : listOrderDetail) {
+                        if (orderDetail.getOrderDetailId() == Integer.parseInt(orderDetailId)) {
+
+                            // remove schedule
+                            boolean resultSchedule = scheduleDAO.deleteScheduleById(orderDetail.getItemId());
+
+                            // remove order detail
+                            boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+                            
+                            if (resultSchedule && result) {
+                                url = CART_PAGE;
+                            }
+                        }
                     }
+
+                    // get list again
+                    List<OrderDetail> listDetail = orderDetailDAO.getOrderDetailByOrderId(existOrder.getOrderId());
+                    if (listDetail.size() > 0) {
+                        // pass list to view
+                        List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
+
+                        for (OrderDetail detail : listDetail) {
+                            //item_id and item_type --> add schedule photo
+                            if (detail.getItemType().equals("photo_schedule")) {
+                                PhotoSchedule photoSchedule = scheduleDAO.getPhotoScheduleById(detail.getItemId());
+
+                                // get item
+                                Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
+                                PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
+
+                                // init photo schedule
+                                OrderItem photoScheduleItem = new OrderItem();
+                                List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
+
+                                // add item into list
+                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), existOrder.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule"));
+                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), existOrder.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule"));
+
+                                // add list into item photo schedule    
+                                photoScheduleItem.setList(listScheduleOrderDetail);
+                                listPhotoScheduleItem.add(photoScheduleItem);
+                            } else {
+                                OrderItem photoScheduleItem = new OrderItem();
+                                List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
+                                listScheduleOrderDetail.add(detail);
+                                // add list into item photo schedule    
+                                photoScheduleItem.setList(listScheduleOrderDetail);
+                                listPhotoScheduleItem.add(photoScheduleItem);
+                            }
+                        }
+                        session.setAttribute("LIST_CARR_ITEM", listPhotoScheduleItem);
+                        session.setAttribute("CART_ITEM", listPhotoScheduleItem.size());
+                    } else {
+                        // order is empty -> delete order
+                        boolean result = orderDAO.removeOrderById(existOrder.getOrderId());
+                        if (result) {
+                            session.setAttribute("CART_ITEM", null);
+                            url = HOME_PAGE;
+                        }
+                    }
+
                 }
+
             }
-        }  catch (NamingException ex) {
+        } catch (NamingException ex) {
             log("DeleteCartItemServlet_NamingException: " + ex.getMessage());
         } catch (SQLException ex) {
             log("DeleteCartItemServlet_SQLException " + ex.getMessage());
