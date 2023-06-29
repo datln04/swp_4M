@@ -101,7 +101,12 @@
                     <a href="DispatcherServlet?btAction=Home">Home - </a>
                 </c:if>
                 <c:if test="${sessionScope.USER != null}">
+
                     <p href="#">Hello <a href="profile.jsp"><strong>${sessionScope.USER.firstName}</strong></a></p>
+                                <c:if test="${sessionScope.USER.roleName eq 'admin'}">
+                        <a href="admin.jsp">Admin</a>
+                        <a href="showFeedback.jsp">Manage Feedback</a>
+                    </c:if>
                     <a href="DispatcherServlet?btAction=Logout"> - Logout</a>
                 </c:if>
                 <c:if test="${sessionScope.USER == null}">
@@ -109,6 +114,9 @@
                     <a href="register.jsp">Register</a>
                 </c:if>          
                 <c:if test="${sessionScope.USER != null and sessionScope.USER.roleName eq 'user'}">
+                    <a class="" href="feedback.jsp">
+                        Feedback
+                    </a>
                     <a class="" href="cart.jsp">
                         <i class="fa fa-shopping-cart"></i> Cart
                         <span class="badge badge-light">${sessionScope.CART_ITEM}</span>
@@ -116,7 +124,7 @@
                 </c:if>
             </div>
 
-            <c:if test="${sessionScope.USER.roleName eq 'user'}">
+            <c:if test="${sessionScope.USER.roleName eq 'user' || sessionScope.USER == null}">
                 <div class="search-bar">
                     <form action="DispatcherServlet" method="GET">
                         <input type="text" name="txtSearch" placeholder="Search for locations, studios, prices..." value="${param.txtSearch}">

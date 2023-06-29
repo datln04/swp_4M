@@ -7,6 +7,7 @@ package controller;
 
 import dao.AccountDAO;
 import dao.DressPhotoComboDAO;
+import dao.FeedbackDAO;
 import dao.LocationDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
@@ -16,6 +17,7 @@ import dao.RentalProductDAO;
 import dao.RoleDAO;
 import dao.studioStaffDAO;
 import dto.DressPhotoCombo;
+import dto.Feedback;
 import dto.Location;
 import dto.Order;
 import dto.OrderDetail;
@@ -86,6 +88,7 @@ public class LoginServlet extends HttpServlet {
 //        studioStaffDAO studioStaffDAO = new studioStaffDAO();
         RentalProductDAO rentalProductDAO = new RentalProductDAO();
         DressPhotoComboDAO comboDAO = new DressPhotoComboDAO();
+        FeedbackDAO feedbackDAO = new FeedbackDAO();
 
         HttpSession session = request.getSession();
 
@@ -131,6 +134,9 @@ public class LoginServlet extends HttpServlet {
                         }
                         session.setAttribute("LIST_ORDER_ADMIN", orderItem);
                     }
+
+                    List<Feedback> listFeedback = feedbackDAO.getAllFeedback();
+                    session.setAttribute("LIST_ADMIN_FFEDBACK", listFeedback);
 
                 } else if (STAFF_ROLE.equals(result.getRoleName())) {
                     url = PHOTO_PAGE;
@@ -187,7 +193,7 @@ public class LoginServlet extends HttpServlet {
 
                                     // add item into list
                                     listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
-                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(),orderId, photoSchedule.getScheduleId(), "photo_schedule"));
+                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
 
                                     // add list into item photo schedule    
                                     photoScheduleItem.setList(listScheduleOrderDetail);
@@ -201,8 +207,7 @@ public class LoginServlet extends HttpServlet {
                                     listPhotoScheduleItem.add(photoScheduleItem);
                                 }
                             }
-                            
-                           
+
                             session.setAttribute("LIST_CARR_ITEM", listPhotoScheduleItem);
                             session.setAttribute("CART_ITEM", listPhotoScheduleItem.size());
                         }
@@ -213,12 +218,15 @@ public class LoginServlet extends HttpServlet {
 
                     List<PhotographyStudio> listStudio = studioDAO.getAllPhotographyStudio();
                     session.setAttribute("LIST_STUDIO", listStudio);
-                    
+
                     List<RentalProduct> rentalProducts = rentalProductDAO.getAllRentalProduct();
                     session.setAttribute("LIST_PRODUCT", rentalProducts);
-                    
+
                     List<DressPhotoCombo> combos = comboDAO.getAllDressPhotoCombo();
                     session.setAttribute("LIST_COMBO", combos);
+
+                    List<Feedback> listFeedback = feedbackDAO.getLastFiveFeedback();
+                    session.setAttribute("LIST_EXIST_FEEDBACK", listFeedback);
 
                 } else if (RENTAL_STAFF_ROLE.equals(result.getRoleName())) {
                     url = RENTAL_STAFF_PAGE;

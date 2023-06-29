@@ -295,3 +295,22 @@ add stock bigint
 
 Alter table orders
 add amount float
+
+-- Create Feedback table
+CREATE TABLE Feedback (
+    feedback_id INT IDENTITY(1,1) PRIMARY KEY,
+    profile_id INT,
+    TimeFeedBack VARCHAR(20),
+    Content NVARCHAR(255),
+    Rating VARCHAR(10),
+	active bit,
+	FOREIGN KEY (profile_id) REFERENCES profiles(profile_id),
+);
+
+
+create table ReplyFeedback(
+	reply_id int IDENTITY(1,1) PRIMARY KEY,
+	feedback_id int not null foreign key references Feedback(feedback_id),
+	profile_id int not null foreign key references profiles(profile_id),
+	ReplyContent varchar(255)
+)

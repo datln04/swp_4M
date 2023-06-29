@@ -4,9 +4,41 @@
         <servlet-name>DispatcherServlet</servlet-name>
         <servlet-class>controller.DispatcherServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>FeedbackServlet</servlet-name>
+        <servlet-class>controller.FeedbackServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>FilterFeedback</servlet-name>
+        <servlet-class>controller.FilterFeedback</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ReplyFeedbackServlet</servlet-name>
+        <servlet-class>controller.ReplyFeedbackServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SearchFeedback</servlet-name>
+        <servlet-class>controller.SearchFeedback</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DispatcherServlet</servlet-name>
         <url-pattern>/DispatcherServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FeedbackServlet</servlet-name>
+        <url-pattern>/feedback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FilterFeedback</servlet-name>
+        <url-pattern>/filterFeedback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReplyFeedbackServlet</servlet-name>
+        <url-pattern>/ReplyFeedback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SearchFeedback</servlet-name>
+        <url-pattern>/searchFeedback</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
