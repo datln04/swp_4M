@@ -200,6 +200,14 @@
                 margin: 0 10px;
             }
 
+            .truncate-text {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
 
         </style>
         <link 
@@ -239,7 +247,7 @@
 
             <div class="card-container">
 
-                <c:forEach items="${requestScope.LIST_ORDER_PAGING}" var="data">
+                <c:forEach items="${sessionScope.LIST_ORDER_PAGING}" var="data">
                     <c:url var="detail" value="detail.jsp">
                         <c:param name="id" value="${data.itemId}" />
                         <c:param name="name" value="${data.name}" />
@@ -254,7 +262,7 @@
                             </div>
                             <div class="card-content">
                                 <h3>${data.name}</h3>
-                                <p>${data.description}</p>
+                                <p class="truncate-text">${data.description}</p>
                                 <p>Price For Rent: $ ${data.price}</p>
                                 <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
                                 <form action="DispatcherServlet" method="POST">

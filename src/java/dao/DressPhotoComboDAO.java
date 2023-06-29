@@ -32,9 +32,9 @@ public class DressPhotoComboDAO implements Serializable {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "select id, combo_name, combo_description,dress_id,photo_studio_id,price,image,is_active\n"
-                        + "from dress_and_photo_combo\n" + 
-                        "where is_active = 1";
+                String sql = "select id, combo_name, combo_description,dress_id,photo_studio_id,price,image,is_active,stock\n"
+                        + "from dress_and_photo_combo\n"
+                        + "where is_active = 1 and stock > 0";
 
                 pst = conn.prepareStatement(sql);
                 rs = pst.executeQuery();
@@ -43,11 +43,12 @@ public class DressPhotoComboDAO implements Serializable {
                     String comboName = rs.getString("combo_name");
                     String comboDescription = rs.getString("combo_description");
                     int dressId = rs.getInt("dress_id");
+                    int stock = rs.getInt("stock");
                     int photoStudioId = rs.getInt("photo_studio_id");
                     double price = rs.getFloat("price");
                     String image = rs.getString("image");
                     boolean active = rs.getBoolean("is_active");
-                    list.add(new DressPhotoCombo(id, comboName, comboDescription,dressId,photoStudioId, price, image,active));
+                    list.add(new DressPhotoCombo(id, comboName, comboDescription, dressId, photoStudioId, price, image, stock, active));
                 }
 
             }
@@ -65,14 +66,14 @@ public class DressPhotoComboDAO implements Serializable {
 
         return list;
     }
-    
+
     public List<DressPhotoCombo> getSearchCombo(String searchValue) throws NamingException, SQLException {
         List<DressPhotoCombo> list = new ArrayList<>();
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
                 String sql = "select id, combo_name, combo_description,dress_id,photo_studio_id,price,image,is_active\n"
-                        + "from dress_and_photo_combo\n" 
+                        + "from dress_and_photo_combo\n"
                         + "where combo_name LIKE ? and is_active = 1";
 
                 pst = conn.prepareStatement(sql);
@@ -87,7 +88,7 @@ public class DressPhotoComboDAO implements Serializable {
                     double price = rs.getFloat("price");
                     String image = rs.getString("image");
                     boolean active = rs.getBoolean("is_active");
-                    list.add(new DressPhotoCombo(id, name, description,dressId, studioId, price, image, active));
+                    list.add(new DressPhotoCombo(id, name, description, dressId, studioId, price, image, active));
                 }
 
             }
@@ -105,20 +106,20 @@ public class DressPhotoComboDAO implements Serializable {
 
         return list;
     }
-    
+
     public List<DressPhotoCombo> getFilterCombo(int min, int max) throws NamingException, SQLException {
         List<DressPhotoCombo> list = new ArrayList<>();
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
                 String sql = "select id, combo_name, combo_description,dress_id,photo_studio_id,price,image,is_active\n"
-                        + "from dress_and_photo_combo\n" 
+                        + "from dress_and_photo_combo\n"
                         + "where price > ? and price < ? and is_active = 1";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, min);
                 pst.setInt(2, max);
-                
+
                 rs = pst.executeQuery();
                 while (rs.next()) {
                     int id = rs.getInt("id");
@@ -129,7 +130,7 @@ public class DressPhotoComboDAO implements Serializable {
                     double price = rs.getFloat("price");
                     String image = rs.getString("image");
                     boolean active = rs.getBoolean("is_active");
-                    list.add(new DressPhotoCombo(id, name, description,dressId, studioId, price, image, active));
+                    list.add(new DressPhotoCombo(id, name, description, dressId, studioId, price, image, active));
                 }
 
             }
@@ -146,5 +147,77 @@ public class DressPhotoComboDAO implements Serializable {
         }
 
         return list;
+    }
+
+    public DressPhotoCombo getComboById(int comboId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select id, combo_name, combo_description,dress_id,photo_studio_id,price,image,is_active, stock\n"
+                        + "from dress_and_photo_combo\n"
+                        + "where is_active = 1 and stock > 0 and id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, comboId);
+
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    int dressId = rs.getInt("dress_id");
+                    int studioId = rs.getInt("photo_studio_id");
+                    int stock = rs.getInt("stock");
+                    String name = rs.getString("combo_name");
+                    String description = rs.getString("combo_description");
+                    double price = rs.getFloat("price");
+                    String image = rs.getString("image");
+                    boolean active = rs.getBoolean("is_active");
+                    return new DressPhotoCombo(id, name, description, dressId, studioId, price, image, stock, active);
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return null;
+    }
+
+    public boolean setStockCombo(int comboId, int stock) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update dress_and_photo_combo\n"
+                        + "set stock = ?\n"
+                        + "where id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, comboId);
+                pst.setInt(2, stock);
+
+                int rs = pst.executeUpdate();
+                if (rs > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+          
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
     }
 }

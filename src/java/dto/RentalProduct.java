@@ -8,6 +8,7 @@ public class RentalProduct implements Serializable {
     private String description;
     private double price;
     private String image;
+    private int stock;
     private boolean active;
 
     // Constructors, getters, and setters
@@ -20,6 +21,24 @@ public class RentalProduct implements Serializable {
         this.price = price;
         this.image = image;
         this.active = active;
+    }
+
+    public RentalProduct(int id, String name, String description, double price, String image, int stock, boolean active) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.image = image;
+        this.stock = stock;
+        this.active = active;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 
     public boolean isActive() {

@@ -20,6 +20,7 @@ public class DressPhotoCombo implements Serializable{
     private int photoStudioId;
     private double price;
     private String image;
+    private int stock;
     private boolean active;
 
     public DressPhotoCombo() {
@@ -35,6 +36,27 @@ public class DressPhotoCombo implements Serializable{
         this.image = image;
         this.active = active;
     }
+
+    public DressPhotoCombo(int id, String comboName, String comboDescription, int dressId, int photoStudioId, double price, String image, int stock, boolean active) {
+        this.id = id;
+        this.comboName = comboName;
+        this.comboDescription = comboDescription;
+        this.dressId = dressId;
+        this.photoStudioId = photoStudioId;
+        this.price = price;
+        this.image = image;
+        this.stock = stock;
+        this.active = active;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+        
 
     public boolean isActive() {
         return active;

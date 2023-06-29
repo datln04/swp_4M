@@ -5,14 +5,7 @@
  */
 package controller;
 
-import dao.DressPhotoComboDAO;
-import dao.LocationDAO;
-import dao.PhotographyStudiosDAO;
 import dao.RentalProductDAO;
-import dto.DressPhotoCombo;
-import dto.Location;
-import dto.OrderDetail;
-import dto.PhotographyStudio;
 import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,17 +19,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import util.Contant;
-import util.PaginationHelper;
+import util.Utilities;
 
 /**
  *
  * @author ptd
  */
-@WebServlet(name = "SearchServlet", urlPatterns = {"/SearchServlet"})
-public class SearchServlet extends HttpServlet {
+@WebServlet(name = "AddProductServlet", urlPatterns = {"/AddProductServlet"})
+public class AddProductServlet extends HttpServlet {
 
     public final String ERROR_PAGE = "error.jsp";
+    public final String PRODUCT_HOME_PAGE = "rentalPage.jsp";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -51,53 +44,32 @@ public class SearchServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String searchText = request.getParameter("txtSearch");
         String url = ERROR_PAGE;
-        HttpSession session = request.getSession();
-        LocationDAO locationDAO = new LocationDAO();
-        RentalProductDAO rentalDAO = new RentalProductDAO();
-        PhotographyStudiosDAO photoDAO = new PhotographyStudiosDAO();
-        DressPhotoComboDAO dressPhotoComboDAO = new DressPhotoComboDAO();
+        String name = request.getParameter("productName");
+        String description = request.getParameter("productDescription");
+        String price = request.getParameter("productPrice");
+        String image = request.getParameter("productImage");
+        String stock = request.getParameter("productStock");
+
+        RentalProductDAO dao = new RentalProductDAO();
 
         try {
-            List<Location> listLocation = locationDAO.getSearchLocation(searchText);
-            List<RentalProduct> listProduct = rentalDAO.getSearchRentalProduct(searchText);
-            List<PhotographyStudio> listStudio = photoDAO.getSearchPhotographyStudio(searchText);
-            List<DressPhotoCombo> listCombo = dressPhotoComboDAO.getSearchCombo(searchText);
-
-            List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
-
-            // Set the number of entities per page
-            int entitiesPerPage = Contant.PAGE_SIZE;
-
-            // Calculate the total pages for all lists combined
-            int totalEntities = listOrder.size();
-            int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
-
-            // Retrieve the current page number from the request parameters
-            int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
-
-            List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-            session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
-
-            request.setAttribute("totalPages", totalPages);
-            request.setAttribute("currentPage", currentPage);
-
-//            request.setAttribute("LIST_LOCATION", listLocation);
-//            request.setAttribute("LIST_PRODUCT", listProduct);
-//            request.setAttribute("LIST_STUDIO", listStudio);
-//            request.setAttribute("LIST_COMBO", listCombo);
-            url = "home.jsp";
-
+            if (Utilities.isPositiveNumber(stock) && Utilities.isPositiveNumber(price)) {
+                HttpSession session = request.getSession();
+                boolean result = dao.insertRentalProduct(new RentalProduct(0, name, description, Double.parseDouble(price), image, Integer.parseInt(stock), true));
+                if (result) {
+                    List<RentalProduct> listProduct = dao.getAllRentalProduct();
+                    session.setAttribute("PRODUCTS", listProduct);
+                    url = PRODUCT_HOME_PAGE;
+                }
+            }
         } catch (NamingException ex) {
-            log("SearchServlet_NamingException: " + ex.getMessage());
+            log("UpdatePhotoServlet_NamingException: " + ex.getMessage());
         } catch (SQLException ex) {
-            log("SearchServlet_SQLException " + ex.getMessage());
+            log("UpdatePhotoServlet_SQLException " + ex.getMessage());
         } finally {
-            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-            dispatcher.forward(request, response);
+            response.sendRedirect(url);
         }
-
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

@@ -315,4 +315,38 @@ public class OrderDetailDAO implements Serializable {
         }
         return list;
     }
+    
+    public boolean changeOrderDetail(OrderDetail orderDetail) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update order_detail\n"
+                        + "set name = ?, description = ?, price =?, order_date = ?, item_id = ?, item_type = ?\n"
+                        + "where order_detail_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, orderDetail.getName());
+                pst.setString(2, orderDetail.getDescription());
+                pst.setFloat(3, (float) orderDetail.getPrice());
+                pst.setString(4, orderDetail.getOrderDate());
+                pst.setInt(5, orderDetail.getItemId());
+                pst.setString(6, orderDetail.getItemType());
+                pst.setInt(7, orderDetail.getOrderDetailId());
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return false;
+    }
 }

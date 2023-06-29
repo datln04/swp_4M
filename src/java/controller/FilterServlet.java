@@ -25,6 +25,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import util.Contant;
 import util.PaginationHelper;
 
@@ -54,6 +55,8 @@ public class FilterServlet extends HttpServlet {
         int min = Integer.parseInt(minNumber);
         int max = Integer.parseInt(maxNumber);
         String url = ERROR_PAGE;
+          HttpSession session = request.getSession();
+        
         
         LocationDAO locationDAO = new LocationDAO();
         RentalProductDAO rentalDAO = new RentalProductDAO();
@@ -79,7 +82,7 @@ public class FilterServlet extends HttpServlet {
                 int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
 
                 List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
 
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("currentPage", currentPage);

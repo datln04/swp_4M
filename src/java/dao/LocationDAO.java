@@ -113,7 +113,7 @@ public class LocationDAO implements Serializable {
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, min);
                 pst.setInt(2, max);
-                
+
                 rs = pst.executeQuery();
                 while (rs.next()) {
                     int id = rs.getInt("location_id");
@@ -176,7 +176,41 @@ public class LocationDAO implements Serializable {
 
         return false;
     }
-    
+
+    public boolean insertLocation(Location location) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "insert into locations(location_name,description,price,image,is_active)\n"
+                        + "values (?,?,?,?,1)";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, location.getName());
+                pst.setString(2, location.getDescription());
+                pst.setFloat(3, (float) location.getPrice());
+                pst.setString(4, location.getImage());
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+
     public boolean deleteLocation(int id) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -186,7 +220,7 @@ public class LocationDAO implements Serializable {
                         + "WHERE location_id = ?;";
 
                 pst = conn.prepareStatement(sql);
- 
+
                 pst.setInt(1, id);
                 int result = pst.executeUpdate();
 
@@ -209,7 +243,7 @@ public class LocationDAO implements Serializable {
 
         return false;
     }
-    
+
     public Location getLocationById(int locationId) throws NamingException, SQLException {
         Location location = null;
         try {

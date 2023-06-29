@@ -116,9 +116,9 @@ CREATE TABLE rental_schedules (
 -- Insert mock data into rental_products table
 INSERT INTO rental_products (product_name, description, price,image)
 VALUES
-    ('Wedding Dress', 'Elegant white wedding dress', 500.00,'https://i.ibb.co/DgVYGGB/wedding-dress.jpg'),
-    ('Tuxedo', 'Classic black tuxedo for groom', 300.00,'https://i.ibb.co/hZMzznQ/tuxedo.jpg'),
-    ('Bridesmaid Dress', 'Stylish bridesmaid dress', 200.00,'https://i.ibb.co/SR5Bw26/Bridesmaid-Dress.jpg');
+    ('Wedding Dress', 'Elegant white wedding dress', 500.00,'https://i.ibb.co/DgVYGGB/wedding-dress.jpg', 10),
+    ('Tuxedo', 'Classic black tuxedo for groom', 300.00,'https://i.ibb.co/hZMzznQ/tuxedo.jpg', 10),
+    ('Bridesmaid Dress', 'Stylish bridesmaid dress', 200.00,'https://i.ibb.co/SR5Bw26/Bridesmaid-Dress.jpg',10);
 
 -- Insert mock data into photography_studios table
 INSERT INTO photography_studios (studio_name, description, price,image)
@@ -285,4 +285,11 @@ CREATE TABLE photo_schedules (
     FOREIGN KEY (studio_id) REFERENCES photography_studios(studio_id)
 );
 
+
+Alter table rental_products
+add stock bigint 
+
+Alter table dress_and_photo_combo
+add stock bigint 
+ 
 

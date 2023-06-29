@@ -28,6 +28,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import util.Contant;
 import util.PaginationHelper;
 
@@ -53,15 +54,13 @@ public class CategoryServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         String url = HOME_PAGE;
+        
+        HttpSession session = request.getSession();
 
         try {
 
             String value = request.getParameter("category");
 
-            request.removeAttribute("LIST_LOCATION");
-            request.removeAttribute("LIST_PRODUCT");
-            request.removeAttribute("LIST_STUDIO");
-            request.removeAttribute("LIST_COMBO");
 
             LocationDAO locationDAO = new LocationDAO();
             RentalProductDAO rentalDAO = new RentalProductDAO();
@@ -74,7 +73,7 @@ public class CategoryServlet extends HttpServlet {
             List<DressPhotoCombo> listCombo = dressPhotoComboDAO.getAllDressPhotoCombo();
             if ("location".equals(value)) {
                 // Set the number of entities per page
-                int entitiesPerPage = Contant.PAGE_SIZE;
+                int entitiesPerPage = 6;
 
                 // Calculate the total pages for all lists combined
                 int totalEntities = listLocation.size();
@@ -91,7 +90,7 @@ public class CategoryServlet extends HttpServlet {
                 }
 
                 List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
 
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("currentPage", currentPage);
@@ -114,7 +113,7 @@ public class CategoryServlet extends HttpServlet {
                 }
 
                 List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
 
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("currentPage", currentPage);
@@ -138,7 +137,7 @@ public class CategoryServlet extends HttpServlet {
                 }
 
                 List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
 
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("currentPage", currentPage);
@@ -161,7 +160,7 @@ public class CategoryServlet extends HttpServlet {
                 }
 
                 List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
 
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("currentPage", currentPage);
@@ -179,7 +178,7 @@ public class CategoryServlet extends HttpServlet {
                 int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
 
                 List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
 
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("currentPage", currentPage);

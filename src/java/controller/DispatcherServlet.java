@@ -65,6 +65,12 @@ public class DispatcherServlet extends HttpServlet {
     public final String PAYMENT_SERVLET = "PaymentServlet";
     
     public final String ADD_TO_CART_SERVLET = "AddToCartServlet";
+    public final String POPUP_UPDATE_SERVLET = "PopupUpdateServlet";
+    
+    public final String ADD_LOCATION_SERVLET = "AddLocationServlet";
+    public final String ADD_PRODUCT_SERVLET = "AddProductServlet";
+    
+    public final String CHANGE_ITEM_SERVLET = "ChangeItemServlet";
 
     public final String HOME_PAGE = "home.jsp";
 
@@ -88,6 +94,7 @@ public class DispatcherServlet extends HttpServlet {
         RentalProductDAO rentalDAO = new RentalProductDAO();
         PhotographyStudiosDAO photoDAO = new PhotographyStudiosDAO();
         DressPhotoComboDAO dressPhotoComboDAO = new DressPhotoComboDAO();
+        HttpSession session = request.getSession();
 
         try {
             if (action == null || "Logout".equals(action) || "Home".equals(action)) {
@@ -110,7 +117,8 @@ public class DispatcherServlet extends HttpServlet {
                 int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
 
                 List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                request.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_ALL", listOrder);
 
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("currentPage", currentPage);
@@ -168,6 +176,18 @@ public class DispatcherServlet extends HttpServlet {
             }
             else if ("Add To Card".equals(action)) {
                 url = ADD_TO_CART_SERVLET;
+            }
+            else if ("popupUpdate".equals(action)) {
+                url = POPUP_UPDATE_SERVLET;
+            }
+            else if ("Add Location".equals(action)) {
+                url = ADD_LOCATION_SERVLET;
+            }
+            else if ("Add Product".equals(action)) {
+                url = ADD_PRODUCT_SERVLET;
+            }
+            else if ("Change Item".equals(action)) {
+                url = CHANGE_ITEM_SERVLET;
             }
         } catch (NamingException ex) {
             log("DispatcherServlet_NamingException: " + ex.getMessage());

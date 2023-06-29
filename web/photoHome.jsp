@@ -189,8 +189,7 @@
             <div class="tab">
                 <button class="tablinks active" onclick="openTab(event, 'Tab1')">Location</button>
                 <button class="tablinks" onclick="openTab(event, 'Tab2')">Schedule Confirm</button>
-
-
+                <button class="tablinks" onclick="openTab(event, 'Tab3')">Add Location</button>
             </div>
 
 
@@ -236,7 +235,7 @@
                     </tr>
                     <c:forEach items="${sessionScope.LIST_PHOTO_SCHEDULE_STAFF}" var="schedule" varStatus="count">
                         <th style="border: none;">${count.index + 1}</th>
-                        <c:forEach items="${schedule.list}" var="scheduleItem" >
+                            <c:forEach items="${schedule.list}" var="scheduleItem" >
                             <tr>                       
                                 <td>${scheduleItem.name}</td>
                                 <td>${scheduleItem.description}</td>
@@ -255,11 +254,31 @@
                                 <input type="hidden" name="scheduleId" value="${schedule.orderDetailId}"/>
                                 <input type="submit" class="button btn-primary btn-delete-all-item" value="Confirm Schedule" name="btAction"/>  
                             </form>
-                                                                                           
+
                         </th>
                         <tr style="border-top: 1px solid black;"></tr>
                     </c:forEach>
                 </table>
+            </div>
+
+            <div id="Tab3" class="tabcontent" style="width: 500px" >
+                <h3>Add Location</h3>
+                <form action="DispatcherServlet" method="POST">
+                  
+                    <p for="locationImage">Image Link:</p>
+                    <input type="text" id="locationImage" name="txtLocationImage" required=""/>
+
+                    <p for="locationName">Name:</p>
+                    <input type="text" id="locationName" name="txtLocationName" required=""/>
+
+                    <p for="locationDescription">Description:</p>
+                    <input type="text" id="locationDescription" name="txtLocationDescription" required=""/>
+
+                    <p for="locationPrice">Price:</p>
+                    <input type="text" id="locationPrice" name="txtLocationPrice" required=""/>
+                    <br/> 
+                    <input type="submit" value="Add Location" name="btAction" class="button button-update"/>
+                </form>
             </div>
 
             <div id="popup" class="popup">
@@ -270,16 +289,16 @@
                         <input type="hidden" id="locationId" name="txtLocationId">
 
                         <p for="locationImage">Image Link:</p>
-                        <input type="text" id="locationImage" name="txtLocationImage"/>
+                        <input type="text" id="locationImage" name="txtLocationImage" required=""/>
 
                         <p for="locationName">Name:</p>
-                        <input type="text" id="locationName" name="txtLocationName"/>
+                        <input type="text" id="locationName" name="txtLocationName" required=""/>
 
                         <p for="locationDescription">Description:</p>
-                        <input type="text" id="locationDescription" name="txtLocationDescription"/>
+                        <input type="text" id="locationDescription" name="txtLocationDescription" required=""/>
 
                         <p for="locationPrice">Price:</p>
-                        <input type="text" id="locationPrice" name="txtLocationPrice"/>
+                        <input type="text" id="locationPrice" name="txtLocationPrice" required=""/>
                         <br/> 
                         <input type="submit" value="UpdateLocation" name="btAction" class="button button-update"/>
                     </form>
@@ -295,16 +314,16 @@
                         <input type="hidden" id="scheduleId">                        
 
                         <p for="locationName">Name:</p>
-                        <input type="text" id="scheduleName"/>
+                        <input type="text" id="scheduleName" required=""/>
 
                         <p for="locationDescription">Description:</p>
-                        <input type="text" id="scheduleDescription"/>
+                        <input type="text" id="scheduleDescription" required=""/>
 
                         <p for="locationImage">Photo Date</p>
-                        <input type="text" id="scheduleOrderDate" />
+                        <input type="text" id="scheduleOrderDate" required=""/>
 
                         <p for="locationPrice">Price:</p>
-                        <input type="text" id="schedulePrice"/>
+                        <input type="text" id="schedulePrice" required=""/>
                         <br/> 
                         <button class="button button-update">Save</button>
                     </form>
@@ -355,7 +374,7 @@
 
                 document.getElementById('popup').style.display = 'block';
             }
-            
+
             function openPopupSchedule(id, name, description, price, orderDate) {
                 document.getElementById('scheduleId').value = id;
                 document.getElementById('scheduleName').value = name;

@@ -93,14 +93,13 @@ public class OrderDAO implements Serializable {
         return null;
     }
 
-    public List<Order> getOrderByUserId(int userId) throws NamingException, SQLException {
-        List<Order> list = new ArrayList();
+    public Order getOrderByUserId(int userId) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
                 String sql = "select order_id,profile_id,order_date,status\n"
                         + "from orders\n"
-                        + "where profile_id = ? and status = 'pending'";
+                        + "where profile_id = ? and status = 'create'";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, userId);
@@ -113,7 +112,7 @@ public class OrderDAO implements Serializable {
                     String orderDate = rs.getString("order_date");
                     String status = rs.getString("status");
 
-                    list.add(new Order(orderId, profileId, orderDate, status));
+                    return new Order(orderId, profileId, orderDate, status);
                 }
 
             }
@@ -127,7 +126,7 @@ public class OrderDAO implements Serializable {
             }
         }
 
-        return list;
+        return null;
     }
 
     public List<Order> getAllOrder() throws NamingException, SQLException {

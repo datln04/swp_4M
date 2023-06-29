@@ -5,17 +5,21 @@
  */
 package controller;
 
+import dao.DressPhotoComboDAO;
 import dao.LocationDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
 import dao.PhotoScheduleDAO;
 import dao.PhotographyStudiosDAO;
+import dao.RentalProductDAO;
+import dto.DressPhotoCombo;
 import dto.Location;
 import dto.Order;
 import dto.OrderDetail;
 import dto.OrderItem;
 import dto.PhotoSchedule;
 import dto.PhotographyStudio;
+import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -65,6 +69,8 @@ public class DeleteCardItemServlet extends HttpServlet {
         PhotoScheduleDAO scheduleDAO = new PhotoScheduleDAO();
         LocationDAO locationDAO = new LocationDAO();
         PhotographyStudiosDAO studioDAO = new PhotographyStudiosDAO();
+        RentalProductDAO productDAO = new RentalProductDAO();
+        DressPhotoComboDAO comboDAO = new DressPhotoComboDAO();
 
         HttpSession session = request.getSession();
 
@@ -82,15 +88,54 @@ public class DeleteCardItemServlet extends HttpServlet {
                     for (OrderDetail orderDetail : listOrderDetail) {
                         if (orderDetail.getOrderDetailId() == Integer.parseInt(orderDetailId)) {
 
-                            // remove schedule
-                            boolean resultSchedule = scheduleDAO.deleteScheduleById(orderDetail.getItemId());
+                            if ("rental_product".equals(orderDetail.getItemType())) {
+                                RentalProduct product = productDAO.getRentalProductById(orderDetail.getItemId());
+                                if (product != null) {
+                                    int stock = product.getStock() + 1;
+                                    boolean resultProduct = productDAO.setStockRentalProduct(orderDetail.getItemId(), stock);
 
-                            // remove order detail
-                            boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-                            
-                            if (resultSchedule || result) {
-                                url = CART_PAGE;
+                                    if (resultProduct) {
+                                        // remove schedule
+                                        boolean resultSchedule = scheduleDAO.deleteScheduleById(orderDetail.getItemId());
+
+                                        // remove order detail
+                                        boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                                        if (resultSchedule || result) {
+                                            url = CART_PAGE;
+                                        }
+                                    }
+                                }
+                            } else if ("combo".equals(orderDetail.getItemType())) {
+                                DressPhotoCombo combo = comboDAO.getComboById(orderDetail.getItemId());
+                                if (combo != null) {
+                                    int stock = combo.getStock() + 1;
+                                    boolean resultCombo = comboDAO.setStockCombo(orderDetail.getItemId(), stock);
+
+                                    if (resultCombo) {
+                                        // remove schedule
+                                        boolean resultSchedule = scheduleDAO.deleteScheduleById(orderDetail.getItemId());
+
+                                        // remove order detail
+                                        boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                                        if (resultSchedule || result) {
+                                            url = CART_PAGE;
+                                        }
+                                    }
+                                }
+                            } else {
+                                // remove schedule
+                                boolean resultSchedule = scheduleDAO.deleteScheduleById(orderDetail.getItemId());
+
+                                // remove order detail
+                                boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                                if (resultSchedule || result) {
+                                    url = CART_PAGE;
+                                }
                             }
+
                         }
                     }
 

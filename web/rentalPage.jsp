@@ -195,6 +195,7 @@
             <div class="tab">
                 <button class="tablinks active" onclick="openTab(event, 'Tab1')">Product</button>
                 <button class="tablinks" onclick="openTab(event, 'Tab2')">Rent Confirm</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab3')">Add Product</button>
 
             </div>
 
@@ -216,7 +217,7 @@
                             <td><img src="${product.image}" alt="product image"></td>
                             <td>${product.id}</td>
                             <td>${product.name}</td>
-                            <td>${product.description}</td>
+                            <td style="width: 500px">${product.description}</td>
                             <td>$ ${product.price}</td>                   
                             <td class="actions" style="width: fit-content">
                                 <button class="button" onclick="openPopup('${product.image}', ${product.id}, '${product.name}', '${product.description}', ${product.price})">Update Product</button>                     
@@ -265,6 +266,30 @@
                 </table>
             </div>
 
+            <div id="Tab3" class="tabcontent" style="width: 500px">
+                <h2>Adding Rental Product</h2>
+                <form action="DispatcherServlet" method="POST">
+
+                    <p for="locationImage">Image Link:</p>
+                    <input type="text"  name="productImage" required="true"/>
+
+                    <p for="locationName">Name:</p>
+                    <input type="text" name="productName" required="true"/>
+
+                    <p for="locationDescription">Description:</p>
+                    <input type="text"  name="productDescription" required="true"/>
+
+                    <p for="locationPrice">Price:</p>
+                    <input type="text"  name="productPrice" required="true"/>
+                    
+                    <p for="locationPrice">Stock:</p>
+                    <input type="text" name="productStock" required="true"/>
+                    <br/> 
+                    <input type="submit" value="Add Product" name="btAction" class="button button-update"/>
+                </form>
+
+            </div>
+
             <div id="popup" class="popup">
                 <div id="popupContent" class="popup-content">
                     <span class="close" onclick="closePopup()">&times;</span>
@@ -273,16 +298,16 @@
                         <input type="hidden" id="productId" name="productId">
 
                         <p for="locationImage">Image Link:</p>
-                        <input type="text" id="productImage" name="productImage"/>
+                        <input type="text" id="productImage" name="productImage" required="true"/>
 
                         <p for="locationName">Name:</p>
-                        <input type="text" id="productName" name="productName"/>
+                        <input type="text" id="productName" name="productName" required="true" />
 
                         <p for="locationDescription">Description:</p>
-                        <input type="text" id="productDescription" name="productDescription"/>
+                        <input type="text" id="productDescription" name="productDescription" required="true"/>
 
                         <p for="locationPrice">Price:</p>
-                        <input type="text" id="productPrice" name="productPrice"/>
+                        <input type="text" id="productPrice" name="productPrice" required="true"/>
                         <br/> 
                         <input type="submit" value="UpdateProduct" name="btAction" class="button button-update"/>
                     </form>

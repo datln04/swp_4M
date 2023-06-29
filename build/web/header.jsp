@@ -26,7 +26,7 @@
                 margin: 10px;
                 display: flex;
                 justify-content: center;
-            
+
             }
 
             .header .login-register a {
@@ -97,7 +97,9 @@
             <h1>My Wedding Planner</h1>
 
             <div class="login-register">
-                <a href="DispatcherServlet?btAction=Home">Home - </a>
+                <c:if test="${sessionScope.USER.roleName eq 'user'}">
+                    <a href="DispatcherServlet?btAction=Home">Home - </a>
+                </c:if>
                 <c:if test="${sessionScope.USER != null}">
                     <p href="#">Hello <a href="profile.jsp"><strong>${sessionScope.USER.firstName}</strong></a></p>
                     <a href="DispatcherServlet?btAction=Logout"> - Logout</a>
@@ -114,19 +116,21 @@
                 </c:if>
             </div>
 
-            <div class="search-bar">
-                <form action="DispatcherServlet" method="GET">
-                    <input type="text" name="txtSearch" placeholder="Search for locations, studios, prices..." value="${param.txtSearch}">
-                    <input type="submit" value="Search" name="btAction">
-                </form>
-            </div>
-            <div class="container-header">
-                <form action="DispatcherServlet" method="GET">
-                    <input name="txtMinNumber" type="number" min="0" placeholder="Enter a positive number" id="txtMinNumber" value="${param.txtMinNumber}">
-                    <input name="txtMaxNumber" type="number" min="0" placeholder="Enter a positive number" id="txtMaxNumber" value="${param.txtMaxNumber}">               
-                    <input type="submit" value="Filter" id="filterButton" name="btAction">
-                </form>
-            </div>
+            <c:if test="${sessionScope.USER.roleName eq 'user'}">
+                <div class="search-bar">
+                    <form action="DispatcherServlet" method="GET">
+                        <input type="text" name="txtSearch" placeholder="Search for locations, studios, prices..." value="${param.txtSearch}">
+                        <input type="submit" value="Search" name="btAction">
+                    </form>
+                </div>
+                <div class="container-header">
+                    <form action="DispatcherServlet" method="GET">
+                        <input name="txtMinNumber" type="number" min="0" placeholder="Enter a positive number" id="txtMinNumber" value="${param.txtMinNumber}">
+                        <input name="txtMaxNumber" type="number" min="0" placeholder="Enter a positive number" id="txtMaxNumber" value="${param.txtMaxNumber}">               
+                        <input type="submit" value="Filter" id="filterButton" name="btAction">
+                    </form>
+                </div>
+            </c:if>
         </div>
 
         <script>

@@ -5,8 +5,11 @@
  */
 package controller;
 
+import dto.OrderDetail;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,8 +22,8 @@ import javax.servlet.http.HttpSession;
  *
  * @author ptd
  */
-@WebServlet(name = "LogoutServlet", urlPatterns = {"/LogoutServlet"})
-public class LogoutServlet extends HttpServlet {
+@WebServlet(name = "PopupUpdateServlet", urlPatterns = {"/PopupUpdateServlet"})
+public class PopupUpdateServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -34,16 +37,30 @@ public class LogoutServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        HttpSession session = request.getSession(false); // Retrieve the session object
-
-        if (session != null) {
-            session.invalidate(); // Destroy the session
-        }
-
-        // Redirect the user to a different page after session destruction
-        String url = "DispatcherServlet?btAction=Home";
+        
+        String url = "cart.jsp?popupOpen=false";
+        String type = request.getParameter("type");
+        
+        HttpSession session = request.getSession();
+        
+        List<OrderDetail> listOrder = (List<OrderDetail>) session.getAttribute("LIST_ORDER_ALL");
+        
+        List<OrderDetail> listItem = filterListByItem(listOrder, type);
+        session.setAttribute("LIST_POPUP_UPDATE", listItem);
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-        dispatcher.forward(request, response);
+            dispatcher.forward(request, response);
+    }
+    
+    private List<OrderDetail> filterListByItem(List<OrderDetail> list, String type){
+        List<OrderDetail> listItem = new ArrayList<>();
+        for (OrderDetail orderDetail : list) {
+            if(orderDetail.getItemType().equals(type)){
+                listItem.add(orderDetail);
+            }
+        }
+        
+        return listItem;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

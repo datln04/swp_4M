@@ -266,7 +266,7 @@
                                 <td class="actions" style="text-align: center">
                                     <button class="button" onclick="openPopupAccount('${user.profileId}', '${user.userName}',
                                                     '${user.firstName}', '${user.lastName}', '${user.email}',
-                                                    '${staff.phoneNumber}', '${user.address}', '${user.userId}', '${user.roleName}')">
+                                                    '${user.phoneNumber}', '${user.address}', '${user.userId}', '${user.roleName}')">
                                         Update
                                     </button>   
                                     <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${user.profileId}')">Delete</button>                   
