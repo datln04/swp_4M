@@ -293,3 +293,5 @@ Alter table dress_and_photo_combo
 add stock bigint 
  
 
+Alter table orders
+add amount float

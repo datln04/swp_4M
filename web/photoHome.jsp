@@ -183,6 +183,9 @@
 
     </head>
     <body>
+        <c:if test="${sessionScope.USER.roleName ne 'staff'}">
+            <jsp:forward page="login.jsp"></jsp:forward>
+        </c:if>
         <jsp:include page="header.jsp"></jsp:include>
         <c:set var="profile" value="${sessionScope.USER}" />
         <div class="container-parent">
@@ -266,16 +269,16 @@
                 <form action="DispatcherServlet" method="POST">
                   
                     <p for="locationImage">Image Link:</p>
-                    <input type="text" id="locationImage" name="txtLocationImage" required=""/>
+                    <input type="text" name="txtLocationImage" required=""/>
 
                     <p for="locationName">Name:</p>
-                    <input type="text" id="locationName" name="txtLocationName" required=""/>
+                    <input type="text" name="txtLocationName" required=""/>
 
                     <p for="locationDescription">Description:</p>
-                    <input type="text" id="locationDescription" name="txtLocationDescription" required=""/>
+                    <input type="text" name="txtLocationDescription" required=""/>
 
                     <p for="locationPrice">Price:</p>
-                    <input type="text" id="locationPrice" name="txtLocationPrice" required=""/>
+                    <input type="text" name="txtLocationPrice" required=""/>
                     <br/> 
                     <input type="submit" value="Add Location" name="btAction" class="button button-update"/>
                 </form>

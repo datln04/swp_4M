@@ -187,6 +187,9 @@
         </style>
     </head>
     <body>
+        <c:if test="${sessionScope.USER.roleName ne 'admin'}">
+            <jsp:forward page="login.jsp"></jsp:forward>
+        </c:if>
         <jsp:include page="header.jsp"></jsp:include>
             <div class="container-parent">
                 <div class="tab">

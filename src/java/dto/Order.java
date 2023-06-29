@@ -11,6 +11,7 @@ public class Order implements Serializable {
 
     private String orderDate;
     private String status;
+    private double amount;
 
     public Order() {
     }
@@ -27,6 +28,24 @@ public class Order implements Serializable {
         this.orderDate = orderDate;
         this.status = status;
     }
+
+    public Order(int orderId, int profileId, String orderDate, String status, double amount) {
+        this.orderId = orderId;
+        this.profileId = profileId;
+        this.orderDate = orderDate;
+        this.status = status;
+        this.amount = amount;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+    
+    
 
     public int getProfileId() {
         return profileId;

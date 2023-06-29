@@ -5,7 +5,6 @@
  */
 package controller;
 
-
 import dto.Profile;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -51,102 +50,9 @@ public class PaymentServlet extends HttpServlet {
             throws ServletException, IOException {
         resp.setContentType("text/html;charset=UTF-8");
 
-        HttpSession session = req.getSession();
-        Profile profile = (Profile) session.getAttribute("USER");
+        
 
-        String orderId = req.getParameter("idOrder");
-        String amountS = req.getParameter("amount");
-
-        if (profile != null) {
-            // get system param
-            String vnp_Version = Contant.VNP_VERSION;
-            String vnp_Command = Contant.VNP_COMMAND;
-            String vnp_TmnCode = Contant.VNP_TMNCODE;
-
-            // get request param
-            double amount =  Double.parseDouble(amountS)* 100;
-
-            Map<String, String> vnp_Params = new HashMap<>();
-            vnp_Params.put("vnp_Version", vnp_Version);
-            vnp_Params.put("vnp_Command", vnp_Command);
-            vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-            vnp_Params.put("vnp_Amount", String.valueOf(amount));
-            vnp_Params.put("vnp_CurrCode", "VND");
-
-            String bank_code = "NCB";
-            if (bank_code != null && !bank_code.isEmpty()) {
-                vnp_Params.put("vnp_BankCode", bank_code);
-            }
-
-            int leftLimit = 48; // numeral '0'
-            int rightLimit = 122; // letter 'z'
-            int targetStringLength = 10;
-            Random random = new Random();
-
-            String vnp_TxnRef = random.ints(leftLimit, rightLimit + 1)
-                    .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-                    .limit(targetStringLength)
-                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                    .toString();
-
-            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-            vnp_Params.put("vnp_OrderInfo", "Thanh Toan Don Jang");
-            vnp_Params.put("vnp_OrderType", "19000");
-
-            String locale = "vi";
-            if (locale != null && !locale.isEmpty()) {
-                vnp_Params.put("vnp_Locale", locale);
-            } else {
-                vnp_Params.put("vnp_Locale", "vi");
-            }
-
-            vnp_Params.put("vnp_ReturnUrl", Contant.VNP_RETURNURL);
-            vnp_Params.put("vnp_IpAddr", "127.0.0.1");
-
-            String vnp_CreateDate = Utilities.getCurrentDateByFormat("yyyyMMddHHmmss");
-
-            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-
-            String vnp_ExpireDate = Utilities.getExpireDate("yyyyMMddHHmmss");
-            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
-
-            // get query String with param in hash map
-            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
-            Collections.sort(fieldNames);
-            StringBuilder hashData = new StringBuilder();
-            StringBuilder query = new StringBuilder();
-            Iterator<String> itr = fieldNames.iterator();
-
-            try {
-                while (itr.hasNext()) {
-                    String fieldName = (String) itr.next();
-                    String fieldValue = (String) vnp_Params.get(fieldName);
-                    if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                        // Build hash data
-                        hashData.append(fieldName);
-                        hashData.append('=');
-                        hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                        // Build query
-                        query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
-                        query.append('=');
-                        query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                        if (itr.hasNext()) {
-                            query.append('&');
-                            hashData.append('&');
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            String queryUrl = query.toString();
-            String vnp_SecureHash = Utilities.hmacSHA512(Contant.VNP_HASHSCRET, hashData.toString());
-            queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
-            String paymentUrl = Contant.VNP_URI + "?" + queryUrl;
-
-            System.out.println(paymentUrl);
-            resp.sendRedirect(paymentUrl);
-        }
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -173,9 +79,91 @@ public class PaymentServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-        processRequest(request, response);
+        processRequest(req, res);
+        
+        HttpSession session = req.getSession();
+        Profile profile = (Profile) session.getAttribute("USER");
+
+        String amountS = req.getParameter("amount");
+
+        if (profile != null) {
+            String vnp_Version = "2.1.0";
+            String vnp_Command = "pay";
+
+            // Remove any commas and convert to long
+            String bankCode = req.getParameter("bankCode");
+
+            String vnp_TxnRef = Config.getRandomNumber(8);
+            String vnp_IpAddr = Config.getIpAddress(req);
+            String vnp_TmnCode = Config.vnp_TmnCode;
+
+            Map<String, String> vnp_Params = new HashMap<>();
+            vnp_Params.put("vnp_Version", vnp_Version);
+            vnp_Params.put("vnp_Command", vnp_Command);
+            vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+//            vnp_Params.put("vnp_BankCode", "NCB");
+            vnp_Params.put("vnp_OrderType", "17000");
+
+            Double price = Double.parseDouble(amountS);
+            vnp_Params.put("vnp_Amount", String.valueOf(price.longValue() * 100));
+            vnp_Params.put("vnp_CurrCode", "VND");
+            if (bankCode != null && !bankCode.isEmpty()) {
+                vnp_Params.put("vnp_BankCode", bankCode);
+            }
+
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_OrderInfo", String.valueOf(profile.getProfileId()));
+            String locate = req.getParameter("language");
+            if (locate != null && !locate.isEmpty()) {
+                vnp_Params.put("vnp_Locale", locate);
+            } else {
+                vnp_Params.put("vnp_Locale", "vn");
+            }
+
+            vnp_Params.put("vnp_ReturnUrl", Config.vnp_Returnurl);
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String vnp_CreateDate = formatter.format(cld.getTime());
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+            cld.add(Calendar.MINUTE, 15);
+            String vnp_ExpireDate = formatter.format(cld.getTime());
+            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+            List fieldNames = new ArrayList(vnp_Params.keySet());
+            Collections.sort(fieldNames);
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+            Iterator itr = fieldNames.iterator();
+            while (itr.hasNext()) {
+                String fieldName = (String) itr.next();
+                String fieldValue = (String) vnp_Params.get(fieldName);
+                if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                    //Build hash data
+                    hashData.append(fieldName);
+                    hashData.append('=');
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    //Build query
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append('=');
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    if (itr.hasNext()) {
+                        query.append('&');
+                        hashData.append('&');
+                    }
+                }
+            }
+            String queryUrl = query.toString();
+            String vnp_SecureHash = Config.hmacSHA512(Config.vnp_HashSecret, hashData.toString());
+            queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+            String paymentUrl = Config.vnp_PayUrl + "?" + queryUrl;
+            System.out.println(paymentUrl);
+            res.sendRedirect(paymentUrl);
+        }
     }
 
     /**
