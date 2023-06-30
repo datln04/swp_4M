@@ -50,9 +50,6 @@ public class PaymentServlet extends HttpServlet {
             throws ServletException, IOException {
         resp.setContentType("text/html;charset=UTF-8");
 
-        
-
-        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -82,7 +79,7 @@ public class PaymentServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         processRequest(req, res);
-        
+
         HttpSession session = req.getSession();
         Profile profile = (Profile) session.getAttribute("USER");
 
@@ -104,10 +101,10 @@ public class PaymentServlet extends HttpServlet {
             vnp_Params.put("vnp_Command", vnp_Command);
             vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
 //            vnp_Params.put("vnp_BankCode", "NCB");
-            vnp_Params.put("vnp_OrderType", "17000");
+            vnp_Params.put("vnp_OrderType", "topup");
 
             Double price = Double.parseDouble(amountS);
-            vnp_Params.put("vnp_Amount", String.valueOf(price.longValue() * 100));
+            vnp_Params.put("vnp_Amount", String.valueOf(price.longValue() * 1000));
             vnp_Params.put("vnp_CurrCode", "VND");
             if (bankCode != null && !bankCode.isEmpty()) {
                 vnp_Params.put("vnp_BankCode", bankCode);
@@ -163,6 +160,82 @@ public class PaymentServlet extends HttpServlet {
             String paymentUrl = Config.vnp_PayUrl + "?" + queryUrl;
             System.out.println(paymentUrl);
             res.sendRedirect(paymentUrl);
+
+//            String vnp_Version = Contant.VNP_VERSION;
+//            String vnp_Command = Contant.VNP_COMMAND;
+//            String vnp_TmnCode = Contant.VNP_TMNCODE;
+//
+//            // get request param
+//            double amount = Double.parseDouble(amountS) * 100;
+//
+//            Map<String, String> vnp_Params = new HashMap<>();
+//            vnp_Params.put("vnp_Version", vnp_Version);
+//            vnp_Params.put("vnp_Command", vnp_Command);
+//            vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+//            vnp_Params.put("vnp_Amount", String.valueOf(amount));
+//            vnp_Params.put("vnp_CurrCode", "VND");
+//
+//            int leftLimit = 48; // numeral '0'
+//            int rightLimit = 122; // letter 'z'
+//            int targetStringLength = 10;
+//            Random random = new Random();
+//
+//            String vnp_TxnRef = random.ints(leftLimit, rightLimit + 1)
+//                    .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+//                    .limit(targetStringLength)
+//                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+//                    .toString();
+//
+//            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+//            vnp_Params.put("vnp_OrderInfo", String.valueOf(profile.getProfileId()));
+//            vnp_Params.put("vnp_OrderType", "13000");
+//
+//            vnp_Params.put("vnp_Locale", "vn");
+//
+//            vnp_Params.put("vnp_ReturnUrl", Contant.VNP_RETURNURL);
+//            vnp_Params.put("vnp_IpAddr", "127.0.0.1");
+//
+//            String vnp_CreateDate = Utilities.getCurrentDateByFormat("yyyyMMddHHmmss");
+//
+//            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+//
+//            String vnp_ExpireDate = Utilities.getExpireDate("yyyyMMddHHmmss");
+//            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+//
+//            // get query String with param in hash map
+//            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+//            Collections.sort(fieldNames);
+//            StringBuilder hashData = new StringBuilder();
+//            StringBuilder query = new StringBuilder();
+//            Iterator<String> itr = fieldNames.iterator();
+//
+//            try {
+//                while (itr.hasNext()) {
+//                    String fieldName = (String) itr.next();
+//                    String fieldValue = (String) vnp_Params.get(fieldName);
+//                    if ((fieldValue != null) && (fieldValue.length() > 0)) {
+//                        // Build hash data
+//                        hashData.append(fieldName);
+//                        hashData.append('=');
+//                        hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+//                        // Build query
+//                        query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+//                        query.append('=');
+//                        query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+//                        if (itr.hasNext()) {
+//                            query.append('&');
+//                            hashData.append('&');
+//                        }
+//                    }
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            String queryUrl = query.toString();
+//            String vnp_SecureHash = Utilities.hmacSHA512(Contant.VNP_HASHSCRET, hashData.toString());
+//            queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+//            String paymentUrl = Contant.VNP_URI + "?" + queryUrl;
+//            res.sendRedirect(paymentUrl);
         }
     }
 

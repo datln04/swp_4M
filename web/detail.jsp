@@ -22,7 +22,7 @@
             .image-left{
                 border: 1px solid gainsboro;
             }
-            
+
             img {
                 height: 500px;
             }
@@ -80,9 +80,14 @@
     <body>
         <jsp:include page="header.jsp"></jsp:include>
             <form action="DispatcherServlet" method="POST">
-                <div class="container">
-                    <div class="image-left">
-                        <img src="${param.image}" alt="img" />
+                <input type="hidden" name="itemId" value="${param.itemId}"/>
+            <input type="hidden" name="itemType" value="${param.itemType}"/>
+            <input type="hidden" name="name" value="${param.name}"/>
+            <input type="hidden" name="description" value="${param.description}"/>
+            <input type="hidden" name="price" value="${param.price}"/>
+            <div class="container">
+                <div class="image-left">
+                    <img src="${param.image}" alt="img" />
                 </div>
 
                 <div class="content-right">

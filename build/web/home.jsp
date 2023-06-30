@@ -249,7 +249,8 @@
 
                 <c:forEach items="${sessionScope.LIST_ORDER_PAGING}" var="data">
                     <c:url var="detail" value="detail.jsp">
-                        <c:param name="id" value="${data.itemId}" />
+                        <c:param name="itemId" value="${data.itemId}" />
+                        <c:param name="itemType" value="${data.itemType}" />
                         <c:param name="name" value="${data.name}" />
                         <c:param name="description" value="${data.description}" />
                         <c:param name="price" value="${data.price}" />

@@ -186,7 +186,7 @@
 
         <div class="container-parent">
             <c:if test="${sessionScope.LIST_CARR_ITEM.size() > 0}">
-                <h2>Photograph Schedule</h2>
+                <h2>Cart Item</h2>
                 <table>
                     <tr>                                       
                         <th>Name</th>
@@ -208,7 +208,7 @@
                             <tr>                       
                                 <td>${item.name}</td>
                                 <td style="width: 500px">${item.description}</td>
-                                <td>${item.orderDate}</td>
+                                <td style="width: 150px">${item.orderDate}</td>
                                 <td>$ ${item.price}</td>
                                 <c:if test="${item.itemType ne 'photo_schedule'}" >
                                     <td style="border-bottom: none; text-align: center">

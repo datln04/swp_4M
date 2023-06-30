@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,10 +22,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author ptd
  */
-@WebServlet(name = "DeleteProfileServlet", urlPatterns = {"/DeleteProfileServlet"})
-public class DeleteProfileServlet extends HttpServlet {
-
-    public final String HOME_PAGE = "DispatcherServlet?btAction=Home";
+public class ChangePassword extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -41,25 +37,27 @@ public class DeleteProfileServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String url = HOME_PAGE;
-        String profileId = request.getParameter("txtId");
+        String otp = request.getParameter("otp");
 
+        
         HttpSession session = request.getSession();
+        Profile p = (Profile) session.getAttribute("USER_TMP");
         AccountDAO dao = new AccountDAO();
-        if (session != null) {
-            Profile profile = (Profile) session.getAttribute("USER");
-            if (profile != null) {
+
+        if (otp.equals(session.getAttribute("OTP"))) {
+            if (p != null) {
                 try {
-                    boolean result = dao.deleteProfile(Integer.parseInt(profileId));
+                   
+                    boolean result = dao.updateProfile(p);
                     if (result) {
-                        session.invalidate(); // Destroy the session
+                        session.setAttribute("USER", p);
                     }
                 } catch (NamingException ex) {
                     log("UpdateProfileServlet_NamingException: " + ex.getMessage());
                 } catch (SQLException ex) {
                     log("UpdateProfileServlet_SQLException " + ex.getMessage());
                 } finally {
-                    RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+                    RequestDispatcher dispatcher = request.getRequestDispatcher("");
                     dispatcher.forward(request, response);
                 }
             }

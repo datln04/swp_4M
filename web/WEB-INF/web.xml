@@ -20,6 +20,10 @@
         <servlet-name>SearchFeedback</servlet-name>
         <servlet-class>controller.SearchFeedback</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ChangePassword</servlet-name>
+        <servlet-class>controller.ChangePassword</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DispatcherServlet</servlet-name>
         <url-pattern>/DispatcherServlet</url-pattern>
@@ -39,6 +43,10 @@
     <servlet-mapping>
         <servlet-name>SearchFeedback</servlet-name>
         <url-pattern>/searchFeedback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChangePassword</servlet-name>
+        <url-pattern>/changePassword</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

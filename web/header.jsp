@@ -100,6 +100,12 @@
                 <c:if test="${sessionScope.USER.roleName eq 'user'}">
                     <a href="DispatcherServlet?btAction=Home">Home - </a>
                 </c:if>
+                <c:if test="${sessionScope.USER.roleName eq 'staff'}">
+                    <a href="photoHome.jsp">Manage - </a>
+                </c:if>
+                <c:if test="${sessionScope.USER.roleName eq 'rental_staff'}">
+                    <a href="rentalPage.jsp">Manage - </a>
+                </c:if>
                 <c:if test="${sessionScope.USER != null}">
 
                     <p href="#">Hello <a href="profile.jsp"><strong>${sessionScope.USER.firstName}</strong></a></p>

@@ -24,6 +24,17 @@ public class Contant {
 
 //  public static final String VNP_RETURNURL = "https://5men.netlify.app/bookingConfirm";
     public static final String VNP_RETURNURL = "http://localhost:3000/bookingConfirm";
-    
+
     public static final String VNP_RETURN_URL_APP = "";
+
+    public static final String IPN_URL_MOMO = "http://localhost:8080/wedding_photography/DispatcherServlet?btAction=PaymentConfirms";
+//     public static final String IPN_URL_MOMO = "http://localhost:3000/momoWebViewConfirm";
+//
+    public static final String REDIRECT_URL_MOMO = "http://localhost:8080/wedding_photography/";
+
+    public static final String PARTNER_CODE = "MOMODJMX20220717";
+    public static final String ACCESS_KEY = "WehkypIRwPP14mHb";
+    public static final String SECRET_KEY = "3fq8h4CqAAPZcTTb3nCDpFKwEkQDsZzz";
+    public static final String MOMO_URI = "https://test-payment.momo.vn/v2/gateway/api/create";
+
 }
