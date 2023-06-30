@@ -67,11 +67,11 @@ public class ConfirmScheduleServlet extends HttpServlet {
 
         try {
             if (!scheduleId.isEmpty() && session != null) {
-                boolean result = scheduleDAO.confirmScheduleByScheduleId(Integer.parseInt(scheduleId));
-                if (result) {
+          
+              
 
                     // set order is confirm;
-                    boolean orderResult = orderDAO.confirmOrderById(Integer.parseInt(orderId));
+                    boolean orderResult = orderDAO.setStatusOrderById(Integer.parseInt(orderId), "confirm");
 
                     if (orderResult) {
                         List<OrderItem> listPhotoScheItem = new ArrayList<>();
@@ -102,7 +102,7 @@ public class ConfirmScheduleServlet extends HttpServlet {
                     session.setAttribute("LOCATIONS", listLocation);
 
                     url = PHOTO_HOME_PAGE;
-                }
+                
             }
         } catch (NamingException ex) {
             log("LoginServlet_NamingException: " + ex.getMessage());

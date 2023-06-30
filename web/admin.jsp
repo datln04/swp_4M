@@ -290,7 +290,8 @@
                             <th>Name</th>
                             <th>Description</th>                      
                             <th>Photo Date</th>  
-                            <th>Price</th>    
+                            <th>Price</th>
+                            <th>Status</th>
                             <th style="text-align: center">Actions</th>
                         </tr>
                         <c:forEach items="${sessionScope.LIST_ORDER_ADMIN}" var="order" varStatus="count">
@@ -301,10 +302,12 @@
                                     <td>${orderItem.description}</td>
                                     <td>${orderItem.orderDate}</td>
                                     <td>${orderItem.price}</td>      
-
-                                    <td class="actions" style="text-align: center">
-                                        <button class="button" onclick="openPopup('${orderItem.orderDetailId}', '${orderItem.name}', '${orderItem.description}', '${orderItem.price}', '${orderItem.orderDate}')">Change</button>                     
-                                    </td>
+                                    <td>${orderItem.status}</td>
+                                    <c:if test="${orderItem.status ne 'confirm'}">
+                                        <td class="actions" style="text-align: center">
+                                            <button class="button" onclick="openPopup('${orderItem.orderDetailId}', '${orderItem.name}', '${orderItem.description}', '${orderItem.price}', '${orderItem.orderDate}')">Change</button>                     
+                                        </td>
+                                    </c:if>
                                 </tr>
                             </c:forEach>
                             <th style="border-bottom: none"></th>
@@ -370,7 +373,7 @@
                                 <input type="submit" name="btAction" value="Add Account" class="btn btn-secondary"/>
                             </td>
                         </tr>
-                        </form>
+                    </form>
                     </tbody>
                 </table>
             </div>

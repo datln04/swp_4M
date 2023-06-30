@@ -14,6 +14,17 @@ public class OrderDetail implements Serializable {
     private int itemId;
     private String itemType;
     private String image;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    
 
     // Constructors, getters, and setters
     public OrderDetail() {

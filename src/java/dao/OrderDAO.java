@@ -136,7 +136,7 @@ public class OrderDAO implements Serializable {
             if (conn != null) {
                 String sql = "select order_id,profile_id,order_date,status\n"
                         + "from orders\n"
-                        + "where status = 'pending'";
+                        + "where status = 'pending' or status = 'confirm'";
 
                 pst = conn.prepareStatement(sql);
 
@@ -220,16 +220,17 @@ public class OrderDAO implements Serializable {
         return false;
     }
 
-    public boolean confirmOrderById(int orderId) throws NamingException, SQLException {
+    public boolean setStatusOrderById(int orderId, String status) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
                 String sql = "update orders\n"
-                        + "set status = 'confirm'\n"
+                        + "set status = ?\n"
                         + "where order_id = ?";
 
                 pst = conn.prepareStatement(sql);
-                pst.setInt(1, orderId);
+                pst.setString(1, status);
+                pst.setInt(2, orderId);
 
                 int result = pst.executeUpdate();
 
@@ -247,6 +248,37 @@ public class OrderDAO implements Serializable {
         }
         return false;
     }
+    
+    public boolean confirmOrderById(int orderId, String status, double amount) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update orders\n"
+                        + "set status = ?, amount = ?\n"
+                        + "where order_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, status);
+                pst.setFloat(2, (float) amount);
+                pst.setInt(3, orderId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return false;
+    }
+    
     
     public boolean paymentOrder(Order order) throws NamingException, SQLException {
         try {

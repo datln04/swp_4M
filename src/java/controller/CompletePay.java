@@ -6,16 +6,9 @@
 package controller;
 
 import dao.OrderDAO;
-import dao.OrderDetailDAO;
-import dto.OrderDetail;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
-import java.util.List;
-import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,11 +18,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author ptd
  */
-@WebServlet(name = "ConfirmProductServlet", urlPatterns = {"/ConfirmProductServlet"})
-public class ConfirmProductServlet extends HttpServlet {
-
-    public final String ERROR_PAGE = "error.jsp";
-    public final String PRODUCT_HOME_PAGE = "rentalPage.jsp";
+public class CompletePay extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -43,34 +32,25 @@ public class ConfirmProductServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-
-        String url = ERROR_PAGE;
-        String orderId = request.getParameter("txtProId");
-
-        OrderDAO dao = new OrderDAO();
-        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
+        
+        String orderId = request.getParameter("sku");
+        String amount = request.getParameter("amount");
+        OrderDAO orderDAO = new OrderDAO();
+        String url = "error.jsp";
         HttpSession session = request.getSession();
-
+        
         try {
-            if (!orderId.isEmpty() && session != null) {
-                boolean result = dao.setStatusOrderById(Integer.parseInt(orderId), "confirm");
-
-                if (result) {
-                    url = PRODUCT_HOME_PAGE;
-                    // get orderdetail with itemtype = rental product
-                    List<OrderDetail> listOrderRental = orderDetailDAO.getOrderDetailByItemType("rental_product");
-                    session.setAttribute("LIST_RENTAL_STAFF", listOrderRental);
-                }
+            boolean result = orderDAO.confirmOrderById(Integer.parseInt(orderId), "pending", Double.parseDouble(amount));
+            if(result){
+                url = "DispatcherServlet?btAction=Home";
+                session.setAttribute("LIST_CARR_ITEM", null);
+                session.setAttribute("CART_ITEM", null);
             }
-        } catch (NamingException ex) {
-            log("LoginServlet_NamingException: " + ex.getMessage());
-        } catch (SQLException ex) {
-            log("LoginServlet_SQLException " + ex.getMessage());
-        } finally {
-            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-            dispatcher.forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            request.getRequestDispatcher(url).forward(request, response);
         }
-
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

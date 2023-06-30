@@ -180,9 +180,9 @@ public class OrderDetailDAO implements Serializable {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "select order_detail_id,order_id,name,description,price,order_date,is_active, item_id, item_type\n"
-                        + "from order_detail\n"
-                        + "where is_active = 1 and order_id = ?";
+                String sql = "select order_detail_id,od.order_id,name,description,price,od.order_date,od.is_active, item_id, item_type\n"
+                        + "from order_detail od join orders o on od.order_id = o.order_id\n"
+                        + "where od.is_active = 1 and od.order_id = ?";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, orderId);

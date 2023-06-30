@@ -126,11 +126,32 @@ public class LoginServlet extends HttpServlet {
                     if (listOrder.size() > 0) {
                         for (Order order : listOrder) {
                             List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
-                            if (listOrderDetail.size() > 0) {
-                                OrderItem orderItemDetail = new OrderItem();
-                                orderItemDetail.setList(listOrderDetail);
-                                orderItem.add(orderItemDetail);
+                            OrderItem photoScheItem = new OrderItem();
+                            List<OrderDetail> list = new ArrayList();
+                            for (OrderDetail orderDetail : listOrderDetail) {
+                                if (orderDetail.getItemType().equals("photo_schedule")) {
+                                    PhotoSchedule schedule = scheduleDAO.getPhotoScheduleById(orderDetail.getItemId());
+                                    Location location = locationDAO.getLocationById(schedule.getLocationId());
+                                    PhotographyStudio studio = studioDAO.getStudioById(schedule.getStudioId());
+
+                                    OrderDetail detailLocation = new OrderDetail(orderDetail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), schedule.getScheduleDate(), orderDetail.getOrderId(), location.getId(), "location");
+                                    detailLocation.setStatus(order.getStatus());
+
+                                    OrderDetail detailStudio = new OrderDetail(orderDetail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), schedule.getScheduleDate(), orderDetail.getOrderId(), studio.getId(), "studio");
+                                    detailStudio.setStatus(order.getStatus());
+
+                                    list.add(detailLocation);
+                                    list.add(detailStudio);
+
+                                } else {
+
+                                    orderDetail.setStatus(order.getStatus());
+                                    list.add(orderDetail);
+
+                                }
                             }
+                            photoScheItem.setList(list);
+                            orderItem.add(photoScheItem);
                         }
                         session.setAttribute("LIST_ORDER_ADMIN", orderItem);
                     }

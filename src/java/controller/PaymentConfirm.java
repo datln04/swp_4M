@@ -5,31 +5,26 @@
  */
 package controller;
 
-import dao.OrderDAO;
-import dao.OrderDetailDAO;
-import dto.OrderDetail;
+import com.paypal.api.payments.PayerInfo;
+import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.Transaction;
+import com.paypal.base.rest.APIContext;
+import com.paypal.base.rest.PayPalRESTException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
-import java.util.List;
-import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import util.Contant;
 
 /**
  *
  * @author ptd
  */
-@WebServlet(name = "ConfirmProductServlet", urlPatterns = {"/ConfirmProductServlet"})
-public class ConfirmProductServlet extends HttpServlet {
-
-    public final String ERROR_PAGE = "error.jsp";
-    public final String PRODUCT_HOME_PAGE = "rentalPage.jsp";
+@WebServlet(name = "PaymentConfirm", urlPatterns = {"/paymentConfirm"})
+public class PaymentConfirm extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -42,35 +37,30 @@ public class ConfirmProductServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-
-        String url = ERROR_PAGE;
-        String orderId = request.getParameter("txtProId");
-
-        OrderDAO dao = new OrderDAO();
-        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-        HttpSession session = request.getSession();
-
         try {
-            if (!orderId.isEmpty() && session != null) {
-                boolean result = dao.setStatusOrderById(Integer.parseInt(orderId), "confirm");
+            response.setContentType("text/html;charset=UTF-8");
 
-                if (result) {
-                    url = PRODUCT_HOME_PAGE;
-                    // get orderdetail with itemtype = rental product
-                    List<OrderDetail> listOrderRental = orderDetailDAO.getOrderDetailByItemType("rental_product");
-                    session.setAttribute("LIST_RENTAL_STAFF", listOrderRental);
-                }
-            }
-        } catch (NamingException ex) {
-            log("LoginServlet_NamingException: " + ex.getMessage());
-        } catch (SQLException ex) {
-            log("LoginServlet_SQLException " + ex.getMessage());
-        } finally {
-            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-            dispatcher.forward(request, response);
+            String paymentId = request.getParameter("paymentId");
+            String payerId = request.getParameter("PayerID");
+
+            Payment payment = getPaymentDetails(paymentId);
+            PayerInfo payerInfo = payment.getPayer().getPayerInfo();
+            Transaction transaction = payment.getTransactions().get(0);
+//            ShippingAddress shippingAddress = transaction.getItemList().getShippingAddress();
+            request.setAttribute("payer", payerInfo);
+            request.setAttribute("transaction", transaction);
+//            request.setAttribute("shippingAddress", shippingAddress);
+            String url = "review.jsp?paymentId=" + paymentId + "&PayerID=" + payerId;
+            request.getRequestDispatcher(url).forward(request, response);
+        } catch (PayPalRESTException ex) {
+            log("PaymentServlet_PayPalRESTException_error: " + ex.getMessage());
         }
 
+    }
+
+    public Payment getPaymentDetails(String paymentId) throws PayPalRESTException {
+        APIContext apiContext = new APIContext(Contant.CLIENT_ID, Contant.CLIENT_SECRET, Contant.CLIENT_MODE);
+        return Payment.get(apiContext, paymentId);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
