@@ -111,7 +111,7 @@
                 padding: 20px;
                 border: 1px solid #888;
                 width: 80%;
-                max-width: 600px;
+                max-width: 650px;
             }
 
             .close {
@@ -154,7 +154,7 @@
     <body>
         <jsp:include page="header.jsp"></jsp:include>
             <div class="container">
-                <form action="searchFeedback" method="GET">
+<!--                <form action="searchFeedback" method="GET">
                     <label>Search Feedback: </label><input type="text" name="txtSearch" value="${param.txtSearch}"/>
                 <button class="btn btn-primary">Search</button>
             </form>
@@ -162,7 +162,7 @@
                 <label>Filter by Rating: </label>
                 <input type="number" min="1" max="5" name="txtFilter" onkeydown="return false;" id="filter" required=""/>
                 <button class="btn btn-secondary">Filter</button>
-            </form>
+            </form>-->
             <h2>Feedback</h2>
             <table>
                 <tr>                                       

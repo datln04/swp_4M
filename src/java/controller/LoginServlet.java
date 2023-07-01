@@ -121,44 +121,66 @@ public class LoginServlet extends HttpServlet {
 
                     // manage order
                     List<Order> listOrder = orderDAO.getAllOrder();
-                    List<OrderItem> orderItem = new ArrayList<>();
+                    List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
 
                     if (listOrder.size() > 0) {
                         for (Order order : listOrder) {
                             List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
-                            OrderItem photoScheItem = new OrderItem();
-                            List<OrderDetail> list = new ArrayList();
-                            for (OrderDetail orderDetail : listOrderDetail) {
-                                if (orderDetail.getItemType().equals("photo_schedule")) {
-                                    PhotoSchedule schedule = scheduleDAO.getPhotoScheduleById(orderDetail.getItemId());
-                                    Location location = locationDAO.getLocationById(schedule.getLocationId());
-                                    PhotographyStudio studio = studioDAO.getStudioById(schedule.getStudioId());
 
-                                    OrderDetail detailLocation = new OrderDetail(orderDetail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), schedule.getScheduleDate(), orderDetail.getOrderId(), location.getId(), "location");
+                            for (OrderDetail detail : listOrderDetail) {
+                                //item_id and item_type --> add schedule photo
+                                if (detail.getItemType().equals("photo_schedule")) {
+                                    PhotoSchedule photoSchedule = scheduleDAO.getPhotoScheduleById(detail.getItemId());
+
+                                    // get item
+                                    Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
+                                    PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
+
+                                    // init photo schedule
+                                    OrderItem photoScheduleItem = new OrderItem();
+                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
+
+                                    // add item into list
+                                    OrderDetail detailLocation = new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule");
                                     detailLocation.setStatus(order.getStatus());
-
-                                    OrderDetail detailStudio = new OrderDetail(orderDetail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), schedule.getScheduleDate(), orderDetail.getOrderId(), studio.getId(), "studio");
+                                    listScheduleOrderDetail.add(detailLocation);
+                                    
+                                    OrderDetail detailStudio = new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule");
                                     detailStudio.setStatus(order.getStatus());
+                                    listScheduleOrderDetail.add(detailStudio);
 
-                                    list.add(detailLocation);
-                                    list.add(detailStudio);
-
+                                    // add list into item photo schedule    
+                                    photoScheduleItem.setList(listScheduleOrderDetail);
+                                    listPhotoScheduleItem.add(photoScheduleItem);
                                 } else {
-
-                                    orderDetail.setStatus(order.getStatus());
-                                    list.add(orderDetail);
-
+                                    OrderItem photoScheduleItem = new OrderItem();
+                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
+                                    detail.setStatus(order.getStatus());
+                                    listScheduleOrderDetail.add(detail);
+                                    // add list into item photo schedule    
+                                    photoScheduleItem.setList(listScheduleOrderDetail);
+                                    listPhotoScheduleItem.add(photoScheduleItem);
                                 }
                             }
-                            photoScheItem.setList(list);
-                            orderItem.add(photoScheItem);
+
                         }
-                        session.setAttribute("LIST_ORDER_ADMIN", orderItem);
+                        session.setAttribute("LIST_ORDER_ADMIN", listPhotoScheduleItem);
                     }
 
                     List<Feedback> listFeedback = feedbackDAO.getAllFeedback();
                     session.setAttribute("LIST_ADMIN_FFEDBACK", listFeedback);
 
+                    List<Location> listLocation = locationDAO.getAllLocation();
+                    session.setAttribute("LIST_LOCATION", listLocation);
+
+                    List<PhotographyStudio> listStudio = studioDAO.getAllPhotographyStudio();
+                    session.setAttribute("LIST_STUDIO", listStudio);
+
+                    List<RentalProduct> rentalProducts = rentalProductDAO.getAllRentalProduct();
+                    session.setAttribute("LIST_PRODUCT", rentalProducts);
+
+                    List<DressPhotoCombo> combos = comboDAO.getAllDressPhotoCombo();
+                    session.setAttribute("LIST_COMBO", combos);
                 } else if (STAFF_ROLE.equals(result.getRoleName())) {
                     url = PHOTO_PAGE;
 

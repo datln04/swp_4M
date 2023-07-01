@@ -5,14 +5,16 @@
  */
 package dao;
 
-
 import dto.Feedback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.naming.NamingException;
 import util.ConnectionConfig;
+
 /**
  *
  * @author ptd
@@ -23,11 +25,11 @@ public class FeedbackDAO {
     PreparedStatement ps = null;
     ResultSet rs = null;
 
-    public List<Feedback> getLastFiveFeedback() {
+    public List<Feedback> getLastFiveFeedback() throws SQLException, NamingException {
 
         List<Feedback> list = new ArrayList<>();
         try {
-             conn = ConnectionConfig.getConnection();
+            conn = ConnectionConfig.getConnection();
 
             String query = "select top 5 f.feedback_id, f.profile_id, TimeFeedBack, ReplyContent, Rating, user_name, f.Content\n"
                     + "from Feedback f join profiles a on f.profile_id = a.profile_id\n"
@@ -48,17 +50,25 @@ public class FeedbackDAO {
 
                 list.add(new Feedback(feedbackId, accountId, accountName, feedbackDate, content, rating, replyContent, authorReply));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         }
         return list;
     }
 
-    public List<Feedback> getAllFeedback() {
+    public List<Feedback> getAllFeedback() throws NamingException, SQLException {
 
         List<Feedback> list = new ArrayList<>();
         try {
-             conn = ConnectionConfig.getConnection();
+            conn = ConnectionConfig.getConnection();
 
             String query = "select feedback_id, f.profile_id, TimeFeedBack, Content, Rating, user_name, Active\n"
                     + "from Feedback f join profiles a on f.profile_id = a.profile_id\n"
@@ -77,15 +87,23 @@ public class FeedbackDAO {
 
                 list.add(new Feedback(feedbackId, accountId, accountName, feedbackDate, content, rating, active));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         }
         return list;
     }
 
-    public boolean insertFeedback(Feedback feedback) {
+    public boolean insertFeedback(Feedback feedback) throws NamingException, SQLException {
         try {
-             conn = ConnectionConfig.getConnection();
+            conn = ConnectionConfig.getConnection();
 
             String query = "insert Feedback(profile_id,Content,TimeFeedBack,Rating,Active)\n"
                     + "values (?,?,?,?,1)";
@@ -101,13 +119,21 @@ public class FeedbackDAO {
                 return true;
 
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         }
         return false;
     }
 
-    public List<Feedback> searchFeedbackByUser(String txtSearch) {
+    public List<Feedback> searchFeedbackByUser(String txtSearch) throws NamingException, SQLException {
 
         List<Feedback> list = new ArrayList<>();
         try {
@@ -130,17 +156,25 @@ public class FeedbackDAO {
 
                 list.add(new Feedback(feedbackId, accountId, accountName, feedbackDate, content, rating));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         }
         return list;
     }
 
-    public List<Feedback> filterFeedbackByRating(String rating) {
+    public List<Feedback> filterFeedbackByRating(String rating) throws NamingException, SQLException {
 
         List<Feedback> list = new ArrayList<>();
         try {
-             conn = ConnectionConfig.getConnection();
+            conn = ConnectionConfig.getConnection();
 
             String query = "select feedback_id, f.profile_id, TimeFeedBack, Content, Rating, user_name\n"
                     + "from Feedback f join profiles a on f.profile_id = a.profile_id\n"
@@ -158,15 +192,23 @@ public class FeedbackDAO {
 
                 list.add(new Feedback(feedbackId, accountId, accountName, feedbackDate, content, rating));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         }
         return list;
     }
 
-    public boolean deleteFeedback(int feedbackId) {
+    public boolean deleteFeedback(int feedbackId) throws NamingException, SQLException {
         try {
-             conn = ConnectionConfig.getConnection();
+            conn = ConnectionConfig.getConnection();
 
             String query = "update Feedback\n"
                     + "set Active = 0\n"
@@ -180,8 +222,16 @@ public class FeedbackDAO {
                 return true;
 
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         }
         return false;
     }

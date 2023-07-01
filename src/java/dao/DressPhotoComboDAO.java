@@ -189,6 +189,47 @@ public class DressPhotoComboDAO implements Serializable {
 
         return null;
     }
+    
+    public DressPhotoCombo getComboByIdDelete(int comboId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select id, combo_name, combo_description,dress_id,photo_studio_id,price,image,is_active, stock\n"
+                        + "from dress_and_photo_combo\n"
+                        + "where is_active = 1 and stock >= 0 and id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, comboId);
+
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    int dressId = rs.getInt("dress_id");
+                    int studioId = rs.getInt("photo_studio_id");
+                    int stock = rs.getInt("stock");
+                    String name = rs.getString("combo_name");
+                    String description = rs.getString("combo_description");
+                    double price = rs.getFloat("price");
+                    String image = rs.getString("image");
+                    boolean active = rs.getBoolean("is_active");
+                    return new DressPhotoCombo(id, name, description, dressId, studioId, price, image, stock, active);
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return null;
+    }
 
     public boolean setStockCombo(int comboId, int stock) throws NamingException, SQLException {
         try {
@@ -199,8 +240,8 @@ public class DressPhotoComboDAO implements Serializable {
                         + "where id = ?";
 
                 pst = conn.prepareStatement(sql);
-                pst.setInt(1, comboId);
-                pst.setInt(2, stock);
+                pst.setInt(1, stock);
+                pst.setInt(2, comboId);
 
                 int rs = pst.executeUpdate();
                 if (rs > 0) {
@@ -209,7 +250,7 @@ public class DressPhotoComboDAO implements Serializable {
 
             }
         } finally {
-          
+
             if (pst != null) {
                 pst.close();
             }

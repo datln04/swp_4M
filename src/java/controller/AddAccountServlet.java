@@ -59,26 +59,32 @@ public class AddAccountServlet extends HttpServlet {
         HttpSession session = request.getSession();
 
         try {
-            Profile profile = new Profile(firstName, lastName, email, phone, address, userName, Integer.parseInt(roleId), passwordDefault);
-            boolean result = dao.insertProfifle(profile);
-            if (result) {
-                // manage user
-                List<Profile> listUser = dao.getAllProfile();
+            boolean checkUserName = dao.checkValidUsername(userName);
+            if (!checkUserName) {
+                Profile profile = new Profile(firstName, lastName, email, phone, address, userName, Integer.parseInt(roleId), passwordDefault);
+                boolean result = dao.insertProfifle(profile);
+                if (result) {
+                    // manage user
+                    List<Profile> listUser = dao.getAllProfile();
 
-                List<Profile> users = new ArrayList<>();
-                List<Profile> staff = new ArrayList<>();
+                    List<Profile> users = new ArrayList<>();
+                    List<Profile> staff = new ArrayList<>();
 
-                for (Profile user : listUser) {
-                    if (user.getRoleName().equals("user")) {
-                        users.add(user);
-                    } else {
-                        staff.add(user);
+                    for (Profile user : listUser) {
+                        if (user.getRoleName().equals("user")) {
+                            users.add(user);
+                        } else {
+                            staff.add(user);
+                        }
                     }
+                    session.setAttribute("LIST_USER", users);
+                    session.setAttribute("LIST_STAFF", staff);
+
+                    url = ADMIN_PAGE;
                 }
-                session.setAttribute("LIST_USER", users);
-                session.setAttribute("LIST_STAFF", staff);
-                
+            }else{
                 url = ADMIN_PAGE;
+                request.setAttribute("ERROR_USER_NAME", "error user name");
             }
 
         } catch (NamingException ex) {
@@ -86,9 +92,9 @@ public class AddAccountServlet extends HttpServlet {
         } catch (SQLException ex) {
             log("DispatcherServlet_SQLException " + ex.getMessage());
         } finally {
-//            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-//            dispatcher.forward(request, response);
-            response.sendRedirect(url);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+            dispatcher.forward(request, response);
+//            response.sendRedirect(url);
         }
     }
 

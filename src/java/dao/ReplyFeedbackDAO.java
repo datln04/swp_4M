@@ -9,6 +9,8 @@ import dto.ReplyFeedback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.naming.NamingException;
 import util.ConnectionConfig;
 
 /**
@@ -21,7 +23,7 @@ public class ReplyFeedbackDAO {
     PreparedStatement ps = null;
     ResultSet rs = null;
 
-    public boolean insertReplyFeedback(ReplyFeedback replyFeedback) {
+    public boolean insertReplyFeedback(ReplyFeedback replyFeedback) throws NamingException, SQLException {
         try {
              conn = ConnectionConfig.getConnection();
 
@@ -39,8 +41,16 @@ public class ReplyFeedbackDAO {
                 return true;
 
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         }
         return false;
     }

@@ -193,6 +193,7 @@
                         <th>Description</th>                      
                         <th>Photo Date</th>  
                         <th>Price</th>    
+                        <th style="text-align: center">Actions</th>    
                     </tr>
                     <c:forEach items="${sessionScope.LIST_CARR_ITEM}" var="cart" varStatus="count">
                         <c:set var="idOrder" value="${cart.getOrderId()}" />
@@ -207,7 +208,7 @@
                                 <c:set var="orderDetailIdofItem" value="${item.orderDetailId}"/>
                             <tr>                       
                                 <td>${item.name}</td>
-                                <td style="width: 500px">${item.description}</td>
+                                <td style="width: 400px">${item.description}</td>
                                 <td style="width: 150px">${item.orderDate}</td>
                                 <td>$ ${item.price}</td>
                                 <c:if test="${item.itemType ne 'photo_schedule'}" >
@@ -384,20 +385,25 @@
                                 var timeRangeInput = document.getElementById("timeRangeInput");
                                 var currentDate = new Date();
                                 var currentDateString = currentDate.toISOString().slice(0, 16); // Format: "YYYY-MM-DDTHH:MM"
+
+                                timeRangeInput.min = currentDateString;
                                 timeRangeInput.value = currentDateString;
                             });
 
                             function openPopupUpdate(orderDetailID, itemType) {
-                              
+
                                 document.getElementById('popupUpdate').style.display = 'block';
-                       
+
 
                                 var items = document.getElementsByClassName("card");
                                 for (var i = 0; i < items.length; i++) {
                                     var tmp = items[i].getAttribute('data-item-type');
                                     if (tmp !== itemType) {
                                         items[i].style.display = "none";
+                                    } else {
+                                        items[i].style.display = "flex"
                                     }
+
 
                                 }
 

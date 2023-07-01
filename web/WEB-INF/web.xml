@@ -28,6 +28,18 @@
         <servlet-name>CompletePay</servlet-name>
         <servlet-class>controller.CompletePay</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DeleteCartItemAdminServlet</servlet-name>
+        <servlet-class>controller.DeleteCartItemAdminServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ChangeItemAdmin</servlet-name>
+        <servlet-class>controller.ChangeItemAdmin</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateBookingScheduleAdmin</servlet-name>
+        <servlet-class>controller.UpdateBookingScheduleAdmin</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>DispatcherServlet</servlet-name>
         <url-pattern>/DispatcherServlet</url-pattern>
@@ -55,6 +67,18 @@
     <servlet-mapping>
         <servlet-name>CompletePay</servlet-name>
         <url-pattern>/CompletePay</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteCartItemAdminServlet</servlet-name>
+        <url-pattern>/deleteItem</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChangeItemAdmin</servlet-name>
+        <url-pattern>/ChangeItemAdmin</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateBookingScheduleAdmin</servlet-name>
+        <url-pattern>/UpdateBookingScheduleAdmin</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

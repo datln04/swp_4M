@@ -314,3 +314,8 @@ create table ReplyFeedback(
 	profile_id int not null foreign key references profiles(profile_id),
 	ReplyContent varchar(255)
 )
+
+
+Alter table profiles
+ADD CONSTRAINT UC_PROFILES_USER_NAME UNIQUE (user_name);
+

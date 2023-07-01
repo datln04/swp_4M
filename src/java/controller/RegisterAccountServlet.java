@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.naming.NamingException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -57,11 +58,17 @@ public class RegisterAccountServlet extends HttpServlet {
         AccountDAO dao = new AccountDAO();
 
         try {
-            Profile profile = new Profile(firstName, lastName, email, phone, address, userName, 2, passwordDefault);
-            boolean result = dao.insertProfifle(profile);
-            if (result) {
-                
-                url = HOME_PAGE;
+            boolean checkUserName = dao.checkValidUsername(userName);
+            if (!checkUserName) {
+                Profile profile = new Profile(firstName, lastName, email, phone, address, userName, 2, passwordDefault);
+                boolean result = dao.insertProfifle(profile);
+                if (result) {
+
+                    url = HOME_PAGE;
+                }
+            }else{
+                url = "register.jsp";
+                request.setAttribute("ERROR_USER_NAME", "error user name");
             }
 
         } catch (NamingException ex) {
@@ -69,9 +76,9 @@ public class RegisterAccountServlet extends HttpServlet {
         } catch (SQLException ex) {
             log("DispatcherServlet_SQLException " + ex.getMessage());
         } finally {
-//            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-//            dispatcher.forward(request, response);
-            response.sendRedirect(url);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+            dispatcher.forward(request, response);
+//            response.sendRedirect(url);
         }
     }
 

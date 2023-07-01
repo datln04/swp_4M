@@ -23,8 +23,8 @@
                                 <input type="text" id="txtUserName" name="txtUserName" class="form-control" value="${param.txtUserName}" />
                         </div>
                         <div class="form-group">
-                                <label for="txtPassword">Password</label>
-                                <input type="password" id="txtUserName" name="txtPassword" class="form-control" value="${param.txtPassword}" />
+                            <label for="txtPassword">Password</label>
+                            <input type="password" id="txtUserName" name="txtPassword" class="form-control" value="${param.txtPassword}" />
                         </div>
                         <div class="form-group">
                             <label for="txtFirstName">First Name</label>
@@ -55,5 +55,11 @@
         </div>
 
         <jsp:include page="footer.jsp"></jsp:include>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+            <script>
+                if (${requestScope.ERROR_USER_NAME != null}) {
+                    swal("Invalid UserName");
+                }
+        </script>
     </body>
 </html>

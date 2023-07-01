@@ -6,12 +6,15 @@
 package controller;
 
 import dao.CartDAO;
+import dao.DressPhotoComboDAO;
 import dao.LocationDAO;
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
 import dao.PhotoScheduleDAO;
 import dao.PhotographyStudiosDAO;
+import dao.RentalProductDAO;
 import dto.Cart;
+import dto.DressPhotoCombo;
 import dto.Location;
 import dto.Order;
 import dto.OrderDetail;
@@ -19,6 +22,7 @@ import dto.PhotoSchedule;
 import dto.OrderItem;
 import dto.PhotographyStudio;
 import dto.Profile;
+import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -32,6 +36,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Contant;
+import util.PaginationHelper;
 
 /**
  *
@@ -66,6 +72,8 @@ public class BookScheduleServlet extends HttpServlet {
         PhotoScheduleDAO photoDAO = new PhotoScheduleDAO();
         LocationDAO locationDAO = new LocationDAO();
         PhotographyStudiosDAO studioDAO = new PhotographyStudiosDAO();
+        RentalProductDAO productDAO = new RentalProductDAO();
+        DressPhotoComboDAO comboDAO = new DressPhotoComboDAO();
         OrderDAO orderDAO = new OrderDAO();
         OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
 
@@ -143,6 +151,29 @@ public class BookScheduleServlet extends HttpServlet {
                         }
                     }
                 }
+                List<Location> listLocation = locationDAO.getAllLocation();
+                List<RentalProduct> listProduct = productDAO.getAllRentalProduct();
+                List<PhotographyStudio> listStudio = studioDAO.getAllPhotographyStudio();
+                List<DressPhotoCombo> listCombo = comboDAO.getAllDressPhotoCombo();
+
+                List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
+
+                // Set the number of entities per page
+                int entitiesPerPage = Contant.PAGE_SIZE;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listOrder.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_ALL", listOrder);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
             }
         } catch (NamingException ex) {
             log("BookScheduleServlet_NamingException: " + ex.getMessage());

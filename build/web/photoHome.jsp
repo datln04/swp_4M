@@ -214,7 +214,7 @@
                             <td><img src="${location.image}" alt="location image"></td>
                             <td>${location.id}</td>
                             <td>${location.name}</td>
-                            <td>${location.description}</td>
+                            <td style="width: 500px">${location.description}</td>
                             <td>$ ${location.price}</td>                   
                             <td class="actions" style="width: fit-content">
                                 <button class="button" onclick="openPopup('${location.image}', ${location.id}, '${location.name}', '${location.description}', ${location.price})">Update Location</button>                     

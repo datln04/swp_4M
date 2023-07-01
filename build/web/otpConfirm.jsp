@@ -57,7 +57,7 @@
     <body>
         <jsp:include page="header.jsp"></jsp:include>
             <div class="form-container">
-                <form action="change_password" method="post">
+                <form action="changePassword" method="post">
                     <label for="otp">Enter OTP:</label>
                     <input type="text" id="otp" name="otp">
                     <button type="submit">Submit</button>

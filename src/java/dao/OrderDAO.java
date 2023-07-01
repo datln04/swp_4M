@@ -381,5 +381,42 @@ public class OrderDAO implements Serializable {
 
         return null;
     }
+    
+    public Order getOrderAdminById(int orderId) throws NamingException, SQLException {
+
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select order_id,profile_id,order_date,status\n"
+                        + "from orders\n"
+                        + "where (status = 'confirm' or status = 'pending') and order_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, orderId);
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    String orderDate = rs.getString("order_date");
+                    String status = rs.getString("status");
+                    int profileId = rs.getInt("profile_id");
+
+                    return new Order(orderId, profileId, orderDate, status);
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return null;
+    }
 
 }

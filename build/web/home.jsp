@@ -6,6 +6,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Home Page</title>
+     
         <style>
             .search-results {
                 width: 100%;
@@ -349,8 +350,9 @@
         </div>
         <jsp:include page="/footer.jsp"></jsp:include>
 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script>
+
                         $(document).ready(function () {
                             $('.dropdown-toggle').click(function () {
                                 $(this).next('.dropdown-content').toggle();
@@ -393,6 +395,8 @@
                             var timeRangeInput = document.getElementById("timeRangeInput");
                             var currentDate = new Date();
                             var currentDateString = currentDate.toISOString().slice(0, 16); // Format: "YYYY-MM-DDTHH:MM"
+
+                            timeRangeInput.min = currentDateString;
                             timeRangeInput.value = currentDateString;
                         });
 

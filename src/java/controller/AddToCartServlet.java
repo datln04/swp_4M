@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Contant;
+import util.PaginationHelper;
 import util.Utilities;
 
 /**
@@ -258,6 +260,30 @@ public class AddToCartServlet extends HttpServlet {
                         }
                     }
                 }
+
+                List<Location> listLocation = locationDAO.getAllLocation();
+                List<RentalProduct> listProduct = productDAO.getAllRentalProduct();
+                List<PhotographyStudio> listStudio = studioDAO.getAllPhotographyStudio();
+                List<DressPhotoCombo> listCombo = comboDAO.getAllDressPhotoCombo();
+
+                List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
+
+                // Set the number of entities per page
+                int entitiesPerPage = Contant.PAGE_SIZE;
+
+                // Calculate the total pages for all lists combined
+                int totalEntities = listOrder.size();
+                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                // Retrieve the current page number from the request parameters
+                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                session.setAttribute("LIST_ORDER_ALL", listOrder);
+
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("currentPage", currentPage);
 
             } else {
                 url = "login.jsp";

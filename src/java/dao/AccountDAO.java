@@ -69,6 +69,35 @@ public class AccountDAO implements Serializable {
         return null;
     }
 
+    public boolean checkValidUsername(String userName) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select profile_id from profiles where user_name = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, userName);
+
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+
     public boolean updateProfile(Profile profile) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -225,7 +254,7 @@ public class AccountDAO implements Serializable {
                 pst.setString(6, profile.getPhoneNumber());
                 pst.setInt(7, profile.getUserId());
                 pst.setString(8, profile.getUserName());
-                
+
                 int result = pst.executeUpdate();
 
                 if (result > 0) {
