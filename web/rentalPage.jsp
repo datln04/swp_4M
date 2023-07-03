@@ -242,7 +242,7 @@
                         <th>Price</th>    
                         <th style="text-align: center">Actions</th>
                     </tr>
-                    <c:forEach items="${sessionScope.LIST_RENTAL_STAFF}" var="p">
+                    <c:forEach items="${sessionScope.LIST_CART_PRODUCT_ADMIN}" var="p">
                         <th style="border: none;">${count.index + 1}</th>
 
                         <tr>                       
@@ -259,7 +259,8 @@
 
                         <th style="border-bottom: none; text-align: center">
                             <form class="DispatcherServlet" method="POST">
-                                <input type="hidden" name="txtProId" value="${p.orderId}"/>
+                                <input type="hidden" name="orderId" value="${p.orderId}"/>
+                                <input type="hidden" name="orderDetailId" value="${p.orderDetailId}"/>
                                 <input type="submit" class="button btn-primary btn-delete-all-item" value="Confirm Rent" name="btAction"/>  
                             </form>
 

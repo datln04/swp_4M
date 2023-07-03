@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -33,6 +34,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Utilities;
 
 /**
  *
@@ -61,8 +63,10 @@ public class ChangeItemServlet extends HttpServlet {
 
         String itemId = request.getParameter("itemId");
         String itemType = request.getParameter("itemType");
-        String orderDetailId = request.getParameter("orderDetailId");
+        String orderDetailId = request.getParameter("detailId");
         String orderIdText = request.getParameter("orderId");
+        String id = request.getParameter("id");
+        String time = Utilities.getCurrentDateByFormat("yyyy-MM-dd HH:mm");
 
         // create booking schedule - create order for card - order detail
         PhotoScheduleDAO photoDAO = new PhotoScheduleDAO();
@@ -78,98 +82,121 @@ public class ChangeItemServlet extends HttpServlet {
             Profile profile = (Profile) session.getAttribute("USER");
             if (session != null && profile != null) {
                 // add photo schedule
-                Order orderExist = orderDAO.getOrderAdminById(Integer.parseInt(orderIdText));
+                Order orderExist = orderDAO.getOrderById(Integer.parseInt(orderIdText));
                 // get orderbyProfileId
                 int orderId = 0;
                 if (orderExist != null) {
                     orderId = orderExist.getOrderId();
                     if (orderId > 0) {
                         boolean isUpdated = false;
-                        // get orderDeetail by order id
-                        List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
 
-                        // filter is not schedule
-                        for (OrderDetail detail : listOrderDetailByOrder) {
-                            // find id and update item
-                            if (detail.getOrderDetailId() == Integer.parseInt(orderDetailId)) {
-                                // update stock when change
-                                if ("rental_product".equals(detail.getItemType())) {
-                                    RentalProduct product = productDAO.getRentalProductById(detail.getItemId());
-                                    if (product != null) {
-                                        int stock = product.getStock() + 1;
-                                        boolean changeStock = productDAO.setStockRentalProduct(product.getId(), stock);
+                       String[] arr = itemType.split("-");
+                        // there is photo schedule
+                        if (arr.length > 1) {
+                            // update photoschedule
+                            String type = arr[1];
+                            if ("location".equals(type)) {
+                                Location location = locationDAO.getLocationById(Integer.parseInt(id));
+                                boolean updateSchedule = photoDAO.updateLocationByScheduleId(Integer.parseInt(itemId), Integer.parseInt(id), time);
 
-                                        if (changeStock) {
-                                            // change orderdetail item
-                                            RentalProduct itemChange = productDAO.getRentalProductById(Integer.parseInt(itemId));
+                                if (updateSchedule) {
+                                    // update order detail 
+                                    OrderDetail orderDetail = new OrderDetail(Integer.parseInt(orderDetailId), location.getName(), location.getDescription(), location.getPrice(), time);
+                                    boolean updateDetail = orderDetailDAO.updateOrderDetailById(orderDetail);
 
-                                            //set value of detail for update order detail
-                                            detail.setName(itemChange.getName());
-                                            detail.setDescription(itemChange.getDescription());
-                                            detail.setPrice(itemChange.getPrice());
-                                            detail.setItemId(itemChange.getId());
-                                            detail.setItemType(itemType);
+                                    if (updateDetail) {
+                                        isUpdated = true;
+                                    }
+                                }
 
-                                            boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
-                                            if (changeOrderDetail) {
-                                                isUpdated = true;
-                                                break;
-                                            }
+                            } else {
+                                PhotographyStudio studio = studioDAO.getStudioById(Integer.parseInt(id));
+                                boolean updateSchedule = photoDAO.updateStudioByScheduleId(Integer.parseInt(itemId), Integer.parseInt(id), time);
+
+                                if (updateSchedule) {
+                                    // update order detail 
+                                    OrderDetail orderDetail = new OrderDetail(Integer.parseInt(orderDetailId), studio.getName(), studio.getDescription(), studio.getPrice(), time);
+                                    boolean updateDetail = orderDetailDAO.updateOrderDetailById(orderDetail);
+
+                                    if (updateDetail) {
+                                        isUpdated = true;
+                                    }
+                                }
+                            }
+                        } else {
+                            OrderDetail detail = orderDetailDAO.getOrderDetailById(Integer.parseInt(orderDetailId));
+                            if ("rental_product".equals(itemType)) {
+                                RentalProduct product = productDAO.getRentalProductById(detail.getItemId());
+                                if (product != null) {
+                                    int stock = product.getStock() + 1;
+                                    boolean changeStock = productDAO.setStockRentalProduct(product.getId(), stock);
+
+                                    if (changeStock) {
+                                        // change orderdetail item
+                                        RentalProduct itemChange = productDAO.getRentalProductById(Integer.parseInt(id));
+
+                                        //set value of detail for update order detail
+                                        detail.setName(itemChange.getName());
+                                        detail.setDescription(itemChange.getDescription());
+                                        detail.setPrice(itemChange.getPrice());
+                                        detail.setItemId(itemChange.getId());
+                                        detail.setItemType(itemType);
+
+                                        boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
+                                        if (changeOrderDetail) {
+                                            isUpdated = true;
                                         }
                                     }
-                                } else if ("combo".equals(detail.getItemType())) {
-                                    DressPhotoCombo combo = comboDAO.getComboById(detail.getItemId());
-                                    if (combo != null) {
-                                        int stock = combo.getStock() + 1;
-                                        boolean resultCombo = comboDAO.setStockCombo(detail.getItemId(), stock);
+                                }
+                            } else if ("combo".equals(detail.getItemType())) {
+                                DressPhotoCombo combo = comboDAO.getComboById(detail.getItemId());
+                                if (combo != null) {
+                                    int stock = combo.getStock() + 1;
+                                    boolean resultCombo = comboDAO.setStockCombo(detail.getItemId(), stock);
 
-                                        if (resultCombo) {
-                                            DressPhotoCombo itemChange = comboDAO.getComboById(Integer.parseInt(itemId));
+                                    if (resultCombo) {
+                                        DressPhotoCombo itemChange = comboDAO.getComboById(Integer.parseInt(id));
 
-                                            //set value of detail for update order detail
-                                            detail.setName(itemChange.getComboName());
-                                            detail.setDescription(itemChange.getComboDescription());
-                                            detail.setPrice(itemChange.getPrice());
-                                            detail.setItemId(itemChange.getId());
-                                            detail.setItemType(itemType);
+                                        //set value of detail for update order detail
+                                        detail.setName(itemChange.getComboName());
+                                        detail.setDescription(itemChange.getComboDescription());
+                                        detail.setPrice(itemChange.getPrice());
+                                        detail.setItemId(itemChange.getId());
+                                        detail.setItemType(itemType);
 
-                                            boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
-                                            if (changeOrderDetail) {
-                                                isUpdated = true;
-                                                break;
-                                            }
+                                        boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
+                                        if (changeOrderDetail) {
+                                            isUpdated = true;
                                         }
                                     }
-                                } else if ("location".equals(detail.getItemType())) {
-                                    Location itemChange = locationDAO.getLocationById(Integer.parseInt(itemId));
+                                }
+                            } else if ("location".equals(detail.getItemType())) {
+                                Location itemChange = locationDAO.getLocationById(Integer.parseInt(id));
 
-                                    //set value of detail for update order detail
-                                    detail.setName(itemChange.getName());
-                                    detail.setDescription(itemChange.getDescription());
-                                    detail.setPrice(itemChange.getPrice());
-                                    detail.setItemId(itemChange.getId());
-                                    detail.setItemType(itemType);
+                                //set value of detail for update order detail
+                                detail.setName(itemChange.getName());
+                                detail.setDescription(itemChange.getDescription());
+                                detail.setPrice(itemChange.getPrice());
+                                detail.setItemId(itemChange.getId());
+                                detail.setItemType(itemType);
 
-                                    boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
-                                    if (changeOrderDetail) {
-                                        isUpdated = true;
-                                        break;
-                                    }
-                                } else if ("studio".equals(detail.getItemType())) {
-                                    PhotographyStudio itemChange = studioDAO.getStudioById(Integer.parseInt(itemId));
+                                boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
+                                if (changeOrderDetail) {
+                                    isUpdated = true;
+                                }
+                            } else if ("studio".equals(detail.getItemType())) {
+                                PhotographyStudio itemChange = studioDAO.getStudioById(Integer.parseInt(id));
 
-                                    //set value of detail for update order detail
-                                    detail.setName(itemChange.getName());
-                                    detail.setDescription(itemChange.getDescription());
-                                    detail.setPrice(itemChange.getPrice());
-                                    detail.setItemId(itemChange.getId());
-                                    detail.setItemType(itemType);
+                                //set value of detail for update order detail
+                                detail.setName(itemChange.getName());
+                                detail.setDescription(itemChange.getDescription());
+                                detail.setPrice(itemChange.getPrice());
+                                detail.setItemId(itemChange.getId());
+                                detail.setItemType(itemType);
 
-                                    boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
-                                    if (changeOrderDetail) {
-                                        isUpdated = true;
-                                        break;
-                                    }
+                                boolean changeOrderDetail = orderDetailDAO.changeOrderDetail(detail);
+                                if (changeOrderDetail) {
+                                    isUpdated = true;
                                 }
                             }
                         }
@@ -177,40 +204,21 @@ public class ChangeItemServlet extends HttpServlet {
                         if (isUpdated) {
                             List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(orderId);
 
-                            List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
+                            List<OrderDetail> listProduct = new ArrayList<>();
+
+                            Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetail);
 
                             for (OrderDetail detail : listOrderDetail) {
                                 //item_id and item_type --> add schedule photo
-                                if (detail.getItemType().equals("photo_schedule")) {
-                                    PhotoSchedule photoSchedule = photoDAO.getPhotoScheduleById(detail.getItemId());
-
-                                    // get item
-                                    Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
-                                    PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
-
-                                    // init photo schedule
-                                    OrderItem photoScheduleItem = new OrderItem();
-                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-
-                                    // add item into list
-                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
-                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
-
-                                    // add list into item photo schedule    
-                                    photoScheduleItem.setList(listScheduleOrderDetail);
-                                    listPhotoScheduleItem.add(photoScheduleItem);
-                                } else {
-                                    OrderItem photoScheduleItem = new OrderItem();
-                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-                                    listScheduleOrderDetail.add(detail);
-                                    // add list into item photo schedule    
-                                    photoScheduleItem.setList(listScheduleOrderDetail);
-                                    listPhotoScheduleItem.add(photoScheduleItem);
+                                if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                    listProduct.add(detail);
                                 }
                             }
+
                             url = CART_PAGE;
-                            session.setAttribute("LIST_CARR_ITEM", listPhotoScheduleItem);
-                            session.setAttribute("CART_ITEM", listPhotoScheduleItem.size());
+                            session.setAttribute("LIST_CART_PRODUCT", listProduct);
+                            session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
+                            session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
                         }
                     }
                 }

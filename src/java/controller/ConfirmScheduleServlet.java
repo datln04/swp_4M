@@ -12,6 +12,7 @@ import dao.PhotoScheduleDAO;
 import dao.PhotographyStudiosDAO;
 import dao.studioStaffDAO;
 import dto.Location;
+import dto.Order;
 import dto.OrderDetail;
 import dto.OrderItem;
 import dto.PhotoSchedule;
@@ -21,7 +22,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -30,6 +35,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Utilities;
 
 /**
  *
@@ -40,6 +46,7 @@ public class ConfirmScheduleServlet extends HttpServlet {
 
     public final String ERROR_PAGE = "error.jsp";
     public final String PHOTO_HOME_PAGE = "photoHome.jsp";
+    public final String ADMIN_PAGE = "admin.jsp";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -54,56 +61,84 @@ public class ConfirmScheduleServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String scheduleId = request.getParameter("scheduleId");
         String orderId = request.getParameter("orderId");
+        String itemId = request.getParameter("itemId");
+
         String url = ERROR_PAGE;
 
-        PhotoScheduleDAO scheduleDAO = new PhotoScheduleDAO();
         LocationDAO locationDAO = new LocationDAO();
-        PhotographyStudiosDAO studioDAO = new PhotographyStudiosDAO();
         HttpSession session = request.getSession();
         OrderDAO orderDAO = new OrderDAO();
         OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
+        Profile profile = (Profile) session.getAttribute("USER");
 
         try {
-            if (!scheduleId.isEmpty() && session != null) {
-          
-              
+            if (!orderId.isEmpty() && session != null) {
+                boolean isUpdated = false;
+                // get orderDetail by orderid
+                List<OrderDetail> listDetail = orderDetailDAO.getOrderDetailByItemIdCart(Integer.parseInt(itemId));
+                for (OrderDetail orderDetail : listDetail) {
+                    boolean confirmOrderDetail = orderDetailDAO.deleteOrderDetailById(orderDetail.getOrderDetailId());
+                    if (confirmOrderDetail) {
+                        isUpdated = true;
+                    }
+                }
 
-                    // set order is confirm;
-                    boolean orderResult = orderDAO.setStatusOrderById(Integer.parseInt(orderId), "confirm");
+                if (isUpdated) {
+                    // get otderDetail to look any order detail left in database then set status of order is confirm
+                    List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(Integer.parseInt(orderId));
+                    if (listOrderDetail.size() > 0) {
 
-                    if (orderResult) {
-                        List<OrderItem> listPhotoScheItem = new ArrayList<>();
+                        // manage order
+                        List<Order> listOrder = "admin".equals(profile.getRoleName()) ? orderDAO.getAllOrder() : orderDAO.getAllOrderStaff();
 
-                        // flow: get order detail with type is rental_schedule and order is pending
-                        List<OrderDetail> listSchedulePending = orderDetailDAO.getOrderDetailByItemType("photo_schedule");
-                        // from order_detail we get location and studio 
-                        for (OrderDetail orderDetail : listSchedulePending) {
-                            PhotoSchedule photoSchedule = scheduleDAO.getPhotoScheduleById(orderDetail.getItemId());
-                            Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
-                            PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
+                        if (listOrder.size() > 0) {
+                            Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
 
-                            OrderDetail detailLocation = new OrderDetail(photoSchedule.getScheduleId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), location.getId(), "location");
-                            OrderDetail detailStudio = new OrderDetail(photoSchedule.getScheduleId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), studio.getId(), "studio");
+                            for (Order order : listOrder) {
+                                List<OrderDetail> listDetail1 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                Utilities.groupOrderDetails(listDetail1, listSchedule, order.getStatus());
+                            }
 
-                            OrderItem photoScheItem = new OrderItem();
-                            photoScheItem.getList().add(detailLocation);
-                            photoScheItem.getList().add(detailStudio);
-                            listPhotoScheItem.add(photoScheItem);
-
+                            session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
                         }
-                        session.setAttribute("LIST_PHOTO_SCHEDULE_STAFF", listPhotoScheItem);
+                    } else {
+                        // set order is confirm;
+                        boolean orderResult = orderDAO.setStatusOrderById(Integer.parseInt(orderId), "confirm");
+                        if (orderResult) {
+                            List<Order> listOrder = "admin".equals(profile.getRoleName()) ? orderDAO.getAllOrder() : orderDAO.getAllOrderStaff();
 
+                            if (listOrder.size() > 0) {
+                                List<OrderDetail> listProduct = new ArrayList<>();
+                                Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
+
+                                for (Order order : listOrder) {
+                                    List<OrderDetail> listOrderDetail2 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                    Utilities.groupOrderDetails(listOrderDetail2, listSchedule, order.getStatus());
+                                    for (OrderDetail detail : listOrderDetail) {
+                                        //item_id and item_type --> add schedule photo
+                                        if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                            detail.setStatus(order.getStatus());
+                                            listProduct.add(detail);
+                                        }
+                                    }
+                                }
+
+                                session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
+                                session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
+                            }
+                        }
                     }
 
                     // get location for manage
                     List<Location> listLocation = locationDAO.getAllLocation();
                     session.setAttribute("LOCATIONS", listLocation);
 
-                    url = PHOTO_HOME_PAGE;
-                
+                    url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : PHOTO_HOME_PAGE;
+                }
+
             }
+
         } catch (NamingException ex) {
             log("LoginServlet_NamingException: " + ex.getMessage());
         } catch (SQLException ex) {
@@ -112,7 +147,6 @@ public class ConfirmScheduleServlet extends HttpServlet {
             RequestDispatcher dispatcher = request.getRequestDispatcher(url);
             dispatcher.forward(request, response);
         }
-
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

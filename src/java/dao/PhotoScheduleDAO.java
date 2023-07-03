@@ -227,6 +227,70 @@ public class PhotoScheduleDAO implements Serializable {
 
         return false;
     }
+    
+    public boolean updateStudioByScheduleId(int scheduleId,int studioId, String orderDate) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update photo_schedules\n"
+                        + "set studio_id = ?, schedule_date = ?\n"
+                        + "where schedule_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, studioId);
+                pst.setString(2, orderDate);
+                pst.setInt(3, scheduleId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+    
+    public boolean updateLocationByScheduleId(int scheduleId, int locationId, String orderDate) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update photo_schedules\n"
+                        + "set location_id = ?, schedule_date = ?\n"
+                        + "where schedule_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, locationId);
+                pst.setString(2, orderDate);
+                pst.setInt(3, scheduleId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
 
     public boolean deleteScheduleById(int scheduleId) throws NamingException, SQLException {
         try {

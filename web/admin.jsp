@@ -182,7 +182,7 @@
             }
 
             .btn-delete-all-item{
-                margin: 10px 0 0 0;
+                margin: 0 0 0 10px;
             }
 
             .card-price{
@@ -307,63 +307,88 @@
             </div>
 
             <div id="Tab3" class="tabcontent">
-                <c:if test="${sessionScope.LIST_ORDER_ADMIN.size() > 0}">
-                    <h3>Cart</h3>
+                <c:if test="${sessionScope.LIST_CART_SCHEDULE_ADMIN.size() > 0 || LIST_CART_PRODUCT_ADMIN.size() > 0}">
+                    <h2>Cart Item</h2>
                     <table>
-                        <tr>                                       
+                        <tr>         
                             <th>Order</th>
                             <th>Name</th>
                             <th>Description</th>                      
                             <th>Photo Date</th>  
                             <th>Price</th>    
-                            <th>Status</th>   
-                            <th style="text-align: center">Actions</th>
+                            <th>Status</th>    
+                            <th style="text-align: center">Actions</th>    
                         </tr>
-                        <c:forEach items="${sessionScope.LIST_ORDER_ADMIN}" var="cart" >
-                            <c:set var="idOrder" value="${cart.getOrderId()}" />
-                            <c:set var="typeofItem" value=""/>
-                            <c:set var="idofItem" value=""/>
-                            <c:set var="orderDetailIdofItem" value=""/>
-                            <c:forEach items="${cart.list}" var="item" varStatus="temp">
-                                <c:set var="typeofItem" value="${item.itemType}"/>
-                                <c:set var="totalPriceCart" value="${totalPriceCart + item.price}" />
-                                <c:set var="idofItem" value="${item.itemId}"/>
-                                <c:set var="orderDetailIdofItem" value="${item.orderDetailId}"/>
-                                <tr>                       
+
+                        <c:forEach var="entry" items="${sessionScope.LIST_CART_SCHEDULE_ADMIN}">
+                            <!-- Get the key and value from the map entry -->
+                            <c:set var="key" value="${entry.key}" />
+                            <c:set var="value" value="${entry.value}" />
+
+                            <!-- Iterate over the list -->
+                            <c:forEach var="item" items="${value}" varStatus="count">
+                                <!-- Display the list item -->
+                                <c:set var="totalPriceCart" value="${totalPriceCart + item.price}"/>
+                                <tr>
                                     <td>${item.orderId}</td>
                                     <td>${item.name}</td>
                                     <td style="width: 400px">${item.description}</td>
                                     <td style="width: 150px">${item.orderDate}</td>
-                                    <td>$ ${item.price}</td>
+                                    <td>${item.price}</td>
                                     <td>${item.status}</td>
-                                    <c:if test="${item.itemType ne 'photo_schedule'}" >
-                                        <td style="border-bottom: none; text-align: center">
-                                            <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemType}', '${item.orderId}')">Change Item</button>
-                                            <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}')">Delete Item</button>                                                                 
-                                        </td>
-                                    </c:if>
-
+                                    <td style="border-bottom: none; text-align: center"> 
+                                        <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemId}', '${item.itemType}', '${item.orderId}')">Change</button>
+                                    </td>
                                 </tr>
-                                <c:if test="${typeofItem eq 'photo_schedule' and temp.index == 1}" >
-                                    <tr >
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td style="border-bottom: none; text-align: center"><button class="button" onclick="openPopup('${item.orderId}', '${item.itemId}')">Change</button>
-                                            <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}')">Delete Item</button>  </td>                                                              
-                                    </tr>
-                                </c:if>
-                            </c:forEach>
-                            <!--                            <th style="border-bottom: none"></th>
-                                                        <th style="border-bottom: none"></th>
-                                                        <th style="border-bottom: none"></th>
-                                                        <th style="border-bottom: none"></th>-->
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <c:if test="${count.index == 1}">
+                                        <td style="border-bottom: none; text-align: center; display: flex">
+                                            <c:if test="${item.status eq 'pending'}">
+                                                <form action="DispatcherServlet" method="GET">
+                                                    <input type="hidden" name="orderId" value="${item.orderId}" />
+                                                    <input type="hidden" name="itemId" value="${item.itemId}" />
+                                                    <input type="submit" name="btAction" value="Confirm Schedule" class="button btn-secondary" />
+                                                </form>                                               
+                                            </c:if>
+                                            <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}', '${item.itemId}', '${item.itemType}')">Delete Item</button>  
+                                        </td>   
+                                    </c:if>   
+                                </tr>
 
-                            <tr style="border-top: 1px solid black"></tr>
+                            </c:forEach>
+                            <br/>
+                            <tr style="border-bottom: 1px solid black"></tr>
+                        </c:forEach >
+
+                        <c:forEach var="product" items="${sessionScope.LIST_CART_PRODUCT_ADMIN}">
+                            <c:set var="totalPriceCart" value="${totalPriceCart + product.price}"/>
+                            <tr>
+                                <td>${product.orderId}</td>
+                                <td>${product.name}</td>
+                                <td style="width: 400px">${product.description}</td>
+                                <td style="width: 150px">${product.orderDate}</td>
+                                <td>${product.price}</td>
+                                <td>${product.status}</td>
+                                <td style="border-bottom: none; text-align: center; display: flex"> 
+                                    <c:if test="${product.status eq 'pending'}">
+                                        <form action="DispatcherServlet" method="GET">
+                                            <input type="hidden" name="orderId" value="${product.orderId}" />
+                                            <input type="hidden" name="orderDetailId" value="${product.orderDetailId}" />
+                                            <input type="submit" name="btAction" value="Confirm Rent" class="button btn-secondary" />
+                                        </form>
+                                    </c:if>
+                                    <button style="margin-left: 10px" class="button" onclick="openPopupUpdate('${product.orderDetailId}', '${product.itemId}', '${product.itemType}', '${product.orderId}')">Change</button>
+                                    <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${product.orderId}', '${product.orderDetailId}', '${product.itemId}', '${product.itemType}')">Delete Item</button>  
+                                </td>
+                            </tr>
                         </c:forEach>
+
                     </table>
 
                 </c:if>
@@ -462,46 +487,6 @@
         </div>
 
 
-
-        <!-- pop-up booking photo schedule -->
-        <div id="popup" class="popup">
-            <c:set var="totalPrice" value="0" />
-            <div id="popupContent" class="popup-content">
-                <span class="close" onclick="closePopup()">&times;</span>
-                <h2>Booking Photography Schedule</h2>
-                <form action="UpdateBookingScheduleAdmin" method="POST">
-                    <input type="hidden" name="txtOrderId" id="txtOrderId" />
-                    <input type="hidden" name="txtItemId" id="txtItemId" />
-                    <label for="locationImage">Select location:</label>
-                    <select name="location" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true">
-
-                        <c:forEach items="${sessionScope.LIST_LOCATION}" var="l">
-                            <option value="${l.id}" data-price="${l.price}">${l.name}</option>
-                        </c:forEach>
-                    </select>
-                    <br/> 
-                    <label for="studioName">Select Studio:</label>
-                    <select name="studio" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true">
-
-                        <c:forEach items="${sessionScope.LIST_STUDIO}" var="s">
-                            <option value="${s.id}" data-price="${s.price}">${s.name}</option>
-                        </c:forEach>
-                    </select>
-                    <br/> 
-                    <label for="locationDescription">Select Time range</label>
-
-                    <input type="datetime-local" name="timeRange" class="ml-5" required="true" id="timeRangeInput">
-                    <br/> 
-                    <br/> 
-                    <label for="locationPrice">Price:</label>
-                    <input type="number" name="price" class="ml-5" id="totalPrice" readonly="true" id="timeRangeInput"/>
-
-                    <br />
-                    <input type="submit" value="Update Booking Schedule" name="btAction" class="button button-update mt-3"/>
-                </form>
-            </div>
-        </div>
-
         <!-- pop-up item -->
         <div id="popupUpdate" class="popup">
             <div id="popupContent" class="popup-content" style="max-width: 900px">
@@ -520,11 +505,12 @@
                                 <p>${data.description}</p>
                                 <p>Price For Rent: $ ${data.price}</p>
                                 <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
-                                <form action="ChangeItemAdmin" method="POST">                                    
-                                    <input type="hidden" name="orderId" class="order-input">                                     
-                                    <input type="hidden" name="orderDetailId" class="detail-input">                                     
-                                    <input type="hidden" name="itemId" value="${data.itemId}"/>
-                                    <input type="hidden" name="itemType" value="${data.itemType}"/>
+                                <form action="ChangeItemAdmin" method="POST">
+                                    <input type="hidden" class="detail-input" name="detailId">                                     
+                                    <input type="hidden" name="itemId" class="itemId-input"/>
+                                    <input type="hidden" name="itemType" class="itemType-input"/>
+                                    <input type="hidden" name="orderId" class="orderId-input"/>
+                                    <input type="hidden" name="id" value="${data.itemId}"/>
                                     <button class="button">Change</button>
                                 </form>
                             </div>
@@ -544,8 +530,10 @@
                 <div class="form-group delete-pop-up-actions">                       
                     <button class="button button-gap" onclick="closePopup()" >Cancel</button>
                     <form action="deleteItem" method="POST">
-                        <input type="text" id="orderId" name="orderId">
-                        <input type="text" id="orderDetailId" name="orderDetailId">
+                        <input type="hidden" id="orderId" name="orderId">
+                        <input type="hidden" id="orderDetailId" name="orderDetailId">
+                        <input type="hidden" id="iId" name="itemId">
+                        <input type="hidden" id="iType" name="itemType">
                         <button class="button button-delete">Delete</button>
                     </form>
                 </div>
@@ -621,9 +609,11 @@
                             document.getElementById('popup').style.display = 'block';
                         }
 
-                        function openPopupDelete(orderId, orderDetailId) {
+                        function openPopupDelete(orderId, orderDetailId, itemId, itemType) {
                             document.getElementById('orderId').value = orderId;
                             document.getElementById('orderDetailId').value = orderDetailId;
+                            document.getElementById('iId').value = itemId;
+                            document.getElementById('iType').value = itemType;
 
                             document.getElementById('popupDelete').style.display = 'block';
                         }
@@ -674,19 +664,27 @@
                             timeRangeInput.value = currentDateString;
                         });
 
-                        function openPopupUpdate(orderDetailID, itemType, orderId) {
+                        function openPopupUpdate(orderDetailID, itemId, itemType, orderId) {
+                            console.log(orderId)
 
                             document.getElementById('popupUpdate').style.display = 'block';
-
+                            var typeArr = itemType.split('-');
+                            var type = "";
+                            if (typeArr.length > 1) {
+                                type = typeArr[1];
+                            } else {
+                                type = itemType;
+                            }
 
                             var items = document.getElementsByClassName("card");
                             for (var i = 0; i < items.length; i++) {
                                 var tmp = items[i].getAttribute('data-item-type');
-                                if (tmp !== itemType) {
+                                if (tmp !== type) {
                                     items[i].style.display = "none";
                                 } else {
                                     items[i].style.display = "flex"
                                 }
+
 
                             }
 
@@ -695,10 +693,21 @@
                                 detailInputs[i].value = orderDetailID;
                             }
 
-                            var orderInputs = document.getElementsByClassName("order-input");
+                            var itemIdInputs = document.getElementsByClassName("itemId-input");
+                            for (var i = 0; i < itemIdInputs.length; i++) {
+                                itemIdInputs[i].value = itemId;
+                            }
+
+                            var itemTypeInputs = document.getElementsByClassName("itemType-input");
+                            for (var i = 0; i < itemTypeInputs.length; i++) {
+                                itemTypeInputs[i].value = itemType;
+                            }
+
+                            var orderInputs = document.getElementsByClassName("orderId-input");
                             for (var i = 0; i < orderInputs.length; i++) {
                                 orderInputs[i].value = orderId;
                             }
+
                         }
         </script>
         <jsp:include page="footer.jsp"></jsp:include>

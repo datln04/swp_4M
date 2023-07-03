@@ -19,12 +19,15 @@ import dto.OrderDetail;
 import dto.OrderItem;
 import dto.PhotoSchedule;
 import dto.PhotographyStudio;
+import dto.Profile;
 import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -34,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import util.Contant;
 import util.PaginationHelper;
+import util.Utilities;
 
 /**
  *
@@ -43,6 +47,8 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
 
     public final String ERROR_PAGE = "error.jsp";
     public final String ADMIN_PAGE = "admin.jsp";
+    public final String PHOTO_HOME_PAGE = "photoHome.jsp";
+    public final String RENTAL_PAGE = "rentalPage.jsp";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -56,8 +62,11 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+
         String orderId = request.getParameter("orderId");
         String orderDetailId = request.getParameter("orderDetailId");
+        String itemId = request.getParameter("itemId");
+        String itemType = request.getParameter("itemType");
         String url = ERROR_PAGE;
 
         OrderDAO orderDAO = new OrderDAO();
@@ -69,115 +78,105 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
         DressPhotoComboDAO comboDAO = new DressPhotoComboDAO();
 
         HttpSession session = request.getSession();
+        Profile profile = (Profile) session.getAttribute("USER");
 
         try {
             if (session != null) {
-
                 // get order Id and orderDetailRemove 
                 Order existOrder = orderDAO.getOrderAdminById(Integer.parseInt(orderId));
 
                 if (existOrder != null) {
-                    // from orderId -> get order detail available 
-                    List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(existOrder.getOrderId());
+                    OrderDetail orderDetail = orderDetailDAO.getOrderDetailById(Integer.parseInt(orderDetailId));
+                    String arr[] = itemType.split("-");
+                    if (arr.length > 1) {
+                        List<OrderDetail> listRemove = orderDetailDAO.getOrderDetailByItemIdCart(Integer.parseInt(itemId));
+                        boolean removeSchedule = scheduleDAO.deleteScheduleById(Integer.parseInt(itemId));
 
-                    // filter orderDetailRemove include in list available 
-                    for (OrderDetail orderDetail : listOrderDetail) {
-                        if (orderDetail.getOrderDetailId() == Integer.parseInt(orderDetailId)) {
-
-                            if ("rental_product".equals(orderDetail.getItemType())) {
-                                RentalProduct product = productDAO.getRentalProductById(orderDetail.getItemId());
-                                if (product != null) {
-                                    int stock = product.getStock() + 1;
-                                    boolean resultProduct = productDAO.setStockRentalProduct(orderDetail.getItemId(), stock);
-
-                                    if (resultProduct) {
-
-                                        // remove order detail
-                                        boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-
-                                        if (result) {
-                                            url = ADMIN_PAGE;
-                                        }
-                                    }
-                                }
-                            } else if ("combo".equals(orderDetail.getItemType())) {
-                                DressPhotoCombo combo = comboDAO.getComboByIdDelete(orderDetail.getItemId());
-                                if (combo != null) {
-                                    int stock = combo.getStock() + 1;
-                                    boolean resultCombo = comboDAO.setStockCombo(orderDetail.getItemId(), stock);
-
-                                    if (resultCombo) {
-
-                                        // remove order detail
-                                        boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-
-                                        if (result) {
-                                            url = ADMIN_PAGE;
-                                        }
-                                    }
-                                }
-
-                            } else {
-
-                                // remove order detail
-                                boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-
-                                if (result) {
-                                    url = ADMIN_PAGE;
+                        if (removeSchedule) {
+                            for (OrderDetail orderDetail1 : listRemove) {
+                                boolean removeDetail = orderDetailDAO.deleteOrderDetail(orderDetail1.getOrderDetailId());
+                                if (removeDetail) {
+                                    url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
                                 }
                             }
 
+                        }
+
+                    } else {
+                        if ("rental_product".equals(orderDetail.getItemType())) {
+                            RentalProduct product = productDAO.getRentalProductById(orderDetail.getItemId());
+                            if (product != null) {
+                                int stock = product.getStock() + 1;
+                                boolean resultProduct = productDAO.setStockRentalProduct(orderDetail.getItemId(), stock);
+
+                                if (resultProduct) {
+
+                                    // remove order detail
+                                    boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                                    if (result) {
+                                        url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                                    }
+                                }
+                            }
+                        } else if ("combo".equals(orderDetail.getItemType())) {
+                            DressPhotoCombo combo = comboDAO.getComboByIdDelete(orderDetail.getItemId());
+                            if (combo != null) {
+                                int stock = combo.getStock() + 1;
+                                boolean resultCombo = comboDAO.setStockCombo(orderDetail.getItemId(), stock);
+
+                                if (resultCombo) {
+
+                                    // remove order detail
+                                    boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                                    if (result) {
+                                        url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                                    }
+                                }
+                            }
+
+                        } else {
+                            // remove order detail
+                            boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                            if (result) {
+                                url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                            }
                         }
                     }
 
                     // manage order
                     List<Order> listOrder = orderDAO.getAllOrder();
-                    List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
 
                     if (listOrder.size() > 0) {
+                        List<OrderDetail> listProduct = new ArrayList<>();
+                        Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
+
                         for (Order order : listOrder) {
-                            List<OrderDetail> listOrderDetail1 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
-
-                            for (OrderDetail detail : listOrderDetail1) {
+                            List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                            Utilities.groupOrderDetails(listOrderDetail, listSchedule, order.getStatus());
+                            for (OrderDetail detail : listOrderDetail) {
                                 //item_id and item_type --> add schedule photo
-                                if (detail.getItemType().equals("photo_schedule")) {
-                                    PhotoSchedule photoSchedule = scheduleDAO.getPhotoScheduleById(detail.getItemId());
-
-                                    // get item
-                                    Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
-                                    PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
-
-                                    // init photo schedule
-                                    OrderItem photoScheduleItem = new OrderItem();
-                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-
-                                    // add item into list
-                                    OrderDetail detailLocation = new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule");
-                                    detailLocation.setStatus(order.getStatus());
-                                    listScheduleOrderDetail.add(detailLocation);
-
-                                    OrderDetail detailStudio = new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule");
-                                    detailStudio.setStatus(order.getStatus());
-                                    listScheduleOrderDetail.add(detailStudio);
-
-                                    // add list into item photo schedule    
-                                    photoScheduleItem.setList(listScheduleOrderDetail);
-                                    listPhotoScheduleItem.add(photoScheduleItem);
-                                } else {
-                                    OrderItem photoScheduleItem = new OrderItem();
-                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
+                                if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
                                     detail.setStatus(order.getStatus());
-                                    listScheduleOrderDetail.add(detail);
-                                    // add list into item photo schedule    
-                                    photoScheduleItem.setList(listScheduleOrderDetail);
-                                    listPhotoScheduleItem.add(photoScheduleItem);
+                                    listProduct.add(detail);
                                 }
                             }
-
                         }
-                        session.setAttribute("LIST_ORDER_ADMIN", listPhotoScheduleItem);
-                    }
 
+                        session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
+                        session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
+                        url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                    } else {
+                        // order is empty -> delete order
+                        boolean result = orderDAO.removeOrderById(existOrder.getOrderId());
+                        if (result) {
+                            session.setAttribute("LIST_CART_PRODUCT", null);
+                            session.setAttribute("LIST_CART_SCHEDULE", null);
+                            url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                        }
+                    }
                 }
 
             }

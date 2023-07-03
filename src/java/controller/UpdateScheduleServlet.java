@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import util.Contant;
 import util.PaginationHelper;
+import util.Utilities;
 
 /**
  *
@@ -98,6 +100,7 @@ public class UpdateScheduleServlet extends HttpServlet {
                             if (detail.getItemType().equals("photo_schedule") && detail.getItemId() == Integer.parseInt(itemTypeText)) {
                                 // update photo schedule
                                 boolean updateRusult = photoDAO.updatePhotoScheduleById(Integer.parseInt(itemTypeText), Integer.parseInt(locationId), Integer.parseInt(studioId), time);
+//                                boolean updateOrderDetail = orderDetailDAO.updateOrderDetailById(detail)
                                 if (updateRusult) {
                                     isUpdated = true;
                                 }
@@ -107,32 +110,27 @@ public class UpdateScheduleServlet extends HttpServlet {
                         if (isUpdated) {
                             List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(orderId);
 
+                            Map<String, List<OrderDetail>> groupOrderDetail = Utilities.groupOrderDetails(listOrderDetail);
                             List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
+
+                            if (groupOrderDetail != null || !groupOrderDetail.isEmpty()) {
+                                for (String key : groupOrderDetail.keySet()) {
+                                    List<OrderDetail> groupedList = groupOrderDetail.get(key);
+                                    OrderItem photoScheduleItem = new OrderItem();
+                                    photoScheduleItem.setList(groupedList);
+                                    listPhotoScheduleItem.add(photoScheduleItem);
+                                }
+                            }
 
                             for (OrderDetail detail : listOrderDetail) {
                                 //item_id and item_type --> add schedule photo
-                                if (detail.getItemType().equals("photo_schedule")) {
-                                    PhotoSchedule photoSchedule = photoDAO.getPhotoScheduleById(detail.getItemId());
-
-                                    // get item
-                                    Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
-                                    PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
-
+                                if (!detail.getItemType().equals("photo_schedule")) {
+//
                                     // init photo schedule
                                     OrderItem photoScheduleItem = new OrderItem();
                                     List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-
-                                    // add item into list
-                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
-                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
-
-                                    // add list into item photo schedule    
-                                    photoScheduleItem.setList(listScheduleOrderDetail);
-                                    listPhotoScheduleItem.add(photoScheduleItem);
-                                } else {
-                                    OrderItem photoScheduleItem = new OrderItem();
-                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
                                     listScheduleOrderDetail.add(detail);
+
                                     // add list into item photo schedule    
                                     photoScheduleItem.setList(listScheduleOrderDetail);
                                     listPhotoScheduleItem.add(photoScheduleItem);

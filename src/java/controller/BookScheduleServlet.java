@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import util.Contant;
 import util.PaginationHelper;
+import util.Utilities;
 
 /**
  *
@@ -82,7 +84,7 @@ public class BookScheduleServlet extends HttpServlet {
             Profile profile = (Profile) session.getAttribute("USER");
             if (session != null && profile != null) {
                 // add photo schedule
-                boolean photoResult = photoDAO.insertPhotoSchedule(new PhotoSchedule(1, profile.getProfileId(), Integer.parseInt(locationId), Integer.parseInt(studioId), time, "pending"));
+                boolean photoResult = photoDAO.insertPhotoSchedule(new PhotoSchedule(1, profile.getProfileId(), Integer.parseInt(locationId), Integer.parseInt(studioId), time, "create"));
 
                 if (photoResult) {
 //                    //get last photo schedule Id
@@ -108,46 +110,34 @@ public class BookScheduleServlet extends HttpServlet {
                         PhotoSchedule lastPhoto = photoDAO.getLastPhotoSchedule();
 
                         // add insert order detail
-                        OrderDetail orderDetail = new OrderDetail(time, orderId, lastPhoto.getScheduleId(), "photo_schedule");
-                        boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
+                        // get item
+                        Location location = locationDAO.getLocationById(lastPhoto.getLocationId());
+                        PhotographyStudio studio = studioDAO.getStudioById(lastPhoto.getStudioId());
 
-                        if (resultOrderDetail) {
+                        OrderDetail orderDetailL = new OrderDetail(0, location.getName(), location.getDescription(), location.getPrice(), time, orderId, lastPhoto.getScheduleId(), "photo_schedule-location");
+                        OrderDetail orderDetailS = new OrderDetail(0, studio.getName(), studio.getDescription(), studio.getPrice(), time, orderId, lastPhoto.getScheduleId(), "photo_schedule-studio");
+
+                        boolean resultOrderDetailL = orderDetailDAO.insertOrderDetail(orderDetailL);
+                        boolean resultOrderDetailS = orderDetailDAO.insertOrderDetail(orderDetailS);
+
+                        if (resultOrderDetailL && resultOrderDetailS) {
                             List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
-
-                            List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
-
+                            
+                            List<OrderDetail> listProduct = new ArrayList<>();
+                            
+                            Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetailByOrder);
+                                                            
                             for (OrderDetail detail : listOrderDetailByOrder) {
                                 //item_id and item_type --> add schedule photo
-                                if (detail.getItemType().equals("photo_schedule")) {
-                                    PhotoSchedule photoSchedule = photoDAO.getPhotoScheduleById(detail.getItemId());
-
-                                    // get item
-                                    Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
-                                    PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
-
-                                    // init photo schedule
-                                    OrderItem photoScheduleItem = new OrderItem();
-                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-
-                                    // add item into list
-                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
-                                    listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), orderId, photoSchedule.getScheduleId(), "photo_schedule"));
-
-                                    // add list into item photo schedule    
-                                    photoScheduleItem.setList(listScheduleOrderDetail);
-                                    listPhotoScheduleItem.add(photoScheduleItem);
-                                } else {
-                                    OrderItem photoScheduleItem = new OrderItem();
-                                    List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-                                    listScheduleOrderDetail.add(detail);
-                                    // add list into item photo schedule    
-                                    photoScheduleItem.setList(listScheduleOrderDetail);
-                                    listPhotoScheduleItem.add(photoScheduleItem);
+                                if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                    listProduct.add(detail);
                                 }
                             }
+                            
                             url = CART_PAGE;
-                            session.setAttribute("LIST_CARR_ITEM", listPhotoScheduleItem);
-                            session.setAttribute("CART_ITEM", listPhotoScheduleItem.size());
+                            session.setAttribute("LIST_CART_PRODUCT", listProduct);
+                            session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
+                            session.setAttribute("CART_ITEM", ( listSchedule.size() + listProduct.size()));
                         }
                     }
                 }
