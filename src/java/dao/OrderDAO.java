@@ -165,6 +165,42 @@ public class OrderDAO implements Serializable {
         return list;
     }
 
+    public List<Order> getAllOrderStaff() throws NamingException, SQLException {
+        List<Order> list = new ArrayList();
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select order_id,profile_id,order_date,status\n"
+                        + "from orders\n"
+                        + "where status = 'pending'";
+
+                pst = conn.prepareStatement(sql);
+
+                rs = pst.executeQuery();
+
+                while (rs.next()) {
+                    int orderId = rs.getInt("order_id");
+                    int profileId = rs.getInt("profile_id");
+                    String orderDate = rs.getString("order_date");
+                    String status = rs.getString("status");
+
+                    list.add(new Order(orderId, profileId, orderDate, status));
+                }
+
+            }
+        } finally {
+
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return list;
+    }
+
     public boolean deleteOrderById(int orderId) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -248,7 +284,7 @@ public class OrderDAO implements Serializable {
         }
         return false;
     }
-    
+
     public boolean confirmOrderById(int orderId, String status, double amount) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -278,8 +314,7 @@ public class OrderDAO implements Serializable {
         }
         return false;
     }
-    
-    
+
     public boolean paymentOrder(Order order) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -381,7 +416,7 @@ public class OrderDAO implements Serializable {
 
         return null;
     }
-    
+
     public Order getOrderAdminById(int orderId) throws NamingException, SQLException {
 
         try {

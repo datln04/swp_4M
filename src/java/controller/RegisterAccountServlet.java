@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Utilities;
 
 /**
  *
@@ -59,11 +60,11 @@ public class RegisterAccountServlet extends HttpServlet {
 
         try {
             boolean checkUserName = dao.checkValidUsername(userName);
-            if (!checkUserName) {
+            boolean checkValidEmail = Utilities.isValidEmail(email);
+            if (!checkUserName && checkValidEmail) {
                 Profile profile = new Profile(firstName, lastName, email, phone, address, userName, 2, passwordDefault);
                 boolean result = dao.insertProfifle(profile);
                 if (result) {
-
                     url = HOME_PAGE;
                 }
             }else{

@@ -5,9 +5,14 @@
  */
 package util;
 
+import dto.OrderDetail;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,58 +30,107 @@ public class Utilities {
         Matcher matcher = pattern.matcher(str);
         return matcher.matches();
     }
-    
-     public static String calculateHMac(String data, String algorithm, String key) throws Exception {
-            Mac Hmac = Mac.getInstance(algorithm);
-            SecretKeySpec secret_key = new SecretKeySpec(key.getBytes("UTF-8"), algorithm);
-            Hmac.init(secret_key);
 
-            return byteArrayToHex(Hmac.doFinal(data.getBytes("UTF-8")));
-      }
+    public static String calculateHMac(String data, String algorithm, String key) throws Exception {
+        Mac Hmac = Mac.getInstance(algorithm);
+        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes("UTF-8"), algorithm);
+        Hmac.init(secret_key);
 
-      public static String byteArrayToHex(byte[] a) {
-            StringBuilder sb = new StringBuilder(a.length * 2);
-            for (byte b : a)
-                  sb.append(String.format("%02x", b));
-            return sb.toString();
-      }
-      
-       public static String getCurrentDateByFormat(String format) {
-            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        return byteArrayToHex(Hmac.doFinal(data.getBytes("UTF-8")));
+    }
 
-            SimpleDateFormat formatter = new SimpleDateFormat(format);
-            String vnp_CreateDate = formatter.format(cld.getTime());
+    public static String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder(a.length * 2);
+        for (byte b : a) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
 
-            return vnp_CreateDate;
-      }
-       
-        public static String getExpireDate(String format) {
-            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-            SimpleDateFormat formatter = new SimpleDateFormat(format);
-            cld.add(Calendar.MINUTE, 15);
-            return formatter.format(cld.getTime());
-      }
-        
-        public static String hmacSHA512(final String key, final String data) {
-            try {
+    public static String getCurrentDateByFormat(String format) {
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
 
-                  if (key == null || data == null) {
-                        throw new NullPointerException();
-                  }
-                  final Mac hmac512 = Mac.getInstance("HmacSHA512");
-                  byte[] hmacKeyBytes = key.getBytes();
-                  final SecretKeySpec secretKey = new SecretKeySpec(hmacKeyBytes, "HmacSHA512");
-                  hmac512.init(secretKey);
-                  byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
-                  byte[] result = hmac512.doFinal(dataBytes);
-                  StringBuilder sb = new StringBuilder(2 * result.length);
-                  for (byte b : result) {
-                        sb.append(String.format("%02x", b & 0xff));
-                  }
-                  return sb.toString();
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        String vnp_CreateDate = formatter.format(cld.getTime());
 
-            } catch (Exception ex) {
-                  return "";
+        return vnp_CreateDate;
+    }
+
+    public static String getExpireDate(String format) {
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        cld.add(Calendar.MINUTE, 15);
+        return formatter.format(cld.getTime());
+    }
+
+    public static String hmacSHA512(final String key, final String data) {
+        try {
+
+            if (key == null || data == null) {
+                throw new NullPointerException();
             }
-      }
+            final Mac hmac512 = Mac.getInstance("HmacSHA512");
+            byte[] hmacKeyBytes = key.getBytes();
+            final SecretKeySpec secretKey = new SecretKeySpec(hmacKeyBytes, "HmacSHA512");
+            hmac512.init(secretKey);
+            byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
+            byte[] result = hmac512.doFinal(dataBytes);
+            StringBuilder sb = new StringBuilder(2 * result.length);
+            for (byte b : result) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            return sb.toString();
+
+        } catch (Exception ex) {
+            return "";
+        }
+    }
+
+    public static Map<String, List<OrderDetail>> groupOrderDetails(List<OrderDetail> orderDetails) {
+        Map<String, List<OrderDetail>> groupedMap = new HashMap<>();
+
+        orderDetails.forEach((orderDetail) -> {
+            String[] arr = orderDetail.getItemType().split("-");
+            if (arr.length > 1) {
+                String key = arr[0] + "-" + orderDetail.getItemId();
+
+                if (groupedMap.containsKey(key)) {
+                    groupedMap.get(key).add(orderDetail);
+                } else {
+                    List<OrderDetail> groupedList = new ArrayList<>();
+                    groupedList.add(orderDetail);
+                    groupedMap.put(key, groupedList);
+                }
+            }
+        });
+
+        return groupedMap;
+    }
+    
+    public static void groupOrderDetails(List<OrderDetail> orderDetails, Map<String, List<OrderDetail>> groupedMap, String orderStatus) {
+     
+        orderDetails.forEach((orderDetail) -> {
+            String[] arr = orderDetail.getItemType().split("-");
+            if (arr.length > 1) {
+                String key = arr[0] + "-" + orderDetail.getItemId();
+
+                if (groupedMap.containsKey(key)) {
+                    orderDetail.setStatus(orderStatus);
+                    groupedMap.get(key).add(orderDetail);
+                } else {
+                    List<OrderDetail> groupedList = new ArrayList<>();
+                    orderDetail.setStatus(orderStatus);
+                    groupedList.add(orderDetail);
+                    groupedMap.put(key, groupedList);
+                }
+            }
+        });
+    }
+    
+    public static boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
 }

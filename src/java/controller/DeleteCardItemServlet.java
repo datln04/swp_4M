@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import util.Contant;
 import util.PaginationHelper;
+import util.Utilities;
 
 /**
  *
@@ -64,6 +66,8 @@ public class DeleteCardItemServlet extends HttpServlet {
 
         String orderId = request.getParameter("orderId");
         String orderDetailId = request.getParameter("orderDetailId");
+        String itemId = request.getParameter("itemId");
+        String itemType = request.getParameter("itemType");
         String url = ERROR_PAGE;
 
         OrderDAO orderDAO = new OrderDAO();
@@ -78,111 +82,98 @@ public class DeleteCardItemServlet extends HttpServlet {
 
         try {
             if (session != null) {
-
                 // get order Id and orderDetailRemove 
                 Order existOrder = orderDAO.getOrderById(Integer.parseInt(orderId));
 
                 if (existOrder != null) {
-                    // from orderId -> get order detail available 
-                    List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(existOrder.getOrderId());
+                    OrderDetail orderDetail = orderDetailDAO.getOrderDetailById(Integer.parseInt(orderDetailId));
+                    String arr[] = itemType.split("-");
+                    if (arr.length > 1) {
+                        List<OrderDetail> listRemove = orderDetailDAO.getOrderDetailByItemIdCart(Integer.parseInt(itemId));
+                        boolean removeSchedule = scheduleDAO.deleteScheduleById(Integer.parseInt(itemId));
 
-                    // filter orderDetailRemove include in list available 
-                    for (OrderDetail orderDetail : listOrderDetail) {
-                        if (orderDetail.getOrderDetailId() == Integer.parseInt(orderDetailId)) {
-
-                            if ("rental_product".equals(orderDetail.getItemType())) {
-                                RentalProduct product = productDAO.getRentalProductById(orderDetail.getItemId());
-                                if (product != null) {
-                                    int stock = product.getStock() + 1;
-                                    boolean resultProduct = productDAO.setStockRentalProduct(orderDetail.getItemId(), stock);
-
-                                    if (resultProduct) {
-
-                                        // remove order detail
-                                        boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-
-                                        if (result) {
-                                            url = CART_PAGE;
-                                        }
-                                    }
-                                }
-                            } else if ("combo".equals(orderDetail.getItemType())) {
-                                DressPhotoCombo combo = comboDAO.getComboByIdDelete(orderDetail.getItemId());
-                                if (combo != null) {
-                                    int stock = combo.getStock() + 1;
-                                    boolean resultCombo = comboDAO.setStockCombo(orderDetail.getItemId(), stock);
-
-                                    if (resultCombo) {
-
-                                        // remove order detail
-                                        boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-
-                                        if (result) {
-                                            url = CART_PAGE;
-                                        }
-                                    }
-                                }
-
-                            } else {
-
-                                // remove order detail
-                                boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
-
-                                if (result) {
+                        if (removeSchedule) {
+                            for (OrderDetail orderDetail1 : listRemove) {
+                                boolean removeDetail = orderDetailDAO.deleteOrderDetail(orderDetail1.getOrderDetailId());
+                                if (removeDetail) {
                                     url = CART_PAGE;
                                 }
                             }
 
+                        }
+
+                    } else {
+                        if ("rental_product".equals(orderDetail.getItemType())) {
+                            RentalProduct product = productDAO.getRentalProductById(orderDetail.getItemId());
+                            if (product != null) {
+                                int stock = product.getStock() + 1;
+                                boolean resultProduct = productDAO.setStockRentalProduct(orderDetail.getItemId(), stock);
+
+                                if (resultProduct) {
+
+                                    // remove order detail
+                                    boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                                    if (result) {
+                                        url = CART_PAGE;
+                                    }
+                                }
+                            }
+                        } else if ("combo".equals(orderDetail.getItemType())) {
+                            DressPhotoCombo combo = comboDAO.getComboByIdDelete(orderDetail.getItemId());
+                            if (combo != null) {
+                                int stock = combo.getStock() + 1;
+                                boolean resultCombo = comboDAO.setStockCombo(orderDetail.getItemId(), stock);
+
+                                if (resultCombo) {
+
+                                    // remove order detail
+                                    boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                                    if (result) {
+                                        url = CART_PAGE;
+                                    }
+                                }
+                            }
+
+                        } else {
+                            // remove order detail
+                            boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
+
+                            if (result) {
+                                url = CART_PAGE;
+                            }
                         }
                     }
 
                     // get list again
                     List<OrderDetail> listDetail = orderDetailDAO.getOrderDetailByOrderId(existOrder.getOrderId());
                     if (listDetail.size() > 0) {
-                        // pass list to view
-                        List<OrderItem> listPhotoScheduleItem = new ArrayList<>();
+                        List<OrderDetail> listProduct = new ArrayList<>();
+
+                        Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listDetail);
 
                         for (OrderDetail detail : listDetail) {
                             //item_id and item_type --> add schedule photo
-                            if (detail.getItemType().equals("photo_schedule")) {
-                                PhotoSchedule photoSchedule = scheduleDAO.getPhotoScheduleById(detail.getItemId());
-
-                                // get item
-                                Location location = locationDAO.getLocationById(photoSchedule.getLocationId());
-                                PhotographyStudio studio = studioDAO.getStudioById(photoSchedule.getStudioId());
-
-                                // init photo schedule
-                                OrderItem photoScheduleItem = new OrderItem();
-                                List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-
-                                // add item into list
-                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), existOrder.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule"));
-                                listScheduleOrderDetail.add(new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), existOrder.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule"));
-
-                                // add list into item photo schedule    
-                                photoScheduleItem.setList(listScheduleOrderDetail);
-                                listPhotoScheduleItem.add(photoScheduleItem);
-                            } else {
-                                OrderItem photoScheduleItem = new OrderItem();
-                                List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
-                                listScheduleOrderDetail.add(detail);
-                                // add list into item photo schedule    
-                                photoScheduleItem.setList(listScheduleOrderDetail);
-                                listPhotoScheduleItem.add(photoScheduleItem);
+                            if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                listProduct.add(detail);
                             }
                         }
-                        session.setAttribute("LIST_CARR_ITEM", listPhotoScheduleItem);
-                        session.setAttribute("CART_ITEM", listPhotoScheduleItem.size());
+
+                        url = CART_PAGE;
+                        session.setAttribute("LIST_CART_PRODUCT", listProduct);
+                        session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
+                        session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
                     } else {
                         // order is empty -> delete order
                         boolean result = orderDAO.removeOrderById(existOrder.getOrderId());
                         if (result) {
-                            session.setAttribute("LIST_CARR_ITEM", null);
+                            session.setAttribute("LIST_CART_PRODUCT", null);
+                            session.setAttribute("LIST_CART_SCHEDULE", null);
                             session.setAttribute("CART_ITEM", null);
                             url = HOME_PAGE;
                         }
                     }
-
                 }
                 List<Location> listLocation = locationDAO.getAllLocation();
                 List<RentalProduct> listProduct = productDAO.getAllRentalProduct();
