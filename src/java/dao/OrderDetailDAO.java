@@ -174,6 +174,47 @@ public class OrderDetailDAO implements Serializable {
         }
         return false;
     }
+    
+    public List<OrderDetail> getOrderDetailByOrderIdAdmin(int orderId) throws NamingException, SQLException {
+        List<OrderDetail> list = new ArrayList();
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select order_detail_id,od.order_id,name,description,price,od.order_date,od.is_active, item_id, item_type\n"
+                        + "from order_detail od join orders o on od.order_id = o.order_id\n"
+                        + "where od.order_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, orderId);
+
+                rs = pst.executeQuery();
+
+                while (rs.next()) {
+                    int orderDetalId = rs.getInt("order_detail_id");
+                    int orderID = rs.getInt("order_id");
+
+                    String orderDate = rs.getString("order_date");
+                    String name = rs.getString("name");
+                    String description = rs.getString("description");
+                    double price = rs.getFloat("price");
+                    boolean active = rs.getBoolean("is_active");
+
+                    String itemType = rs.getString("item_type");
+                    int itemId = rs.getInt("item_id");
+
+                    list.add(new OrderDetail(orderDetalId, name, description, price, orderDate, active, orderID, itemId, itemType));
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return list;
+    }
 
     public List<OrderDetail> getOrderDetailByOrderId(int orderId) throws NamingException, SQLException {
         List<OrderDetail> list = new ArrayList();

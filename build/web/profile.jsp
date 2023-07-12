@@ -163,15 +163,15 @@
         </div>
         <div id="popupDeleteProfile" class="popup">
             <div id="popupContent" class="popup-content">
-                <span class="close" onclick="closePopup()">&times;</span>
+                <span class="close " onclick="closePopup()">&times;</span>
 
                 <h2>Warning</h2>
                 <p class="warning-message">Are you sure!!!</p>
                 <div class="form-group delete-pop-up-actions">                       
-                    <button class="button button-gap" onclick="closePopup()" >Cancel</button>
+                    <button class="btn btn-primary btn-gap" onclick="closePopup()" >Cancel</button>
                     <form action="DispatcherServlet" method="POST">
                         <input type="hidden" id="profileIdDelete" name="txtId">
-                        <input type="submit" value="Delete Profile" name="btAction" class="button button-danger" />
+                        <input type="submit" value="Delete Profile" name="btAction" class="btn btn-danger" />
                     </form>
                 </div>
 
@@ -198,7 +198,7 @@
             }
 
             function closePopup() {
-                document.getElementById('popupDelete').style.display = 'none';
+                document.getElementById('popupDeleteProfile').style.display = 'none';
             }
         </script>
     </body>

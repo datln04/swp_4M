@@ -96,7 +96,7 @@ public class ConfirmScheduleServlet extends HttpServlet {
                             Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
 
                             for (Order order : listOrder) {
-                                List<OrderDetail> listDetail1 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                List<OrderDetail> listDetail1 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) :orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
                                 Utilities.groupOrderDetails(listDetail1, listSchedule, order.getStatus());
                             }
 
@@ -113,7 +113,7 @@ public class ConfirmScheduleServlet extends HttpServlet {
                                 Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
 
                                 for (Order order : listOrder) {
-                                    List<OrderDetail> listOrderDetail2 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                    List<OrderDetail> listOrderDetail2 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) :orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
                                     Utilities.groupOrderDetails(listOrderDetail2, listSchedule, order.getStatus());
                                     for (OrderDetail detail : listOrderDetail) {
                                         //item_id and item_type --> add schedule photo

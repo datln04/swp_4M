@@ -154,7 +154,7 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
                         Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
 
                         for (Order order : listOrder) {
-                            List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                            List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
                             Utilities.groupOrderDetails(listOrderDetail, listSchedule, order.getStatus());
                             for (OrderDetail detail : listOrderDetail) {
                                 //item_id and item_type --> add schedule photo

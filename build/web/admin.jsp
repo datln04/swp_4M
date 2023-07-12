@@ -335,10 +335,25 @@
                                     <td style="width: 400px">${item.description}</td>
                                     <td style="width: 150px">${item.orderDate}</td>
                                     <td>${item.price}</td>
-                                    <td>${item.status}</td>
-                                    <td style="border-bottom: none; text-align: center"> 
-                                        <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemId}', '${item.itemType}', '${item.orderId}')">Change</button>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${item.status eq 'pending' && item.active eq false}">
+                                                confirm
+                                            </c:when>
+                                            <c:when test="${item.status eq 'pending' && item.active eq true}">
+                                                ${item.status}
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${item.status}
+                                            </c:otherwise>
+                                        </c:choose>
+
                                     </td>
+                                    <c:if test="${item.status eq 'pending' && item.active eq true}">
+                                        <td style="border-bottom: none; text-align: center"> 
+                                            <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemId}', '${item.itemType}', '${item.orderId}')">Change</button>
+                                        </td>
+                                    </c:if>
                                 </tr>
                                 <tr>
                                     <td></td>
@@ -347,15 +362,15 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <c:if test="${count.index == 1}">
+                                    <c:if test="${count.index == 1 && item.status eq 'pending' && item.active eq true}">
                                         <td style="border-bottom: none; text-align: center; display: flex">
-                                            <c:if test="${item.status eq 'pending'}">
-                                                <form action="DispatcherServlet" method="GET">
-                                                    <input type="hidden" name="orderId" value="${item.orderId}" />
-                                                    <input type="hidden" name="itemId" value="${item.itemId}" />
-                                                    <input type="submit" name="btAction" value="Confirm Schedule" class="button btn-secondary" />
-                                                </form>                                               
-                                            </c:if>
+
+                                            <form action="DispatcherServlet" method="GET">
+                                                <input type="hidden" name="orderId" value="${item.orderId}" />
+                                                <input type="hidden" name="itemId" value="${item.itemId}" />
+                                                <input type="submit" name="btAction" value="Confirm Schedule" class="button btn-secondary" />
+                                            </form>                                               
+
                                             <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}', '${item.itemId}', '${item.itemType}')">Delete Item</button>  
                                         </td>   
                                     </c:if>   
@@ -375,17 +390,19 @@
                                 <td style="width: 150px">${product.orderDate}</td>
                                 <td>${product.price}</td>
                                 <td>${product.status}</td>
-                                <td style="border-bottom: none; text-align: center; display: flex"> 
-                                    <c:if test="${product.status eq 'pending'}">
+                                <c:if test="${product.status eq 'pending'}">
+                                    <td style="border-bottom: none; text-align: center; display: flex"> 
+
                                         <form action="DispatcherServlet" method="GET">
                                             <input type="hidden" name="orderId" value="${product.orderId}" />
                                             <input type="hidden" name="orderDetailId" value="${product.orderDetailId}" />
                                             <input type="submit" name="btAction" value="Confirm Rent" class="button btn-secondary" />
                                         </form>
-                                    </c:if>
-                                    <button style="margin-left: 10px" class="button" onclick="openPopupUpdate('${product.orderDetailId}', '${product.itemId}', '${product.itemType}', '${product.orderId}')">Change</button>
-                                    <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${product.orderId}', '${product.orderDetailId}', '${product.itemId}', '${product.itemType}')">Delete Item</button>  
-                                </td>
+
+                                        <button style="margin-left: 10px" class="button" onclick="openPopupUpdate('${product.orderDetailId}', '${product.itemId}', '${product.itemType}', '${product.orderId}')">Change</button>
+                                        <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${product.orderId}', '${product.orderDetailId}', '${product.itemId}', '${product.itemType}')">Delete Item</button>  
+                                    </td>
+                                </c:if>
                             </tr>
                         </c:forEach>
 
@@ -626,7 +643,6 @@
                         function closePopup() {
                             document.getElementById('popupAccount').style.display = 'none';
                             document.getElementById('popupUpdate').style.display = 'none';
-                            document.getElementById('popup').style.display = 'none';
                             document.getElementById('popupDelete').style.display = 'none';
                             document.getElementById('popupDeleteAccount').style.display = 'none';
                         }
