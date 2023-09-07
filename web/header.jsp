@@ -97,7 +97,7 @@
             <h1>My Wedding Planner</h1>
 
             <div class="login-register">
-                <c:if test="${sessionScope.USER.roleName eq 'user'}">
+                <c:if test="${sessionScope.USER.roleName eq 'user' || sessionScope.USER == null}">
                     <a href="DispatcherServlet?btAction=Home">Home - </a>
                 </c:if>
                 <c:if test="${sessionScope.USER.roleName eq 'staff'}">

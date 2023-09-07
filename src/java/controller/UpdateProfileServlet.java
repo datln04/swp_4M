@@ -72,7 +72,7 @@ public class UpdateProfileServlet extends HttpServlet {
                         address = request.getParameter("txtAddress").isEmpty() ? profile.getAddress() : request.getParameter("txtAddress");
                         email = request.getParameter("txtEmail").isEmpty() ? profile.getEmail() : request.getParameter("txtEmail");
 
-                        Profile p = new Profile(Integer.parseInt(profileId), firstName, lastName, email, phoneNumber, address, lastName, true, profile.getUserName(), password);
+                        Profile p = new Profile(Integer.parseInt(profileId), firstName, lastName, email, phoneNumber, address, profile.getRoleName(), true, profile.getUserName(), password);
                         boolean result = dao.updateProfile(p);
                         if (result) {
                             session.setAttribute("USER", p);

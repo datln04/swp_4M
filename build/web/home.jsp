@@ -273,7 +273,7 @@
                                     <input type="hidden" name="name" value="${data.name}"/>
                                     <input type="hidden" name="description" value="${data.description}"/>
                                     <input type="hidden" name="price" value="${data.price}"/>
-                                    <input type="submit" value="Add To Card" name="btAction" class="button" />
+                                    <input type="submit" value="Add To Cart" name="btAction" class="button" />
                                 </form>
                             </div>
                         </div>

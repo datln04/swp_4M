@@ -174,7 +174,7 @@ public class DispatcherServlet extends HttpServlet {
             else if ("Payment".equals(action)) {
                 url = PAYMENT_SERVLET;
             }
-            else if ("Add To Card".equals(action)) {
+            else if ("Add To Cart".equals(action)) {
                 url = ADD_TO_CART_SERVLET;
             }
             else if ("popupUpdate".equals(action)) {
@@ -194,8 +194,7 @@ public class DispatcherServlet extends HttpServlet {
         } catch (SQLException ex) {
             log("DispatcherServlet_SQLException " + ex.getMessage());
         } finally {
-            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-            dispatcher.forward(request, response);
+            request.getRequestDispatcher(url).forward(request, response);
         }
     }
 

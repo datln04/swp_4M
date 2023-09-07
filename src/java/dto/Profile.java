@@ -32,6 +32,8 @@ public class Profile implements Serializable {
         this.userName = userName;
         this.password = password;
     }
+   
+    
     public Profile(int profileId, String firstName, String lastName, String email, String phoneNumber, String address, String roleName, boolean active, String userName) {
         this.profileId = profileId;
         this.firstName = firstName;
@@ -67,6 +69,7 @@ public class Profile implements Serializable {
         this.userId = userId;
         this.password = password;
     }
+
 
     public int getUserId() {
         return userId;

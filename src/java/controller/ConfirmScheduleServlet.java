@@ -126,6 +126,9 @@ public class ConfirmScheduleServlet extends HttpServlet {
 
                                 session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
                                 session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
+                            }else{
+                                Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
+                                 session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
                             }
                         }
                     }

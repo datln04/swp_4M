@@ -87,7 +87,9 @@ public class ConfirmProductServlet extends HttpServlet {
                                 }
                             }
 
+                            List<Order> listOrderAfterChange = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
                             session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
+
                         }
 
                     } else {
@@ -97,11 +99,10 @@ public class ConfirmProductServlet extends HttpServlet {
 
                             if (details.size() > 0) {
                                 List<OrderDetail> listProduct = new ArrayList<>();
-                                
 
                                 for (Order order : details) {
                                     List<OrderDetail> listOrderDetail2 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
-                                  
+
                                     for (OrderDetail detail : listOrderDetail2) {
                                         //item_id and item_type --> add schedule photo
                                         if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
@@ -113,6 +114,8 @@ public class ConfirmProductServlet extends HttpServlet {
 
                                 session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
 
+                            }else{
+                                 session.setAttribute("LIST_CART_PRODUCT_ADMIN", null);
                             }
                         }
                     }
