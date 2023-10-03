@@ -17,6 +17,45 @@
                 "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js">
         </script>
         <style>
+            .popup {
+                display: none;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.4);
+                overflow: auto;
+            }
+
+            .popup-content {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: #fefefe;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+                max-width: 600px;
+            }
+
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .close:hover,
+            .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
             body {
                 background: rgb(99, 39, 120)
             }
@@ -77,7 +116,6 @@
             .popup-content {
                 display: block;
                 background-color: #fefefe;
-                margin: 15% auto;
                 padding: 20px;
                 border: 1px solid #888;
                 width: 80%;
@@ -142,16 +180,13 @@
                                 <div class="col-md-6"><label class="labels">Last Name</label><input type="text" class="form-control" value="${pro.lastName}" placeholder="enter last name" name="txtLastname"></div>
                             </div>
                             <div class="row mt-3">
-                                <div class="col-md-12"><label class="labels">Password</label><input type="password" class="form-control" placeholder="enter password" value="${pro.password}" name="txtPassword"></div>
+                                <div class="col-md-8"><label class="labels">Password</label><input readonly="true" type="password" class="form-control" placeholder="enter password" value="${pro.password}" name="txtPassword"></div>
+                                <div class="col-md-4"><label class="labels">Click to change password</label><button onclick="showPasswordChangePopup()" type="button" class="btn btn-primary" id="passwordChangeButton">Change password</button></div>
                                 <div class="col-md-12"><label class="labels">Mobile Number</label><input type="text" class="form-control" placeholder="enter phone number" value="${pro.phoneNumber}" name="txtPhoneNumber"></div>
                                 <div class="col-md-12"><label class="labels">Address</label><input type="text" class="form-control" placeholder="enter address" value="${pro.address}" name="txtAddress"></div>
                                 <div class="col-md-12"><label class="labels">Email</label><input type="text" class="form-control" placeholder="enter email" value="${pro.email}" name="txtEmail"></div>
 
                             </div>
-                            <!--                            <div class="row mt-3">
-                                                            <div class="col-md-6"><label class="labels">Country</label><input type="text" class="form-control" placeholder="country" value=""></div>
-                                                            <div class="col-md-6"><label class="labels">State/Region</label><input type="text" class="form-control" value="" placeholder="state"></div>
-                                                        </div>-->
                             <div class="justify-content-center d-flex">
                                 <div class="mt-5 mr-3 text-center"><a id="deleteProfileLink" class="btn btn-danger" href="#" data-profile-id="${pro.profileId}">Delete Profile</a></div>
                                 <div class="mt-5 text-center"><input class="btn btn-primary profile-button" type="submit" value="Save Profile" name="btAction"/></div>
@@ -178,6 +213,26 @@
             </div>
         </div>
 
+        <!-- Password change popup -->
+        <div id="passwordChangePopup" class="popup">
+            <div class="popup-content">
+                <span class="close" onclick="closePopup()()">&times;</span>
+                <h2>Change Password</h2>
+                <form action="DispatcherServlet" method="post">
+                    <label for="newPassword">Old Password: </label>
+                    <input type="password" id="newPassword" name="oldPassword" required><br>
+                    <label for="newPassword">New Password:</label>
+                    <input type="password" id="newPassword" name="password" required><br>
+                    <label for="newPassword">Password Confirm</label>
+                    <input type="password" id="newPassword" name="confirmPassword" required><br>
+                    <!-- You can add more input fields if needed (e.g., confirm password) -->
+
+                    <input type="submit" value="changePassword" name="btAction" class="btn btn-outline-info">
+                </form>
+            </div>
+        </div>
+
+
         <jsp:include page="footer.jsp"></jsp:include>
         <script>
 
@@ -199,6 +254,13 @@
 
             function closePopup() {
                 document.getElementById('popupDeleteProfile').style.display = 'none';
+                document.getElementById('passwordChangePopup').style.display = 'none';
+            }
+
+
+            function showPasswordChangePopup() {
+                var popup = document.getElementById("passwordChangePopup");
+                popup.style.display = "block";
             }
         </script>
     </body>

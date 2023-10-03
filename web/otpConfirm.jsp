@@ -1,9 +1,9 @@
 <%-- 
     Document   : otpConfirm
     Created on : Jun 30, 2023, 11:50:35 AM
-    Author     : ptd
+    Author     : 
 --%>
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -56,15 +56,33 @@
 
     <body>
         <jsp:include page="header.jsp"></jsp:include>
+        <c:if test="${sessionScope.USER_ID_CHANGE_PASSWORD != null}">
             <div class="form-container">
-                <form action="changePassword" method="post">
+                <form action="DispatcherServlet" method="get">
                     <label for="otp">Enter OTP:</label>
                     <input type="text" id="otp" name="otp">
-                    <button type="submit">Submit</button>
+                    <input type="submit" name="btAction" value="Verify" class="btn btn-primary"/>
                 </form>
             </div>
-
-
+        </c:if>
+        <c:if test="${sessionScope.USER_REGISTER != null}">
+            <div class="form-container">
+                <form action="DispatcherServlet" method="get">
+                    <label for="otp">Enter OTP:</label>
+                    <input type="text" id="otp" name="otp">
+                    <input type="submit" name="btAction" value="Register" class="btn btn-primary"/>
+                </form>
+            </div>
+        </c:if>
+        <c:if test="${sessionScope.USER_ID != null}">
+            <div class="form-container">
+                <form action="DispatcherServlet" method="get">
+                    <label for="otp">Enter OTP:</label>
+                    <input type="text" id="otp" name="otp">
+                    <input type="submit" name="btAction" value="Verify" class="btn btn-primary"/>
+                </form>
+            </div>
+        </c:if>
         <jsp:include page="footer.jsp"></jsp:include>
     </body>
 </html>

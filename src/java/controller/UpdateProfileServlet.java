@@ -128,8 +128,8 @@ public class UpdateProfileServlet extends HttpServlet {
         properties.put("mail.smtp.starttls.enable", "true");
 
         // SMTP server authentication credentials
-        String username = "todentsukanai@gmail.com";
-        String password = "lcetetofunsjregf";
+        String username = "cunplong.1@gmail.com";
+        String password = "jioywrlndbjmfhda";
 
         // Create a session with SMTP server
         Session session = Session.getInstance(properties, new Authenticator() {
