@@ -60,17 +60,20 @@ public class DispatcherServlet extends HttpServlet {
 
     public final String ADD_ACCOUNT_SERVLET = "AddAccountServlet";
     public final String REGISTER_ACCOUNT_SERVLET = "RegisterAccountServlet";
-    
+
     public final String UPDATE_SCHEDULE_SERVLET = "UpdateScheduleServlet";
     public final String PAYMENT_SERVLET = "PaymentServlet";
-    
+
     public final String ADD_TO_CART_SERVLET = "AddToCartServlet";
     public final String POPUP_UPDATE_SERVLET = "PopupUpdateServlet";
-    
+
     public final String ADD_LOCATION_SERVLET = "AddLocationServlet";
     public final String ADD_PRODUCT_SERVLET = "AddProductServlet";
-    
+    public final String VERIFY_PASSWORD_SERVLET = "VerifyPasswordServlet";
+
+
     public final String CHANGE_ITEM_SERVLET = "ChangeItemServlet";
+    public final String FORGOT_PASSWORD_SERVLET = "ForgotPasswordServlet";
 
     public final String HOME_PAGE = "home.jsp";
 
@@ -164,30 +167,28 @@ public class DispatcherServlet extends HttpServlet {
                 url = COMFIRM_PRODUCT_SERVLET;
             } else if ("Add Account".equals(action)) {
                 url = ADD_ACCOUNT_SERVLET;
-            }
-            else if ("Register".equals(action)) {
+            } else if ("Register".equals(action)) {
                 url = REGISTER_ACCOUNT_SERVLET;
-            }
-            else if ("Update Booking Schedule".equals(action)) {
+            } else if ("Update Booking Schedule".equals(action)) {
                 url = UPDATE_SCHEDULE_SERVLET;
-            }
-            else if ("Payment".equals(action)) {
+            } else if ("Payment".equals(action)) {
                 url = PAYMENT_SERVLET;
-            }
-            else if ("Add To Cart".equals(action)) {
+            } else if ("Add To Cart".equals(action)) {
                 url = ADD_TO_CART_SERVLET;
-            }
-            else if ("popupUpdate".equals(action)) {
+            } else if ("popupUpdate".equals(action)) {
                 url = POPUP_UPDATE_SERVLET;
-            }
-            else if ("Add Location".equals(action)) {
+            } else if ("Add Location".equals(action)) {
                 url = ADD_LOCATION_SERVLET;
-            }
-            else if ("Add Product".equals(action)) {
+            } else if ("Add Product".equals(action)) {
                 url = ADD_PRODUCT_SERVLET;
-            }
-            else if ("Change Item".equals(action)) {
+            } else if ("Change Item".equals(action)) {
                 url = CHANGE_ITEM_SERVLET;
+            } else if ("ForgotPassword".equals(action)) {
+                url = FORGOT_PASSWORD_SERVLET;
+            }else if("Verify".equals(action)){
+                url = VERIFY_PASSWORD_SERVLET;
+            }else if("changePassword".equals(action)){
+                url = FORGOT_PASSWORD_SERVLET;
             }
         } catch (NamingException ex) {
             log("DispatcherServlet_NamingException: " + ex.getMessage());
@@ -228,8 +229,6 @@ public class DispatcherServlet extends HttpServlet {
 
         processRequest(request, response);
     }
-
-    
 
     /**
      * Returns a short description of the servlet.

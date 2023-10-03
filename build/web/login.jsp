@@ -94,7 +94,7 @@
         .login_btn{
             color: black;
             background-color: #FFC312;
-            width: 100px;
+            width: 200px;
         }
 
         .login_btn:hover{
@@ -142,8 +142,9 @@
                                 <input type="submit" value="Login" class="btn float-right login_btn" name="btAction">
                             </div>
                         </form>
+                         <a href="/wedding_photography/forgotPassword.jsp">Quên mật khẩu</a>
                     </div>
-                    
+                   
                 </div>
             </div>
         </div>

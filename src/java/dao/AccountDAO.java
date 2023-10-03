@@ -97,6 +97,35 @@ public class AccountDAO implements Serializable {
 
         return false;
     }
+    
+     public int checkValidEmail(String email) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select profile_id from profiles where email = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, email);
+
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    return rs.getInt("profile_id");
+                }
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return -1;
+    }
 
     public boolean updateProfile(Profile profile) throws NamingException, SQLException {
         try {
@@ -114,6 +143,35 @@ public class AccountDAO implements Serializable {
                 pst.setString(5, profile.getEmail());
                 pst.setString(6, profile.getPassword());
                 pst.setInt(7, profile.getProfileId());
+
+                int result = pst.executeUpdate();
+                if (result > 0) {
+                    return true;
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+    
+    public boolean changePassword(int profileId, String password) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "UPDATE profiles\n"
+                        + "SET password = ?\n"
+                        + "where profile_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, password);
+                pst.setInt(2, profileId);
 
                 int result = pst.executeUpdate();
                 if (result > 0) {

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Login Page</title>
+        <title>Forgot Password Page</title>
         <!--Made with love by Mutiullah Samim -->
 
         <!--Bootsrap 4 CDN-->
@@ -115,7 +115,8 @@
             <div class="d-flex justify-content-center h-100">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Sign In</h3>
+                        <h3>Sign Up</h3>
+                        <p>Check email to verify after change password</p>
                         <div class="d-flex justify-content-end social_icon">
                             <span><i class="fab fa-facebook-square"></i></span>
                             <span><i class="fab fa-google-plus-square"></i></span>
@@ -124,25 +125,32 @@
                     </div>
                     <div class="card-body">
                         <form  action="DispatcherServlet" method="POST">
+                             <div class="input-group form-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                </div>
+                                <input type="text" name="email" class="form-control" placeholder="email">
+
+                            </div>
                             <div class="input-group form-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                                 </div>
-                                <input type="text" name="userName" class="form-control" placeholder="username">
+                                <input type="password" name="password" class="form-control" placeholder="password">
 
                             </div>
                             <div class="input-group form-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"><i class="fas fa-key"></i></span>
                                 </div>
-                                <input type="password" name="password" class="form-control" placeholder="password">
+                                <input type="password" name="confirmPassword" class="form-control" placeholder="confirmPassword">
                             </div>
                            
                             <div class="form-group">
-                                <input type="submit" value="Login" class="btn float-right login_btn" name="btAction">
+                                <input type="submit" value="ForgotPassword" class="btn float-right login_btn" name="btAction" style="width: 200px">
                             </div>
                         </form>
-                         <a href="/wedding_photography/forgotPassword.jsp">Quên mật khẩu</a>
+                      
                     </div>
                    
                 </div>
