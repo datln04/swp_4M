@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -59,7 +60,7 @@ public class ChangeItemServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String url = ERROR_PAGE;
+        String url = CART_PAGE;
 
         String itemId = request.getParameter("itemId");
         String itemType = request.getParameter("itemType");
@@ -67,6 +68,8 @@ public class ChangeItemServlet extends HttpServlet {
         String orderIdText = request.getParameter("orderId");
         String id = request.getParameter("id");
         String time = Utilities.getCurrentDateByFormat("yyyy-MM-dd HH:mm");
+        String timeRange = request.getParameter("timeRange");
+        String timeRangeReturn = request.getParameter("timeRangeReturn");
 
         // create booking schedule - create order for card - order detail
         PhotoScheduleDAO photoDAO = new PhotoScheduleDAO();
@@ -81,6 +84,7 @@ public class ChangeItemServlet extends HttpServlet {
             HttpSession session = request.getSession();
             Profile profile = (Profile) session.getAttribute("USER");
             if (session != null && profile != null) {
+
                 // add photo schedule
                 Order orderExist = orderDAO.getOrderById(Integer.parseInt(orderIdText));
                 // get orderbyProfileId
@@ -90,38 +94,44 @@ public class ChangeItemServlet extends HttpServlet {
                     if (orderId > 0) {
                         boolean isUpdated = false;
 
-                       String[] arr = itemType.split("-");
+                        String[] arr = itemType.split("-");
                         // there is photo schedule
                         if (arr.length > 1) {
-                            // update photoschedule
-                            String type = arr[1];
-                            if ("location".equals(type)) {
-                                Location location = locationDAO.getLocationById(Integer.parseInt(id));
-                                boolean updateSchedule = photoDAO.updateLocationByScheduleId(Integer.parseInt(itemId), Integer.parseInt(id), time);
+                            List<String> listScheduleAvailable = photoDAO.checkScheduleAvailableAdmin(timeRange, timeRangeReturn, arr[1], Integer.parseInt(id), Integer.parseInt(itemId));
+                            if (listScheduleAvailable == null) {
+                                // update photoschedule
+                                String type = arr[1];
+                                if ("location".equals(type)) {
+                                    Location location = locationDAO.getLocationById(Integer.parseInt(id));
+                                    boolean updateSchedule = photoDAO.updateLocationByScheduleId(Integer.parseInt(itemId), Integer.parseInt(id), time);
 
-                                if (updateSchedule) {
-                                    // update order detail 
-                                    OrderDetail orderDetail = new OrderDetail(Integer.parseInt(orderDetailId), location.getName(), location.getDescription(), location.getPrice(), time);
-                                    boolean updateDetail = orderDetailDAO.updateOrderDetailById(orderDetail);
+                                    if (updateSchedule) {
+                                        // update order detail 
+                                        OrderDetail orderDetail = new OrderDetail(Integer.parseInt(orderDetailId), location.getName(), location.getDescription(), location.getPrice(), time);
+                                        boolean updateDetail = orderDetailDAO.updateOrderDetailById(orderDetail);
 
-                                    if (updateDetail) {
-                                        isUpdated = true;
+                                        if (updateDetail) {
+                                            isUpdated = true;
+                                        }
+                                    }
+
+                                } else {
+                                    PhotographyStudio studio = studioDAO.getStudioById(Integer.parseInt(id));
+                                    boolean updateSchedule = photoDAO.updateStudioByScheduleId(Integer.parseInt(itemId), Integer.parseInt(id), time);
+
+                                    if (updateSchedule) {
+                                        // update order detail 
+                                        OrderDetail orderDetail = new OrderDetail(Integer.parseInt(orderDetailId), studio.getName(), studio.getDescription(), studio.getPrice(), time);
+                                        boolean updateDetail = orderDetailDAO.updateOrderDetailById(orderDetail);
+
+                                        if (updateDetail) {
+                                            isUpdated = true;
+                                        }
                                     }
                                 }
-
                             } else {
-                                PhotographyStudio studio = studioDAO.getStudioById(Integer.parseInt(id));
-                                boolean updateSchedule = photoDAO.updateStudioByScheduleId(Integer.parseInt(itemId), Integer.parseInt(id), time);
-
-                                if (updateSchedule) {
-                                    // update order detail 
-                                    OrderDetail orderDetail = new OrderDetail(Integer.parseInt(orderDetailId), studio.getName(), studio.getDescription(), studio.getPrice(), time);
-                                    boolean updateDetail = orderDetailDAO.updateOrderDetailById(orderDetail);
-
-                                    if (updateDetail) {
-                                        isUpdated = true;
-                                    }
-                                }
+                                String errMessage = "Already has a booking from " + listScheduleAvailable.get(0) + " to " + listScheduleAvailable.get(1) + " pls change location or studio or time-range";
+                                request.setAttribute("BOOK_NOT_AVAILABLE", errMessage);
                             }
                         } else {
                             OrderDetail detail = orderDetailDAO.getOrderDetailById(Integer.parseInt(orderDetailId));
@@ -222,15 +232,16 @@ public class ChangeItemServlet extends HttpServlet {
                         }
                     }
                 }
+
             }
         } catch (NamingException ex) {
             log("BookScheduleServlet_NamingException: " + ex.getMessage());
         } catch (SQLException ex) {
             log("BookScheduleServlet_SQLException " + ex.getMessage());
         } finally {
-//            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-//            dispatcher.forward(request, response);
-            response.sendRedirect(url);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+            dispatcher.forward(request, response);
+//            response.sendRedirect(url);
         }
     }
 

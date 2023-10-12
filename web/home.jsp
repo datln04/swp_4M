@@ -6,7 +6,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Home Page</title>
-     
+
         <style>
             .search-results {
                 width: 100%;
@@ -266,21 +266,40 @@
                                 <h3>${data.name}</h3>
                                 <p class="truncate-text">${data.description}</p>
                                 <p>Price For Rent: $ ${data.price}</p>
-                                <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
-                                <form action="DispatcherServlet" method="POST">
-                                    <input type="hidden" name="itemId" value="${data.itemId}"/>
-                                    <input type="hidden" name="itemType" value="${data.itemType}"/>
-                                    <input type="hidden" name="name" value="${data.name}"/>
-                                    <input type="hidden" name="description" value="${data.description}"/>
-                                    <input type="hidden" name="price" value="${data.price}"/>
-                                    <input type="submit" value="Add To Cart" name="btAction" class="button" />
-                                </form>
+                                <div class="d-flex justify-content-center">
+                                    <p><b>${data.itemType}</b></p>
+                                    <p><a href="ownerContact.jsp" class="contact-link">Contact</a></p>
+                                </div>
+                                <input type="submit" value="Add To Cart" name="btAction" class="button" onclick="openPopupDate('${data.itemId}', '${data.itemType}', '${data.name}', '${data.description}', '${data.price}')"/>
+
                             </div>
                         </div>
                     </a>
                 </c:forEach>
             </div>  
         </div>
+        <!-- date selection pop-up-->
+        <div id="datePopup" class="popup">
+            <div class="popup-content">
+                <span class="close" onclick="closePopup()">&times;</span>
+                <h2>Select Dates</h2>
+                <form action="DispatcherServlet" method="POST">
+                    <input type="hidden" id="itemId" name="itemId" value="">
+                    <input type="hidden" id="itemType" name="itemType" value="">
+                    <input type="hidden" id="name" name="name" value="">
+                    <input type="hidden" id="description" name="description" value="">
+                    <input type="hidden" id="price" name="price" value="">
+                    <label for="startDate">Start Date:</label>
+                    <input type="datetime-local" name="timeRange" required id="timeRangeInput">
+                    <br>
+                    <label for="endDate">End Date:</label>
+                    <input type="datetime-local" name="timeRangeReturn" required id="timeRangeReturnInput">
+                    <br>
+                    <input type="submit" value="Add To Cart" name="btAction">
+                </form>
+            </div>
+        </div>
+
         <!-- Paging navigation -->
         <c:if test="${requestScope.totalPages > 1}">
             <div class="pagination">
@@ -335,9 +354,11 @@
                         </c:forEach>
                     </select>
                     <br/> 
-                    <label for="locationDescription">Select Time range</label>
-
-                    <input type="datetime-local" name="timeRange" class="ml-5" required="true" id="timeRangeInput">
+                    <label for="locationDescription">Select Time booking</label>
+                    <input type="datetime-local" name="timeRange" class="ml-5" required="true" id="timeRangeBooking">
+                    <br/> 
+                    <label for="locationDescription">Select Time return</label>
+                    <input type="datetime-local" name="timeRangeReturn" class="ml-5" required="true" id="timeRangeReturnBooking">
                     <br/> 
                     <br/> 
                     <label for="locationPrice">Price:</label>
@@ -351,8 +372,18 @@
         <jsp:include page="/footer.jsp"></jsp:include>
 
             <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
             <script>
+                        function openPopupDate(itemId, itemType, name, description, price) {
+                            document.getElementById("datePopup").style.display = "block";
 
+                            // Populate hidden fields in the dateForm with item details
+                            document.getElementById("itemId").value = itemId;
+                            document.getElementById("itemType").value = itemType;
+                            document.getElementById("name").value = name;
+                            document.getElementById("description").value = description;
+                            document.getElementById("price").value = price;
+                        }
                         $(document).ready(function () {
                             $('.dropdown-toggle').click(function () {
                                 $(this).next('.dropdown-content').toggle();
@@ -365,6 +396,7 @@
 
                         function closePopup() {
                             document.getElementById('popup').style.display = 'none';
+                            document.getElementById('datePopup').style.display = 'none';
                         }
 
                         function updateTotalPrice(selectElement) {
@@ -393,12 +425,41 @@
                         // Set default value to current date and time
                         window.addEventListener("DOMContentLoaded", function () {
                             var timeRangeInput = document.getElementById("timeRangeInput");
+                            var timeRangeReturnInput = document.getElementById("timeRangeReturnInput");
+
+                            var timeRangeBooking = document.getElementById("timeRangeBooking");
+                            var timeRangeReturnBooking = document.getElementById("timeRangeReturnBooking");
+
                             var currentDate = new Date();
+                            var nextDate = new Date(currentDate);
+                            nextDate.setDate(currentDate.getDate() + 1);
                             var currentDateString = currentDate.toISOString().slice(0, 16); // Format: "YYYY-MM-DDTHH:MM"
+                            var nextDateString = nextDate.toISOString().slice(0, 16);
 
                             timeRangeInput.min = currentDateString;
                             timeRangeInput.value = currentDateString;
+
+                            timeRangeBooking.min = currentDateString;
+                            timeRangeBooking.value = currentDateString;
+
+                            timeRangeReturnInput.min = nextDateString;
+                            timeRangeReturnInput.value = nextDateString;
+
+                            timeRangeReturnBooking.min = nextDateString;
+                            timeRangeReturnBooking.value = nextDateString;
                         });
+                        if (${requestScope.BOOK_NOT_AVAILABLE != null}) {
+                            swal("Opps!", '${requestScope.BOOK_NOT_AVAILABLE}', "warning");
+                        }
+                        
+                        if (${requestScope.PAYMENT_SUCCESS != null && requestScope.LIST_ITEM_ERROR != null}) {
+                            swal("Congratulation!", '${requestScope.LIST_ITEM_ERROR}', "success");
+                        }else if (${requestScope.PAYMENT_SUCCESS != null}) {
+                            swal("Congratulation!", '${requestScope.PAYMENT_SUCCESS}', "success");
+                        }
+                        
+                        
+
 
         </script>
 

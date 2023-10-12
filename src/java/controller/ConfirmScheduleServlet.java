@@ -64,40 +64,39 @@ public class ConfirmScheduleServlet extends HttpServlet {
         String orderId = request.getParameter("orderId");
         String itemId = request.getParameter("itemId");
 
-        String url = ERROR_PAGE;
+        String url = "admin.jsx";
 
         LocationDAO locationDAO = new LocationDAO();
         HttpSession session = request.getSession();
         OrderDAO orderDAO = new OrderDAO();
         OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
+        PhotoScheduleDAO photoDAO = new PhotoScheduleDAO();
         Profile profile = (Profile) session.getAttribute("USER");
 
         try {
             if (!orderId.isEmpty() && session != null) {
                 boolean isUpdated = false;
-                // get orderDetail by orderid
-                List<OrderDetail> listDetail = orderDetailDAO.getOrderDetailByItemIdCart(Integer.parseInt(itemId));
-                for (OrderDetail orderDetail : listDetail) {
-                    boolean confirmOrderDetail = orderDetailDAO.deleteOrderDetailById(orderDetail.getOrderDetailId());
-                    if (confirmOrderDetail) {
-                        isUpdated = true;
-                    }
+
+                boolean confirmSchedule = photoDAO.confirmScheduleById(Integer.parseInt(itemId));
+                if (confirmSchedule) {
+                    isUpdated = true;
                 }
 
                 if (isUpdated) {
                     // get otderDetail to look any order detail left in database then set status of order is confirm
                     List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(Integer.parseInt(orderId));
-                    if (listOrderDetail.size() > 0) {
+                    if (!listOrderDetail.isEmpty()) {
 
                         // manage order
                         List<Order> listOrder = "admin".equals(profile.getRoleName()) ? orderDAO.getAllOrder() : orderDAO.getAllOrderStaff();
 
-                        if (listOrder.size() > 0) {
+                        if (!listOrder.isEmpty()) {
                             Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
-
+                            List<Integer> list =new ArrayList<>();
+                            list.add(Integer.parseInt(itemId));
                             for (Order order : listOrder) {
-                                List<OrderDetail> listDetail1 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) :orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
-                                Utilities.groupOrderDetails(listDetail1, listSchedule, order.getStatus());
+                                List<OrderDetail> listDetail1 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) : orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                Utilities.groupOrderDetailsAdminLoaded(listDetail1, listSchedule, order.getStatus(),list);
                             }
 
                             session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
@@ -108,12 +107,12 @@ public class ConfirmScheduleServlet extends HttpServlet {
                         if (orderResult) {
                             List<Order> listOrder = "admin".equals(profile.getRoleName()) ? orderDAO.getAllOrder() : orderDAO.getAllOrderStaff();
 
-                            if (listOrder.size() > 0) {
+                            if (!listOrder.isEmpty()) {
                                 List<OrderDetail> listProduct = new ArrayList<>();
                                 Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
 
                                 for (Order order : listOrder) {
-                                    List<OrderDetail> listOrderDetail2 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) :orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                    List<OrderDetail> listOrderDetail2 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) : orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
                                     Utilities.groupOrderDetails(listOrderDetail2, listSchedule, order.getStatus());
                                     for (OrderDetail detail : listOrderDetail) {
                                         //item_id and item_type --> add schedule photo
@@ -126,9 +125,9 @@ public class ConfirmScheduleServlet extends HttpServlet {
 
                                 session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
                                 session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
-                            }else{
+                            } else {
                                 Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
-                                 session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
+                                session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
                             }
                         }
                     }

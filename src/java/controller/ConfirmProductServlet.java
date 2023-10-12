@@ -64,7 +64,8 @@ public class ConfirmProductServlet extends HttpServlet {
 
         try {
             if (!orderId.isEmpty() && session != null) {
-                boolean updateDetail = orderDetailDAO.deleteOrderDetailById(Integer.parseInt(orderDetailId));
+                boolean updateDetail = orderDetailDAO.deleteOrderDetailByIdAdmin(Integer.parseInt(orderDetailId), "confirm");
+                
 
                 if (updateDetail) {
                     List<OrderDetail> listOrderLeft = orderDetailDAO.getOrderDetailByOrderId(Integer.parseInt(orderId));

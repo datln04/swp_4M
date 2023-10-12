@@ -20,7 +20,7 @@
             }
 
             .container-parent {
-                max-width: 1200px;
+                max-width: 1400px;
                 margin: 20px auto;
                 padding: 20px;
                 background-color: #f4f4f4;
@@ -86,7 +86,7 @@
             .button:active {
                 background-color: #3e8e41;
                 transform: translateY(1px);
-            }         
+            }
 
             .button-delete{
                 background-color: lightcoral;
@@ -192,6 +192,8 @@
                         <th>Name</th>
                         <th>Description</th>                      
                         <th>Photo Date</th>  
+                        <th>Date Rent From</th>  
+                        <th>Date Rent To</th>  
                         <th>Price</th>    
                         <th style="text-align: center">Actions</th>    
                     </tr>
@@ -205,14 +207,16 @@
                         <c:forEach var="item" items="${value}" varStatus="count">
                             <!-- Display the list item -->
                             <c:set var="totalPriceCart" value="${totalPriceCart + item.price}"/>
-                             <c:set var="idOrder" value="${item.orderId}"/>
+                            <c:set var="idOrder" value="${item.orderId}"/>
                             <tr>
                                 <td>${item.name}</td>
                                 <td style="width: 400px">${item.description}</td>
                                 <td style="width: 150px">${item.orderDate}</td>
+                                <td style="width: 150px">${item.orderStartDate}</td>
+                                <td style="width: 150px">${item.orderEndDate}</td>
                                 <td>${item.price}</td>
                                 <td style="border-bottom: none; text-align: center"> 
-                                    <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemId}', '${item.itemType}', '${item.orderId}')">Change</button>
+                                    <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemId}', '${item.itemType}', '${item.orderId}', '${item.orderStartDate}', '${item.orderEndDate}')">Change</button>
                                 </td>
                             </tr>
                             <tr>
@@ -239,9 +243,11 @@
                             <td>${product.name}</td>
                             <td style="width: 400px">${product.description}</td>
                             <td style="width: 150px">${product.orderDate}</td>
+                            <td style="width: 150px">${product.orderStartDate}</td>
+                            <td style="width: 150px">${product.orderEndDate}</td>
                             <td>${product.price}</td>
                             <td style="border-bottom: none; text-align: center"> 
-                                <button class="button" onclick="openPopupUpdate('${product.orderDetailId}', '${product.itemId}', '${product.itemType}', '${product.orderId}')">Change</button>
+                                <button class="button" onclick="openPopupUpdate('${product.orderDetailId}', '${product.itemId}', '${product.itemType}', '${product.orderId}', '${product.orderStartDate}', '${product.orderEndDate}')">Change</button>
                                 <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${product.orderId}', '${product.orderDetailId}', '${product.itemId}', '${product.itemType}')">Delete Item</button>  
                             </td>
                         </tr>
@@ -253,7 +259,7 @@
                         <input type="hidden" name="idOrder" value="${idOrder}"/>
                         <input type="hidden" name="amount" value="${totalPriceCart}"/>
                         <h3>Total: ${totalPriceCart}</h3>
-                        <input  type="submit" class="btn btn-secondary w-25 mt-3" name="btAction" value="Payment"/>
+                        <input  type="submit" class="btn btn-secondary mt-3" name="btAction" value="Payment" style="width: 20%"/>
                     </form>
                 </div>
             </c:if>
@@ -320,6 +326,8 @@
                                         <input type="hidden" name="itemId" class="itemId-input"/>
                                         <input type="hidden" name="itemType" class="itemType-input"/>
                                         <input type="hidden" name="orderId" class="orderId-input"/>
+                                        <input type="hidden" name="timeRange" class="timeRange-input"/>
+                                        <input type="hidden" name="timeRangeReturn" class="timeRangeReturn-input"/>
                                         <input type="hidden" name="id" value="${data.itemId}"/>
                                         <input type="submit" value="Change Item" name="btAction" class="button" />
                                     </form>
@@ -353,8 +361,9 @@
         </div>
 
         <jsp:include page="footer.jsp"></jsp:include>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+            <script>
 
                             function openPopup(orderId, itemId) {
                                 document.getElementById('txtOrderId').value = orderId;
@@ -412,7 +421,7 @@
                                 timeRangeInput.value = currentDateString;
                             });
 
-                            function openPopupUpdate(orderDetailID, itemId, itemType, orderId) {
+                            function openPopupUpdate(orderDetailID, itemId, itemType, orderId, orderStartDate, orderEndDate) {
 
                                 document.getElementById('popupUpdate').style.display = 'block';
                                 var typeArr = itemType.split('-');
@@ -455,8 +464,21 @@
                                     orderInputs[i].value = orderId;
                                 }
 
+                                var orderInputs = document.getElementsByClassName("timeRange-input");
+                                for (var i = 0; i < orderInputs.length; i++) {
+                                    orderInputs[i].value = orderStartDate;
+                                }
+
+                                var orderInputs = document.getElementsByClassName("timeRangeReturn-input");
+                                for (var i = 0; i < orderInputs.length; i++) {
+                                    orderInputs[i].value = orderEndDate;
+                                }
+
                             }
 
+                            if (${requestScope.BOOK_NOT_AVAILABLE != null}) {
+                                swal("Opps!", '${requestScope.BOOK_NOT_AVAILABLE}', "warning");
+                            }
 
         </script>
     </body>

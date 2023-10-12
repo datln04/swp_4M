@@ -298,3 +298,36 @@ create table ReplyFeedback(
 
 Alter table profiles
 ADD CONSTRAINT UC_PROFILES_USER_NAME UNIQUE (user_name);
+-------------------------------------------------------------------------
+
+alter table order_detail
+add order_end_date varchar(50)
+
+
+alter table order_detail
+add order_start_date varchar(50)
+
+
+alter table photo_schedules
+add order_start_date varchar(50)
+
+
+alter table photo_schedules
+add order_end_date varchar(50)
+
+
+/*SELECT order_detail_id, order_id, item_id, item_type, order_date, name, description, price, is_active, order_end_date, order_start_date
+FROM order_detail
+WHERE 
+  item_id = 2 and is_active = 1
+  AND ( order_start_date <= '2023-10-11 17:15' 
+  AND order_end_date >= '2023-10-11 17:15') OR ( order_start_date <= '2023-10-12 17:15' AND order_end_date >= '2023-10-12 17:15')*/
+
+/*
+SELECT schedule_id, user_id, location_id, studio_id, schedule_date, status, order_start_date, order_end_date
+FROM photo_schedules
+WHERE 
+  (location_id = 2 and studio_id = 1) 
+  AND (status = 'pending' or status = 'confirm')
+  AND (( order_start_date <= '2023-10-11 19:23' AND order_end_date >= '2023-10-11 19:23') 
+  OR ( order_start_date <= '2023-10-12 19:23' AND order_end_date >= '2023-10-12 19:23'))*/

@@ -24,13 +24,16 @@ import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +43,7 @@ import javax.servlet.http.HttpSession;
 import util.Contant;
 import util.PaginationHelper;
 import util.Utilities;
+import static util.Utilities.convertTimeZoneToISO120;
 
 /**
  *
@@ -69,8 +73,10 @@ public class AddToCartServlet extends HttpServlet {
         String name = request.getParameter("name");
         String description = request.getParameter("description");
         String price = request.getParameter("price");
+        String timeRange = convertTimeZoneToISO120(request.getParameter("timeRange"));
+        String timeRangeReturn = convertTimeZoneToISO120(request.getParameter("timeRangeReturn"));
 
-        String url = ERROR_PAGE;
+        String url = CART_PAGE;
 
         // create booking schedule - create order for card - order detail
         PhotoScheduleDAO photoDAO = new PhotoScheduleDAO();
@@ -85,147 +91,154 @@ public class AddToCartServlet extends HttpServlet {
             HttpSession session = request.getSession();
             Profile profile = (Profile) session.getAttribute("USER");
             if (session != null && profile != null) {
-                String time = OffsetDateTime
-                        .now(ZoneOffset.UTC)
-                        .minus(Period.ofYears(1))
-                        .toString(); // get orderbyProfileId
-                Order orderExist = orderDAO.getOrderByProfileId(profile.getProfileId());
-                int orderId = 0;
-                if (orderExist != null) {
-                    orderId = orderExist.getOrderId();
-                } else {
-                    // add order and order Detail
-                    boolean orderResult = orderDAO.insertOrder(new Order(profile.getProfileId(), time, "create")); // see it
-
-                    // get last order to add order detail
-                    if (orderResult) {
-                        Order order = orderDAO.getLastOrder();
-                        orderId = order.getOrderId();
-                    }
-                }
-
-                if (orderId > 0) {
-
-                    // check if stock available for book
-                    if ("rental_product".equals(itemType)) {
-                        RentalProduct rentalProduct = productDAO.getRentalProductById(Integer.parseInt(itemId));
-
-                        if (rentalProduct != null) {
-                            int stock = rentalProduct.getStock() - 1;
-                            boolean minusStock = productDAO.setStockRentalProduct(Integer.parseInt(itemId), stock);
-
-                            if (minusStock) {
-                                // todo
-                                // add insert order detail
-                                OrderDetail orderDetail = new OrderDetail(0, name, description, Double.parseDouble(price), time, orderId, Integer.parseInt(itemId), itemType);
-                                boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
-
-                                if (resultOrderDetail) {
-                                    List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
-
-                                    List<OrderDetail> listProduct = new ArrayList<>();
-
-                                    Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetailByOrder);
-
-                                    for (OrderDetail detail : listOrderDetailByOrder) {
-                                        //item_id and item_type --> add schedule photo
-                                        if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
-                                            listProduct.add(detail);
-                                        }
-                                    }
-
-                                    url = CART_PAGE;
-                                    session.setAttribute("LIST_CART_PRODUCT", listProduct);
-                                    session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
-                                    session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
-                                }
-                            }
-                        }
-                    } else if ("combo".equals(itemType)) {
-                        DressPhotoCombo combo = comboDAO.getComboById(Integer.parseInt(itemId));
-
-                        if (combo != null) {
-                            int stock = combo.getStock() - 1;
-
-                            boolean minusStock = comboDAO.setStockCombo(Integer.parseInt(itemId), stock);
-
-                            if (minusStock) {
-                                // add insert order detail
-                                OrderDetail orderDetail = new OrderDetail(0, name, description, Double.parseDouble(price), time, orderId, Integer.parseInt(itemId), itemType);
-                                boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
-
-                                if (resultOrderDetail) {
-                                    List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
-
-                                    List<OrderDetail> listProduct = new ArrayList<>();
-
-                                    Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetailByOrder);
-
-                                    for (OrderDetail detail : listOrderDetailByOrder) {
-                                        //item_id and item_type --> add schedule photo
-                                        if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
-                                            listProduct.add(detail);
-                                        }
-                                    }
-
-                                    url = CART_PAGE;
-                                    session.setAttribute("LIST_CART_PRODUCT", listProduct);
-                                    session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
-                                    session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
-                                }
-                            }
-                        }
+//                boolean bookAvailable = orderDetailDAO.checkBookAvailable(timeRange, timeRangeReturn, Integer.parseInt(itemId));
+//                if (!bookAvailable) {
+                    // Get the current time
+                    LocalDateTime currentTime = LocalDateTime.now();
+                    // Define the desired date-time format
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    // Format the current time using the formatter
+                    String formattedTime = currentTime.format(formatter);
+                    Order orderExist = orderDAO.getOrderByProfileId(profile.getProfileId());
+                    int orderId = 0;
+                    if (orderExist != null) {
+                        orderId = orderExist.getOrderId();
                     } else {
-                        // add insert order detail
-                        OrderDetail orderDetail = new OrderDetail(0, name, description, Double.parseDouble(price), time, orderId, Integer.parseInt(itemId), itemType);
-                        boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
+                        // add order and order Detail
+                        boolean orderResult = orderDAO.insertOrder(new Order(profile.getProfileId(), formattedTime, "create")); // see it
 
-                        if (resultOrderDetail) {
-                            List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
-
-                            List<OrderDetail> listProduct = new ArrayList<>();
-
-                            Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetailByOrder);
-
-                            for (OrderDetail detail : listOrderDetailByOrder) {
-                                //item_id and item_type --> add schedule photo
-                                if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
-                                    listProduct.add(detail);
-                                }
-                            }
-
-                            url = CART_PAGE;
-                            session.setAttribute("LIST_CART_PRODUCT", listProduct);
-                            session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
-                            session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
+                        // get last order to add order detail
+                        if (orderResult) {
+                            Order order = orderDAO.getLastOrder();
+                            orderId = order.getOrderId();
                         }
                     }
-                }
 
-                List<Location> listLocation = locationDAO.getAllLocation();
-                List<RentalProduct> listProduct = productDAO.getAllRentalProduct();
-                List<PhotographyStudio> listStudio = studioDAO.getAllPhotographyStudio();
-                List<DressPhotoCombo> listCombo = comboDAO.getAllDressPhotoCombo();
+                    if (orderId > 0) {
 
-                List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
+                        // check if stock available for book
+                        if ("rental_product".equals(itemType)) {
+                            RentalProduct rentalProduct = productDAO.getRentalProductById(Integer.parseInt(itemId));
 
-                // Set the number of entities per page
-                int entitiesPerPage = Contant.PAGE_SIZE;
+                            if (rentalProduct != null) {
+                                int stock = rentalProduct.getStock() - 1;
+                                boolean minusStock = productDAO.setStockRentalProduct(Integer.parseInt(itemId), stock);
 
-                // Calculate the total pages for all lists combined
-                int totalEntities = listOrder.size();
-                int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+                                if (minusStock) {
+                                    // todo
+                                    // add insert order detail
+                                    OrderDetail orderDetail = new OrderDetail(0, name, description, Double.parseDouble(price), formattedTime, orderId, Integer.parseInt(itemId), itemType, timeRange, timeRangeReturn);
+                                    boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
 
-                // Retrieve the current page number from the request parameters
-                int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+                                    if (resultOrderDetail) {
+                                        List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
 
-                List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
-                session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
-                session.setAttribute("LIST_ORDER_ALL", listOrder);
+                                        List<OrderDetail> listProduct = new ArrayList<>();
 
-                request.setAttribute("totalPages", totalPages);
-                request.setAttribute("currentPage", currentPage);
+                                        Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetailByOrder);
 
+                                        for (OrderDetail detail : listOrderDetailByOrder) {
+                                            //item_id and item_type --> add schedule photo
+                                            if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                                listProduct.add(detail);
+                                            }
+                                        }
+
+                                        url = CART_PAGE;
+                                        session.setAttribute("LIST_CART_PRODUCT", listProduct);
+                                        session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
+                                        session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
+                                    }
+                                }
+                            }
+                        } else if ("combo".equals(itemType)) {
+                            DressPhotoCombo combo = comboDAO.getComboById(Integer.parseInt(itemId));
+
+                            if (combo != null) {
+                                int stock = combo.getStock() - 1;
+
+                                boolean minusStock = comboDAO.setStockCombo(Integer.parseInt(itemId), stock);
+
+                                if (minusStock) {
+                                    // add insert order detail
+                                    OrderDetail orderDetail = new OrderDetail(0, name, description, Double.parseDouble(price), formattedTime, orderId, Integer.parseInt(itemId), itemType, timeRange, timeRangeReturn);
+                                    boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
+
+                                    if (resultOrderDetail) {
+                                        List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
+
+                                        List<OrderDetail> listProduct = new ArrayList<>();
+
+                                        Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetailByOrder);
+
+                                        for (OrderDetail detail : listOrderDetailByOrder) {
+                                            //item_id and item_type --> add schedule photo
+                                            if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                                listProduct.add(detail);
+                                            }
+                                        }
+
+                                        url = CART_PAGE;
+                                        session.setAttribute("LIST_CART_PRODUCT", listProduct);
+                                        session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
+                                        session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
+                                    }
+                                }
+                            }
+                        } else {
+                            // add insert order detail
+                            OrderDetail orderDetail = new OrderDetail(0, name, description, Double.parseDouble(price), formattedTime, orderId, Integer.parseInt(itemId), itemType, timeRange, timeRangeReturn);
+                            boolean resultOrderDetail = orderDetailDAO.insertOrderDetail(orderDetail);
+
+                            if (resultOrderDetail) {
+                                List<OrderDetail> listOrderDetailByOrder = orderDetailDAO.getOrderDetailByOrderId(orderId);
+
+                                List<OrderDetail> listProduct = new ArrayList<>();
+
+                                Map<String, List<OrderDetail>> listSchedule = Utilities.groupOrderDetails(listOrderDetailByOrder);
+
+                                for (OrderDetail detail : listOrderDetailByOrder) {
+                                    //item_id and item_type --> add schedule photo
+                                    if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                        listProduct.add(detail);
+                                    }
+                                }
+
+                                url = CART_PAGE;
+                                session.setAttribute("LIST_CART_PRODUCT", listProduct);
+                                session.setAttribute("LIST_CART_SCHEDULE", listSchedule);
+                                session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
+                            }
+                        }
+                    }
+
+                    List<Location> listLocation = locationDAO.getAllLocation();
+                    List<RentalProduct> listProduct = productDAO.getAllRentalProduct();
+                    List<PhotographyStudio> listStudio = studioDAO.getAllPhotographyStudio();
+                    List<DressPhotoCombo> listCombo = comboDAO.getAllDressPhotoCombo();
+
+                    List<OrderDetail> listOrder = PaginationHelper.pagingList(listLocation, listProduct, listStudio, listCombo);
+
+                    // Set the number of entities per page
+                    int entitiesPerPage = Contant.PAGE_SIZE;
+
+                    // Calculate the total pages for all lists combined
+                    int totalEntities = listOrder.size();
+                    int totalPages = (int) Math.ceil((double) totalEntities / entitiesPerPage);
+
+                    // Retrieve the current page number from the request parameters
+                    int currentPage = PaginationHelper.getCurrentPage(request, "page", totalPages);
+
+                    List<OrderDetail> listOrderDetailPage = PaginationHelper.getPageEntities(listOrder, currentPage, entitiesPerPage);
+                    session.setAttribute("LIST_ORDER_PAGING", listOrderDetailPage);
+                    session.setAttribute("LIST_ORDER_ALL", listOrder);
+
+                    request.setAttribute("totalPages", totalPages);
+                    request.setAttribute("currentPage", currentPage);
+//                } else {
+//                    url = "home.jsp";
+//                    request.setAttribute("BOOK_NOT_AVAILABLE", "booking_not_available");
+//                }
             } else {
                 url = "login.jsp";
             }
@@ -234,9 +247,9 @@ public class AddToCartServlet extends HttpServlet {
         } catch (SQLException ex) {
             log("BookScheduleServlet_SQLException " + ex.getMessage());
         } finally {
-//            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-//            dispatcher.forward(request, response);
-            response.sendRedirect(url);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+            dispatcher.forward(request, response);
+//            response.sendRedirect(url);
         }
     }
 

@@ -9,6 +9,8 @@ public class OrderDetail implements Serializable {
     private String description;
     private double price;
     private String orderDate;
+    private String orderEndDate;
+    private String orderStartDate;
     private boolean active;
     private int orderId;
     private int itemId;
@@ -23,14 +25,12 @@ public class OrderDetail implements Serializable {
     public void setStatus(String status) {
         this.status = status;
     }
-    
-    
 
     // Constructors, getters, and setters
     public OrderDetail() {
     }
 
-    public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate, boolean active, int orderId, int itemId, String itemType) {
+    public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate, boolean active, int orderId, int itemId, String itemType,String orderStartDate, String orderEndDate) {
         this.orderDetailId = orderDetailId;
         this.name = name;
         this.description = description;
@@ -40,8 +40,10 @@ public class OrderDetail implements Serializable {
         this.orderId = orderId;
         this.itemId = itemId;
         this.itemType = itemType;
+        this.orderStartDate = orderStartDate;
+        this.orderEndDate = orderEndDate;
     }
-    
+
     public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate, int itemId, String itemType) {
         this.orderDetailId = orderDetailId;
         this.name = name;
@@ -51,8 +53,8 @@ public class OrderDetail implements Serializable {
         this.itemId = itemId;
         this.itemType = itemType;
     }
-    
-    public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate, int orderId, int itemId, String itemType) {
+
+    public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate, int orderId, int itemId, String itemType,String orderStartDate, String orderEndDate) {
         this.orderDetailId = orderDetailId;
         this.name = name;
         this.description = description;
@@ -61,8 +63,10 @@ public class OrderDetail implements Serializable {
         this.orderId = orderId;
         this.itemId = itemId;
         this.itemType = itemType;
+        this.orderStartDate = orderStartDate;
+        this.orderEndDate = orderEndDate;
     }
-    
+
     public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate) {
         this.orderDetailId = orderDetailId;
         this.name = name;
@@ -83,14 +87,31 @@ public class OrderDetail implements Serializable {
         this.itemType = itemType;
         this.image = image;
     }
-    
-     public OrderDetail(String orderDate, int orderId, int itemId, String itemType) {            
+
+    public OrderDetail(String orderDate, int orderId, int itemId, String itemType) {
         this.orderDate = orderDate;
         this.orderId = orderId;
         this.itemId = itemId;
         this.itemType = itemType;
     }
 
+    public String getOrderEndDate() {
+        return orderEndDate;
+    }
+
+    public void setOrderEndDate(String orderEndDate) {
+        this.orderEndDate = orderEndDate;
+    }
+
+    public String getOrderStartDate() {
+        return orderStartDate;
+    }
+
+    public void setOrderStartDate(String orderStartDate) {
+        this.orderStartDate = orderStartDate;
+    }
+    
+    
     public String getImage() {
         return image;
     }

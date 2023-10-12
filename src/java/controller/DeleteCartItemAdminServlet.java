@@ -86,7 +86,7 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
                 Order existOrder = orderDAO.getOrderAdminById(Integer.parseInt(orderId));
 
                 if (existOrder != null) {
-                    OrderDetail orderDetail = orderDetailDAO.getOrderDetailById(Integer.parseInt(orderDetailId));
+                    OrderDetail orderDetail = orderDetailDAO.getOrderDetailByIdAdmin(Integer.parseInt(orderDetailId));
                     String arr[] = itemType.split("-");
                     if (arr.length > 1) {
                         List<OrderDetail> listRemove = orderDetailDAO.getOrderDetailByItemIdCart(Integer.parseInt(itemId));
