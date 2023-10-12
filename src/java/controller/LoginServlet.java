@@ -126,17 +126,21 @@ public class LoginServlet extends HttpServlet {
 
                         for (Order order : listOrder) {
                             List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
-                            List<Integer> photoList = new ArrayList<>();
+                            int photoTmp = 0;
+                            List<PhotoSchedule> photoList = new ArrayList<>();
                             for (OrderDetail orderDetail : listOrderDetail) {
                                 String arr[] = orderDetail.getItemType().split("-");
                                 if (arr.length > 1) {
-                                    PhotoSchedule photo = scheduleDAO.getPhotoScheduleByIdAdmin(orderDetail.getItemId());
-                                    if(photo != null){
-                                        photoList.add(photo.getScheduleId());
+                                    if (photoTmp != orderDetail.getItemId()) {
+                                        PhotoSchedule photo = scheduleDAO.getPhotoScheduleByIdAdmin(orderDetail.getItemId());
+                                        if (photo != null) {
+                                            photoTmp = photo.getScheduleId();
+                                            photoList.add(photo);
+                                        }
                                     }
                                 }
                             }
-                            Utilities.groupOrderDetailsAdminLoaded(listOrderDetail, listSchedule, order.getStatus(), photoList);
+                            Utilities.groupOrderDetailsAdminLoaded(listOrderDetail, listSchedule, photoList);
                             for (OrderDetail detail : listOrderDetail) {
                                 //item_id and item_type --> add schedule photo
                                 if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {

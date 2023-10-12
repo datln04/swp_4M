@@ -68,7 +68,7 @@ public class ConfirmProductServlet extends HttpServlet {
                 
 
                 if (updateDetail) {
-                    List<OrderDetail> listOrderLeft = orderDetailDAO.getOrderDetailByOrderId(Integer.parseInt(orderId));
+                    List<OrderDetail> listOrderLeft = orderDetailDAO.getOrderDetailByOrderIdAdminItem(Integer.parseInt(orderId));
 
                     if (listOrderLeft.size() > 0) {
                         List<Order> listOrder = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
@@ -77,7 +77,7 @@ public class ConfirmProductServlet extends HttpServlet {
                             List<OrderDetail> listProduct = new ArrayList<>();
 
                             for (Order order : listOrder) {
-                                List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
 
                                 for (OrderDetail detail : listOrderDetail) {
                                     //item_id and item_type --> add schedule photo

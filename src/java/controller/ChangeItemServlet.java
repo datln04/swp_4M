@@ -97,7 +97,8 @@ public class ChangeItemServlet extends HttpServlet {
                         String[] arr = itemType.split("-");
                         // there is photo schedule
                         if (arr.length > 1) {
-                            List<String> listScheduleAvailable = photoDAO.checkScheduleAvailableAdmin(timeRange, timeRangeReturn, arr[1], Integer.parseInt(id), Integer.parseInt(itemId));
+                            PhotoSchedule photo = photoDAO.getPhotoScheduleByIdCreate(Integer.parseInt(itemId));
+                            List<String> listScheduleAvailable = photoDAO.checkScheduleAvailableAdmin(timeRange, timeRangeReturn, arr[1], Integer.parseInt(id), photo);
                             if (listScheduleAvailable == null) {
                                 // update photoschedule
                                 String type = arr[1];

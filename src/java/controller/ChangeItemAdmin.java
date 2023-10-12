@@ -85,7 +85,7 @@ public class ChangeItemAdmin extends HttpServlet {
             HttpSession session = request.getSession();
             Profile profile = (Profile) session.getAttribute("USER");
             if (session != null && profile != null) {
-                
+
                 // add photo schedule
                 Order orderExist = orderDAO.getOrderAdminById(Integer.parseInt(orderIdText));
                 // get orderbyProfileId
@@ -97,7 +97,8 @@ public class ChangeItemAdmin extends HttpServlet {
 
                         // there is photo schedule
                         if (arr.length > 1) {
-                            List<String> listScheduleAvailable = photoDAO.checkScheduleAvailableAdmin(timeRange, timeRangeReturn, arr[1], Integer.parseInt(id), Integer.parseInt(itemId));
+                            PhotoSchedule photo = photoDAO.getPhotoScheduleByIdAdmin(Integer.parseInt(itemId));
+                            List<String> listScheduleAvailable = photoDAO.checkScheduleAvailableAdmin(timeRange, timeRangeReturn, arr[1], Integer.parseInt(id), photo);
                             if (listScheduleAvailable == null) {
                                 // update photoschedule
                                 String type = arr[1];
@@ -220,9 +221,27 @@ public class ChangeItemAdmin extends HttpServlet {
                                 Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
 
                                 for (Order order : listOrder) {
-                                    List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
-                                    Utilities.groupOrderDetails(listOrderDetail, listSchedule, order.getStatus());
-                                    for (OrderDetail detail : listOrderDetail) {
+                                    List<PhotoSchedule> photoList = new ArrayList<>();
+
+                                    List<OrderDetail> listDetail1 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) : orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+                                    int photoTmp = 0;
+
+                                    for (OrderDetail orderDetail : listDetail1) {
+                                        String arr1[] = orderDetail.getItemType().split("-");
+                                        if (arr1.length > 1) {
+                                            if (photoTmp != orderDetail.getItemId()) {
+                                                PhotoSchedule photo = photoDAO.getPhotoScheduleByIdAdmin(orderDetail.getItemId());
+                                                if (photo != null) {
+                                                    photoTmp = photo.getScheduleId();
+                                                    photoList.add(photo);
+                                                }
+                                            }
+                                        }
+
+                                        
+                                    }
+                                    Utilities.groupOrderDetailsAdminLoaded(listDetail1, listSchedule, photoList);
+                                    for (OrderDetail detail : listDetail1) {
                                         //item_id and item_type --> add schedule photo
                                         if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
                                             detail.setStatus(order.getStatus());

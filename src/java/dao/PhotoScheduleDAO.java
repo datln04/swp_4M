@@ -109,7 +109,7 @@ public class PhotoScheduleDAO implements Serializable {
         return null;
     }
 
-    public List<String> checkScheduleAvailableAdmin(String startDate, String endDate, String itemType, int id, int scheduleId) throws NamingException, SQLException {
+    public List<String> checkScheduleAvailableAdmin(String startDate, String endDate, String itemType, int id, PhotoSchedule photo) throws NamingException, SQLException {
         List<String> list = new ArrayList<>();
         try {
             conn = ConnectionConfig.getConnection();
@@ -118,28 +118,26 @@ public class PhotoScheduleDAO implements Serializable {
                 if ("location".equals(itemType)) {
                     sql = "SELECT schedule_id, user_id, location_id, studio_id, schedule_date, status, order_start_date, order_end_date\n"
                             + "FROM photo_schedules\n"
-                            + "WHERE schedule_id = ?\n"
-                            + "  AND (location_id = ?) \n"
+                            + "WHERE \n"
+                            + "  (location_id = " + id + " and studio_id = " + photo.getStudioId() + " )\n"
                             + "  AND (status = 'pending' or status = 'confirm')\n"
                             + "  AND (( order_start_date <= ? AND order_end_date >= ?) \n"
                             + "  OR ( order_start_date <= ? AND order_end_date >= ?))";
                 } else {
                     sql = "SELECT schedule_id, user_id, location_id, studio_id, schedule_date, status, order_start_date, order_end_date\n"
                             + "FROM photo_schedules\n"
-                            + "WHERE schedule_id = ?\n"
-                            + "  AND (studio_id = ?) \n"
+                            + "WHERE \n"
+                            + "  (location_id = " + photo.getLocationId()+ " and studio_id = " + id + " )\n"
                             + "  AND (status = 'pending' or status = 'confirm')\n"
                             + "  AND (( order_start_date <= ? AND order_end_date >= ?) \n"
                             + "  OR ( order_start_date <= ? AND order_end_date >= ?))";
                 }
 
                 pst = conn.prepareStatement(sql);
-                pst.setInt(1, scheduleId);
-                pst.setInt(2, id);
-                pst.setString(3, startDate);
-                pst.setString(4, startDate);
-                pst.setString(5, endDate);
-                pst.setString(6, endDate);
+                pst.setString(1, startDate);
+                pst.setString(2, startDate);
+                pst.setString(3, endDate);
+                pst.setString(4, endDate);
 
                 rs = pst.executeQuery();
 
@@ -508,7 +506,7 @@ public class PhotoScheduleDAO implements Serializable {
             if (conn != null) {
                 String sql = "select schedule_id,user_id,location_id,studio_id,schedule_date,status,order_start_date, order_end_date\n"
                         + "from photo_schedules\n"
-                        + "where schedule_id = ? and status = 'confirm'";
+                        + "where schedule_id = ? and (status = 'confirm' or status = 'pending')";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, scheduleId);
