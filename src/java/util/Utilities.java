@@ -155,23 +155,25 @@ public class Utilities {
         });
     }
 
-    public static void groupOrderDetailsAdminLoaded(List<OrderDetail> orderDetails, Map<String, List<OrderDetail>> groupedMap, String orderStatus, List<Integer> photoIdList) {
+    public static void groupOrderDetailsAdminLoaded(List<OrderDetail> orderDetails, Map<String, List<OrderDetail>> groupedMap, List<PhotoSchedule> photoIdList) {
         orderDetails.forEach((orderDetail) -> {
             String[] arr = orderDetail.getItemType().split("-");
             if (arr.length > 1) {
                 String key = arr[0] + "-" + orderDetail.getItemId();
-
-                if (groupedMap.containsKey(key)) {
-                    groupedMap.get(key).add(orderDetail);
-                    orderDetail.setStatus(orderStatus);
-                } else {
-                    if (!photoIdList.contains(orderDetail.getItemId())) {
-                        List<OrderDetail> groupedList = new ArrayList<>();
-                        groupedList.add(orderDetail);
-                        groupedMap.put(key, groupedList);
-                        orderDetail.setStatus(orderStatus);
+                photoIdList.forEach((p -> {
+                    if (p.getScheduleId() == orderDetail.getItemId()) {
+                        if (groupedMap.containsKey(key)) {
+                            groupedMap.get(key).add(orderDetail);
+                            orderDetail.setStatus(p.getStatus());
+                        } else {
+                            List<OrderDetail> groupedList = new ArrayList<>();
+                            groupedList.add(orderDetail);
+                            groupedMap.put(key, groupedList);
+                            orderDetail.setStatus(p.getStatus());
+                        }
                     }
-                }
+                }));
+
             }
         });
     }

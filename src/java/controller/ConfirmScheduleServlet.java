@@ -92,11 +92,25 @@ public class ConfirmScheduleServlet extends HttpServlet {
 
                         if (!listOrder.isEmpty()) {
                             Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
-                            List<Integer> list =new ArrayList<>();
-                            list.add(Integer.parseInt(itemId));
+
+                            List<PhotoSchedule> photoList = new ArrayList<>();
                             for (Order order : listOrder) {
                                 List<OrderDetail> listDetail1 = "admin".equals(profile.getRoleName()) ? orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId()) : orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
-                                Utilities.groupOrderDetailsAdminLoaded(listDetail1, listSchedule, order.getStatus(),list);
+                                int photoTmp = 0;
+
+                                for (OrderDetail orderDetail : listDetail1) {
+                                    String arr[] = orderDetail.getItemType().split("-");
+                                    if (arr.length > 1) {
+                                        if (photoTmp != orderDetail.getItemId()) {
+                                            PhotoSchedule photo = photoDAO.getPhotoScheduleByIdAdmin(orderDetail.getItemId());
+                                            if (photo != null) {
+                                                photoTmp = photo.getScheduleId();
+                                                photoList.add(photo);
+                                            }
+                                        }
+                                    }
+                                }
+                                Utilities.groupOrderDetailsAdminLoaded(listDetail1, listSchedule, photoList);
                             }
 
                             session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
