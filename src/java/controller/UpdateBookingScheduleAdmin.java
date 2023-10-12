@@ -24,6 +24,11 @@ import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.naming.NamingException;
@@ -60,7 +65,8 @@ public class UpdateBookingScheduleAdmin extends HttpServlet {
 
         String locationId = request.getParameter("location");
         String studioId = request.getParameter("studio");
-        String time = request.getParameter("timeRange");
+        String timeRange = request.getParameter("timeRange");
+        String timeRangeReturn = request.getParameter("timeRangeReturn");
         String orderIdText = request.getParameter("txtOrderId");
         String itemTypeText = request.getParameter("txtItemId");
 
@@ -77,8 +83,12 @@ public class UpdateBookingScheduleAdmin extends HttpServlet {
             HttpSession session = request.getSession();
             Profile profile = (Profile) session.getAttribute("USER");
             if (session != null && profile != null) {
-                // add photo schedule
-
+                // Get the current time
+                LocalDateTime currentTime = LocalDateTime.now();
+                // Define the desired date-time format
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                // Format the current time using the formatter
+                String formattedTime = currentTime.format(formatter);
                 // get orderbyProfileId
                 Order orderExist = orderDAO.getOrderAdminById(Integer.parseInt(orderIdText));
                 int orderId = 0;
@@ -94,7 +104,7 @@ public class UpdateBookingScheduleAdmin extends HttpServlet {
                             // find id and update photo schedule
                             if (detail.getItemType().equals("photo_schedule") && detail.getItemId() == Integer.parseInt(itemTypeText)) {
                                 // update photo schedule
-                                boolean updateRusult = photoDAO.updatePhotoScheduleById(Integer.parseInt(itemTypeText), Integer.parseInt(locationId), Integer.parseInt(studioId), time);
+                                boolean updateRusult = photoDAO.updatePhotoScheduleById(Integer.parseInt(itemTypeText), Integer.parseInt(locationId), Integer.parseInt(studioId), formattedTime);
                                 if (updateRusult) {
                                     isUpdated = true;
                                 }
@@ -124,11 +134,11 @@ public class UpdateBookingScheduleAdmin extends HttpServlet {
                                             List<OrderDetail> listScheduleOrderDetail = new ArrayList<>();
 
                                             // add item into list
-                                            OrderDetail detailLocation = new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule");
+                                            OrderDetail detailLocation = new OrderDetail(detail.getOrderDetailId(), location.getName(), location.getDescription(), location.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule", timeRange, timeRangeReturn);
                                             detailLocation.setStatus(order.getStatus());
                                             listScheduleOrderDetail.add(detailLocation);
 
-                                            OrderDetail detailStudio = new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule");
+                                            OrderDetail detailStudio = new OrderDetail(detail.getOrderDetailId(), studio.getName(), studio.getDescription(), studio.getPrice(), photoSchedule.getScheduleDate(), order.getOrderId(), photoSchedule.getScheduleId(), "photo_schedule", timeRange, timeRangeReturn);
                                             detailStudio.setStatus(order.getStatus());
                                             listScheduleOrderDetail.add(detailStudio);
 

@@ -11,18 +11,22 @@ public class PhotoSchedule implements Serializable {
     private int studioId;
     private String scheduleDate;
     private String status;
+    private String timeRange;
+    private String timeRangeReturn;
 
     // Constructors, getters, and setters
 
     public PhotoSchedule(){}
 
-    public PhotoSchedule(int scheduleId, int userId, int locationId, int studioId, String scheduleDate, String status) {
+    public PhotoSchedule(int scheduleId, int userId, int locationId, int studioId, String scheduleDate, String status, String timeRange, String timeRangeReturn) {
         this.scheduleId = scheduleId;
         this.userId = userId;
         this.locationId = locationId;
         this.studioId = studioId;
         this.scheduleDate = scheduleDate;
         this.status = status;
+        this.timeRange = timeRange;
+        this.timeRangeReturn = timeRangeReturn;
     }
 
     public String getStatus() {
@@ -31,6 +35,22 @@ public class PhotoSchedule implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getTimeRange() {
+        return timeRange;
+    }
+
+    public void setTimeRange(String timeRange) {
+        this.timeRange = timeRange;
+    }
+
+    public String getTimeRangeReturn() {
+        return timeRangeReturn;
+    }
+
+    public void setTimeRangeReturn(String timeRangeReturn) {
+        this.timeRangeReturn = timeRangeReturn;
     }
 
     

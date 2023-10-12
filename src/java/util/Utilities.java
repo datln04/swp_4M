@@ -6,6 +6,7 @@
 package util;
 
 import dto.OrderDetail;
+import dto.PhotoSchedule;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -106,9 +107,9 @@ public class Utilities {
 
         return groupedMap;
     }
-    
+
     public static void groupOrderDetails(List<OrderDetail> orderDetails, Map<String, List<OrderDetail>> groupedMap, String orderStatus) {
-     
+
         orderDetails.forEach((orderDetail) -> {
             String[] arr = orderDetail.getItemType().split("-");
             if (arr.length > 1) {
@@ -126,11 +127,63 @@ public class Utilities {
             }
         });
     }
-    
+
+    public static void groupOrderDetailsAdmin(List<OrderDetail> orderDetails, Map<String, List<OrderDetail>> groupedMap, String orderStatus, int itemId) {
+        orderDetails.forEach((orderDetail) -> {
+            String[] arr = orderDetail.getItemType().split("-");
+            if (arr.length > 1) {
+                String key = arr[0] + "-" + orderDetail.getItemId();
+
+                if (groupedMap.containsKey(key)) {
+                    if (itemId == orderDetail.getItemId()) {
+                        orderDetail.setStatus("confirm");
+                    } else {
+                        orderDetail.setStatus(orderStatus);
+                    }
+                    groupedMap.get(key).add(orderDetail);
+                } else {
+                    List<OrderDetail> groupedList = new ArrayList<>();
+                    groupedList.add(orderDetail);
+                    groupedMap.put(key, groupedList);
+                    if (itemId == orderDetail.getItemId()) {
+                        orderDetail.setStatus("confirm");
+                    } else {
+                        orderDetail.setStatus(orderStatus);
+                    }
+                }
+            }
+        });
+    }
+
+    public static void groupOrderDetailsAdminLoaded(List<OrderDetail> orderDetails, Map<String, List<OrderDetail>> groupedMap, String orderStatus, List<Integer> photoIdList) {
+        orderDetails.forEach((orderDetail) -> {
+            String[] arr = orderDetail.getItemType().split("-");
+            if (arr.length > 1) {
+                String key = arr[0] + "-" + orderDetail.getItemId();
+
+                if (groupedMap.containsKey(key)) {
+                    groupedMap.get(key).add(orderDetail);
+                    orderDetail.setStatus(orderStatus);
+                } else {
+                    if (!photoIdList.contains(orderDetail.getItemId())) {
+                        List<OrderDetail> groupedList = new ArrayList<>();
+                        groupedList.add(orderDetail);
+                        groupedMap.put(key, groupedList);
+                        orderDetail.setStatus(orderStatus);
+                    }
+                }
+            }
+        });
+    }
+
     public static boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
+    }
+
+    public static String convertTimeZoneToISO120(String time) {
+        return time.replace("T", " ");
     }
 }

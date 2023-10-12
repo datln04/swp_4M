@@ -89,7 +89,7 @@ public class DeleteCardItemServlet extends HttpServlet {
                     OrderDetail orderDetail = orderDetailDAO.getOrderDetailById(Integer.parseInt(orderDetailId));
                     String arr[] = itemType.split("-");
                     if (arr.length > 1) {
-                        List<OrderDetail> listRemove = orderDetailDAO.getOrderDetailByItemIdCart(Integer.parseInt(itemId));
+                        List<OrderDetail> listRemove = orderDetailDAO.getOrderDetailByItemIdCartClient(Integer.parseInt(itemId));
                         boolean removeSchedule = scheduleDAO.deleteScheduleById(Integer.parseInt(itemId));
 
                         if (removeSchedule) {

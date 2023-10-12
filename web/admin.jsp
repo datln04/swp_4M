@@ -86,7 +86,7 @@
             .button:active {
                 background-color: #3e8e41;
                 transform: translateY(1px);
-            }         
+            }
 
             .button-delete{
                 background-color: lightcoral;
@@ -315,6 +315,8 @@
                             <th>Name</th>
                             <th>Description</th>                      
                             <th>Photo Date</th>  
+                            <th>Date Rent From</th>  
+                            <th>Date Rent To</th>  
                             <th>Price</th>    
                             <th>Status</th>    
                             <th style="text-align: center">Actions</th>    
@@ -334,24 +336,23 @@
                                     <td>${item.name}</td>
                                     <td style="width: 400px">${item.description}</td>
                                     <td style="width: 150px">${item.orderDate}</td>
+                                    <td style="width: 150px">${item.orderStartDate}</td>
+                                    <td style="width: 150px">${item.orderEndDate}</td>
                                     <td>${item.price}</td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${item.status eq 'pending' && item.active eq false}">
+                                            <c:when test="${item.status eq 'confirm'}">
                                                 confirm
                                             </c:when>
-                                            <c:when test="${item.status eq 'pending' && item.active eq true}">
+                                            <c:when test="${item.status eq 'pending'}">
                                                 ${item.status}
                                             </c:when>
-                                            <c:otherwise>
-                                                ${item.status}
-                                            </c:otherwise>
                                         </c:choose>
 
                                     </td>
-                                    <c:if test="${item.status eq 'pending' && item.active eq true}">
+                                    <c:if test="${item.status eq 'pending'}">
                                         <td style="border-bottom: none; text-align: center"> 
-                                            <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemId}', '${item.itemType}', '${item.orderId}')">Change</button>
+                                            <button class="button" onclick="openPopupUpdate('${item.orderDetailId}', '${item.itemId}', '${item.itemType}', '${item.orderId}', '${item.orderStartDate}', '${item.orderEndDate}')">Change</button>
                                         </td>
                                     </c:if>
                                 </tr>
@@ -362,7 +363,9 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <c:if test="${count.index == 1 && item.status eq 'pending' && item.active eq true}">
+                                    <td></td>
+                                    <td></td>
+                                    <c:if test="${count.index == 1 && item.status eq 'pending'}">
                                         <td style="border-bottom: none; text-align: center; display: flex">
 
                                             <form action="DispatcherServlet" method="GET">
@@ -371,7 +374,7 @@
                                                 <input type="submit" name="btAction" value="Confirm Schedule" class="button btn-secondary" />
                                             </form>                                               
 
-                                            <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}', '${item.itemId}', '${item.itemType}')">Delete Item</button>  
+                                            <button style="width: 110px" class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}', '${item.itemId}', '${item.itemType}')">Delete Item</button>  
                                         </td>   
                                     </c:if>   
                                 </tr>
@@ -388,6 +391,8 @@
                                 <td>${product.name}</td>
                                 <td style="width: 400px">${product.description}</td>
                                 <td style="width: 150px">${product.orderDate}</td>
+                                <td style="width: 150px">${product.orderStartDate}</td>
+                                <td style="width: 150px">${product.orderEndDate}</td>
                                 <td>${product.price}</td>
                                 <td>${product.status}</td>
                                 <c:if test="${product.status eq 'pending'}">
@@ -399,8 +404,8 @@
                                             <input type="submit" name="btAction" value="Confirm Rent" class="button btn-secondary" />
                                         </form>
 
-                                        <button style="margin-left: 10px" class="button" onclick="openPopupUpdate('${product.orderDetailId}', '${product.itemId}', '${product.itemType}', '${product.orderId}')">Change</button>
-                                        <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${product.orderId}', '${product.orderDetailId}', '${product.itemId}', '${product.itemType}')">Delete Item</button>  
+                                        <button style="margin: 0 1rem" class="button" onclick="openPopupUpdate('${product.orderDetailId}', '${product.itemId}', '${product.itemType}', '${product.orderId}', '${product.orderStartDate}', '${product.orderEndDate}')">Change</button>
+                                        <button style="width: 110px" class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${product.orderId}', '${product.orderDetailId}', '${product.itemId}', '${product.itemType}')">Delete Item</button>  
                                     </td>
                                 </c:if>
                             </tr>
@@ -527,6 +532,8 @@
                                     <input type="hidden" name="itemId" class="itemId-input"/>
                                     <input type="hidden" name="itemType" class="itemType-input"/>
                                     <input type="hidden" name="orderId" class="orderId-input"/>
+                                    <input type="hidden" name="timeRange" class="timeRange-input"/>
+                                    <input type="hidden" name="timeRangeReturn" class="timeRangeReturn-input"/>
                                     <input type="hidden" name="id" value="${data.itemId}"/>
                                     <button class="button">Change</button>
                                 </form>
@@ -574,6 +581,7 @@
 
             </div>
         </div>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
                         if (${requestScope.ERROR_USER_NAME != null}) {
@@ -680,8 +688,7 @@
                             timeRangeInput.value = currentDateString;
                         });
 
-                        function openPopupUpdate(orderDetailID, itemId, itemType, orderId) {
-                            console.log(orderId)
+                        function openPopupUpdate(orderDetailID, itemId, itemType, orderId, orderStartDate, orderEndDate) {
 
                             document.getElementById('popupUpdate').style.display = 'block';
                             var typeArr = itemType.split('-');
@@ -724,7 +731,22 @@
                                 orderInputs[i].value = orderId;
                             }
 
+                            var orderInputs = document.getElementsByClassName("timeRange-input");
+                            for (var i = 0; i < orderInputs.length; i++) {
+                                orderInputs[i].value = orderStartDate;
+                            }
+
+                            var orderInputs = document.getElementsByClassName("timeRangeReturn-input");
+                            for (var i = 0; i < orderInputs.length; i++) {
+                                orderInputs[i].value = orderEndDate;
+                            }
+
                         }
+
+                        if (${requestScope.BOOK_NOT_AVAILABLE != null}) {
+                            swal("Opps!", "${requestScope.BOOK_NOT_AVAILABLE}", "warning");
+                        }
+
         </script>
         <jsp:include page="footer.jsp"></jsp:include>
     </body>

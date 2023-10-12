@@ -32,14 +32,16 @@ public class PhotoScheduleDAO implements Serializable {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "insert dbo.photo_schedules(user_id,location_id,studio_id,schedule_date,status)\n"
-                        + "values (?, ?, ?, ?, 'pending')";
+                String sql = "insert dbo.photo_schedules(user_id,location_id,studio_id,schedule_date,status, order_start_date, order_end_date)\n"
+                        + "values (?, ?, ?, ?, 'create',?,?)";
 
                 pst = conn.prepareStatement(sql);
                 pst.setInt(1, ps.getUserId());
                 pst.setInt(2, ps.getLocationId());
                 pst.setInt(3, ps.getStudioId());
                 pst.setString(4, ps.getScheduleDate());
+                pst.setString(5, ps.getTimeRange());
+                pst.setString(6, ps.getTimeRangeReturn());
 
                 int result = pst.executeUpdate();
 
@@ -60,12 +62,117 @@ public class PhotoScheduleDAO implements Serializable {
         return rs;
     }
 
+    public List<String> checkScheduleAvailable(String startDate, String endDate, int locationId, int studioId) throws NamingException, SQLException {
+        List<String> list = new ArrayList<>();
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "SELECT schedule_id, user_id, location_id, studio_id, schedule_date, status, order_start_date, order_end_date\n"
+                        + "FROM photo_schedules\n"
+                        + "WHERE \n"
+                        + "  (location_id = ? and studio_id = ?) \n"
+                        + "  AND (status = 'pending' or status = 'confirm')\n"
+                        + "  AND (( order_start_date <= ? AND order_end_date >= ?) \n"
+                        + "  OR ( order_start_date <= ? AND order_end_date >= ?))";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, locationId);
+                pst.setInt(2, studioId);
+                pst.setString(3, startDate);
+                pst.setString(4, startDate);
+                pst.setString(5, endDate);
+                pst.setString(6, endDate);
+
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    String orderStartDate = rs.getString("order_start_date");
+                    String orderEndDate = rs.getString("order_end_date");
+                    list.add(orderStartDate);
+                    list.add(orderEndDate);
+                }
+
+                if (!list.isEmpty()) {
+                    return list;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return null;
+    }
+
+    public List<String> checkScheduleAvailableAdmin(String startDate, String endDate, String itemType, int id, int scheduleId) throws NamingException, SQLException {
+        List<String> list = new ArrayList<>();
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "";
+                if ("location".equals(itemType)) {
+                    sql = "SELECT schedule_id, user_id, location_id, studio_id, schedule_date, status, order_start_date, order_end_date\n"
+                            + "FROM photo_schedules\n"
+                            + "WHERE schedule_id = ?\n"
+                            + "  AND (location_id = ?) \n"
+                            + "  AND (status = 'pending' or status = 'confirm')\n"
+                            + "  AND (( order_start_date <= ? AND order_end_date >= ?) \n"
+                            + "  OR ( order_start_date <= ? AND order_end_date >= ?))";
+                } else {
+                    sql = "SELECT schedule_id, user_id, location_id, studio_id, schedule_date, status, order_start_date, order_end_date\n"
+                            + "FROM photo_schedules\n"
+                            + "WHERE schedule_id = ?\n"
+                            + "  AND (studio_id = ?) \n"
+                            + "  AND (status = 'pending' or status = 'confirm')\n"
+                            + "  AND (( order_start_date <= ? AND order_end_date >= ?) \n"
+                            + "  OR ( order_start_date <= ? AND order_end_date >= ?))";
+                }
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, scheduleId);
+                pst.setInt(2, id);
+                pst.setString(3, startDate);
+                pst.setString(4, startDate);
+                pst.setString(5, endDate);
+                pst.setString(6, endDate);
+
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    String orderStartDate = rs.getString("order_start_date");
+                    String orderEndDate = rs.getString("order_end_date");
+                    list.add(orderStartDate);
+                    list.add(orderEndDate);
+                }
+
+                if (!list.isEmpty()) {
+                    return list;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return null;
+    }
+
     public List<PhotoSchedule> getPhotoScheduleByUserId(int userId) throws NamingException, SQLException {
         List<PhotoSchedule> list = new ArrayList();
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "select schedule_id, user_id, location_id, studio_id,schedule_date,status\n"
+                String sql = "select schedule_id, user_id, location_id, studio_id,schedule_date,status,order_start_date, order_end_date\n"
                         + "from photo_schedules\n"
                         + "where user_id = ? and status = 'pending'";
 
@@ -81,8 +188,10 @@ public class PhotoScheduleDAO implements Serializable {
                     int studioId = rs.getInt("studio_id");
                     String scheduleDate = rs.getString("schedule_date");
                     String status = rs.getString("status");
+                    String timeRange = rs.getString("order_start_date");
+                    String timeRangeReturn = rs.getString("order_end_date");
 
-                    list.add(new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status));
+                    list.add(new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status, timeRange, timeRangeReturn));
                 }
 
             }
@@ -102,7 +211,7 @@ public class PhotoScheduleDAO implements Serializable {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "select schedule_id,user_id,location_id,schedule_date,status\n"
+                String sql = "select schedule_id,user_id,location_id,schedule_date,status,order_start_date, order_end_date\n"
                         + "from photo_schedules\n"
                         + "where studio_id = ? and status = 'pending'";
 
@@ -117,8 +226,9 @@ public class PhotoScheduleDAO implements Serializable {
                     int locationId = rs.getInt("location_id");
                     String scheduleDate = rs.getString("schedule_date");
                     String status = rs.getString("status");
-
-                    list.add(new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status));
+                    String timeRange = rs.getString("order_start_date");
+                    String timeRangeReturn = rs.getString("order_end_date");
+                    list.add(new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status, timeRange, timeRangeReturn));
                 }
 
             }
@@ -195,6 +305,36 @@ public class PhotoScheduleDAO implements Serializable {
         return false;
     }
 
+    public boolean pendingScheduleByScheduleId(int scheduleId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update photo_schedules\n"
+                        + "set status = 'pending'\n"
+                        + "where schedule_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, scheduleId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return false;
+    }
+
     public boolean updatePhotoScheduleById(int scheduleId, int locationId, int studioId, String orderDate) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -227,8 +367,8 @@ public class PhotoScheduleDAO implements Serializable {
 
         return false;
     }
-    
-    public boolean updateStudioByScheduleId(int scheduleId,int studioId, String orderDate) throws NamingException, SQLException {
+
+    public boolean updateStudioByScheduleId(int scheduleId, int studioId, String orderDate) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
@@ -259,7 +399,7 @@ public class PhotoScheduleDAO implements Serializable {
 
         return false;
     }
-    
+
     public boolean updateLocationByScheduleId(int scheduleId, int locationId, String orderDate) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
@@ -326,7 +466,7 @@ public class PhotoScheduleDAO implements Serializable {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "select schedule_id,user_id,location_id,studio_id,schedule_date,status\n"
+                String sql = "select schedule_id,user_id,location_id,studio_id,schedule_date,status,order_start_date, order_end_date\n"
                         + "from photo_schedules\n"
                         + "where schedule_id = ? and status = 'pending'";
 
@@ -341,8 +481,89 @@ public class PhotoScheduleDAO implements Serializable {
                     int studioId = rs.getInt("studio_id");
                     String scheduleDate = rs.getString("schedule_date");
                     String status = rs.getString("status");
+                    String timeRange = rs.getString("order_start_date");
+                    String timeRangeReturn = rs.getString("order_end_date");
+                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status, timeRange, timeRangeReturn);
+                }
 
-                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status);
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return null;
+    }
+    
+    public PhotoSchedule getPhotoScheduleByIdAdmin(int scheduleId) throws NamingException, SQLException {
+
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select schedule_id,user_id,location_id,studio_id,schedule_date,status,order_start_date, order_end_date\n"
+                        + "from photo_schedules\n"
+                        + "where schedule_id = ? and status = 'confirm'";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, scheduleId);
+
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    int userID = rs.getInt("user_id");
+                    int locationId = rs.getInt("location_id");
+                    int studioId = rs.getInt("studio_id");
+                    String scheduleDate = rs.getString("schedule_date");
+                    String status = rs.getString("status");
+                    String timeRange = rs.getString("order_start_date");
+                    String timeRangeReturn = rs.getString("order_end_date");
+                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status, timeRange, timeRangeReturn);
+                }
+
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return null;
+    }
+
+    public PhotoSchedule getPhotoScheduleByIdCreate(int scheduleId) throws NamingException, SQLException {
+
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "select schedule_id,user_id,location_id,studio_id,schedule_date,status,order_start_date, order_end_date\n"
+                        + "from photo_schedules\n"
+                        + "where schedule_id = ? and status = 'create'";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, scheduleId);
+
+                rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    int userID = rs.getInt("user_id");
+                    int locationId = rs.getInt("location_id");
+                    int studioId = rs.getInt("studio_id");
+                    String scheduleDate = rs.getString("schedule_date");
+                    String status = rs.getString("status");
+                    String timeRange = rs.getString("order_start_date");
+                    String timeRangeReturn = rs.getString("order_end_date");
+                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status, timeRange, timeRangeReturn);
                 }
 
             }
@@ -365,9 +586,9 @@ public class PhotoScheduleDAO implements Serializable {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "select top 1 schedule_id,user_id,location_id,studio_id,schedule_date,status\n"
+                String sql = "select top 1 schedule_id,user_id,location_id,studio_id,schedule_date,status, order_start_date, order_end_date\n"
                         + "from photo_schedules\n"
-                        + "where status = 'pending'\n"
+                        + "where status = 'create'\n"
                         + "order by schedule_id desc";
 
                 pst = conn.prepareStatement(sql);
@@ -381,8 +602,9 @@ public class PhotoScheduleDAO implements Serializable {
                     int studioId = rs.getInt("studio_id");
                     String scheduleDate = rs.getString("schedule_date");
                     String status = rs.getString("status");
-
-                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status);
+                    String timeRange = rs.getString("order_start_date");
+                    String timeRangeReturn = rs.getString("order_end_date");
+                    return new PhotoSchedule(scheduleId, userID, locationId, studioId, scheduleDate, status, timeRange, timeRangeReturn);
                 }
 
             }
@@ -398,5 +620,33 @@ public class PhotoScheduleDAO implements Serializable {
             }
         }
         return null;
+    }
+    
+    public boolean confirmScheduleById(int scheduleId) throws NamingException, SQLException {
+        try {
+            conn = ConnectionConfig.getConnection();
+            if (conn != null) {
+                String sql = "update photo_schedules\n"
+                        + "set status = 'confirm'\n"
+                        + "where schedule_id = ?";
+
+                pst = conn.prepareStatement(sql);
+                pst.setInt(1, scheduleId);
+
+                int result = pst.executeUpdate();
+
+                if (result > 0) {
+                    return true;
+                }
+            }
+        } finally {
+            if (pst != null) {
+                pst.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+        return false;
     }
 }
