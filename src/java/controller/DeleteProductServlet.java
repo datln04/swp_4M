@@ -44,7 +44,7 @@ public class DeleteProductServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String url = PRODUCT_HOME_PAGE;
+        String url = "admin.jsp";
         String id = request.getParameter("txtProductId");
 
         RentalProductDAO dao = new RentalProductDAO();

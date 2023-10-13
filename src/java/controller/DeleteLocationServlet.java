@@ -43,7 +43,7 @@ public class DeleteLocationServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
 
-        String url = PHOTO_HOME_PAGE;
+        String url = "admin.jsp";
         String id = request.getParameter("txtDeleteId");
 
         LocationDAO dao = new LocationDAO();

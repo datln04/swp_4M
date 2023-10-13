@@ -62,7 +62,7 @@ public class UpdateProductServlet extends HttpServlet {
                 if (result) {
                     List<RentalProduct> listProduct = dao.getAllRentalProduct();
                     session.setAttribute("PRODUCTS", listProduct);
-                    url = PRODUCT_HOME_PAGE;
+                    url = "admin.jsp";
                 }
             }
         } catch (NamingException ex) {

@@ -218,55 +218,17 @@
         <c:set var="idOrder" value="0"/>
         <div class="container-parent">
             <div class="tab">
-                <button class="tablinks active" onclick="openTab(event, 'Tab1')">Staff</button>
-                <button class="tablinks" onclick="openTab(event, 'Tab2')">User</button>
-                <button class="tablinks" onclick="openTab(event, 'Tab3')">Cart</button>
-                <button class="tablinks" onclick="openTab(event, 'Tab4')">Add Account</button>
+                <!--<button class="tablinks active" onclick="openTab(event, 'Tab1')">Staff</button>-->
+                <button class="tablinks active" onclick="openTab(event, 'Tab1')">User</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab2')">Cart</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab3')">Add Location</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab4')">Add Product</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab5')">Manage Location</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab6')">Manage Product</button>
 
             </div>
 
-            <div id="Tab1" class="tabcontent" style="display: block;">
-
-                <c:if test="${sessionScope.LIST_STAFF.size() > 0}">
-                    <h3>Staff</h3>
-                    <table>
-                        <tr>                                       
-                            <th>User Name</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>                      
-                            <th>Email</th>  
-                            <th>Phone Number</th>  
-                            <th>Address</th>           
-                            <th>Role Name</th>           
-                            <th style="text-align: center">Actions</th>
-
-                        </tr>
-                        <c:forEach items="${sessionScope.LIST_STAFF}" var="staff">
-                            <tr>                       
-                                <td>${staff.userName}</td>
-                                <td>${staff.firstName}</td>
-                                <td>${staff.lastName}</td>
-                                <td>${staff.email}</td>
-                                <td>${staff.phoneNumber}</td>      
-                                <td>${staff.address}</td>      
-                                <td>${staff.roleName}</td>      
-
-                                <td class="actions" style="text-align: center">
-                                    <button class="button" onclick="openPopupAccount('${staff.profileId}', '${staff.userName}',
-                                                    '${staff.firstName}', '${staff.lastName}', '${staff.email}',
-                                                    '${staff.phoneNumber}', '${staff.address}', '${staff.userId}', '${staff.roleName}')">
-                                        Update
-                                    </button>   
-                                    <button class="button button-delete btn-delete-all-item" onclick="openPopupDeleteAccount('${staff.profileId}')">Delete</button>  
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </table>
-
-                </c:if>
-            </div>
-
-            <div id="Tab2" class="tabcontent">
+            <div id="Tab1" class="tabcontent" style="display: block">
                 <c:if test="${sessionScope.LIST_USER.size() > 0}">
                     <h3>User</h3>
                     <table>
@@ -306,7 +268,7 @@
                 </c:if>
             </div>
 
-            <div id="Tab3" class="tabcontent">
+            <div id="Tab2" class="tabcontent">
                 <c:if test="${sessionScope.LIST_CART_SCHEDULE_ADMIN.size() > 0 || LIST_CART_PRODUCT_ADMIN.size() > 0}">
                     <h2>Cart Item</h2>
                     <table>
@@ -416,55 +378,160 @@
                 </c:if>
             </div>
 
-            <div id="Tab4" class="tabcontent">
-                <h3>Staff</h3>
+            <!--            <div id="Tab4" class="tabcontent">
+                            <h3>Staff</h3>
+                            <table>
+                                <tr>                                       
+                                    <th>User Name</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>                      
+                                    <th>Email</th>  
+                                    <th>Phone Number</th>  
+                                    <th>Address</th>           
+                                    <th>Role Name</th>           
+                                    <th style="text-align: center">Actions</th>
+            
+                                </tr>
+                                <tbody>
+                                <form action="DispatcherServlet" method="POST"> 
+                                    <tr>                       
+                                        <td>
+                                            <input type="text" name="txtUserName" value="${param.txtUserName}"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="txtFistName" value="${param.txtFistName}"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="txtLastName" value="${param.txtLastName}"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="txtEmail" value="${param.txtEmail}"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="txtPhone" value="${param.txtPhone}"/>
+                                        </td>      
+                                        <td>
+                                            <input type="text" name="txtAddress" value="${param.txtAddress}"/>
+                                        </td>      
+                                        <td>
+                                            <select name="roleId">
+            <c:forEach items="${sessionScope.LIST_STAFF_ROLE}" var="r">
+                <option value="${r.roleId}">${r.roleName}</option>
+            </c:forEach>
+        </select>
+    </td>      
+
+    <td class="actions" style="text-align: center">
+        <input type="submit" name="btAction" value="Add Account" class="btn btn-secondary"/>
+    </td>
+</tr>
+</form>
+</tbody>
+</table>
+</div>-->
+            <div id="Tab3" class="tabcontent" style="width: 500px" >
+                <h3>Add Location</h3>
+                <form action="DispatcherServlet" method="POST">
+
+                    <p for="locationImage">Image Link:</p>
+                    <input type="text" name="txtLocationImage" required=""/>
+
+                    <p for="locationName">Name:</p>
+                    <input type="text" name="txtLocationName" required=""/>
+
+                    <p for="locationDescription">Description:</p>
+                    <input type="text" name="txtLocationDescription" required=""/>
+
+                    <p for="locationPrice">Price:</p>
+                    <input type="text" name="txtLocationPrice" required=""/>
+                    <br/> 
+                    <input type="submit" value="Add Location" name="btAction" class="button button-update"/>
+                </form>
+            </div>
+
+            <div id="Tab4" class="tabcontent" style="width: 500px">
+                <h2>Adding Rental Product</h2>
+                <form action="DispatcherServlet" method="POST">
+
+                    <p for="locationImage">Image Link:</p>
+                    <input type="text"  name="productImage" required="true"/>
+
+                    <p for="locationName">Name:</p>
+                    <input type="text" name="productName" required="true"/>
+
+                    <p for="locationDescription">Description:</p>
+                    <input type="text"  name="productDescription" required="true"/>
+
+                    <p for="locationPrice">Price:</p>
+                    <input type="text"  name="productPrice" required="true"/>
+
+                    <p for="locationPrice">Stock:</p>
+                    <input type="text" name="productStock" required="true"/>
+                    <br/> 
+                    <input type="submit" value="Add Product" name="btAction" class="button button-update"/>
+                </form>
+
+            </div>
+
+            <div id="Tab5" class="tabcontent" >
+                <h3>Location For Rent Management</h3>
+
                 <table>
-                    <tr>                                       
-                        <th>User Name</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>                      
-                        <th>Email</th>  
-                        <th>Phone Number</th>  
-                        <th>Address</th>           
-                        <th>Role Name</th>           
-                        <th style="text-align: center">Actions</th>
-
+                    <tr>
+                        <th>Image</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>       
+                        <th>Actions</th>
                     </tr>
-                    <tbody>
-                    <form action="DispatcherServlet" method="POST"> 
-                        <tr>                       
-                            <td>
-                                <input type="text" name="txtUserName" value="${param.txtUserName}"/>
-                            </td>
-                            <td>
-                                <input type="text" name="txtFistName" value="${param.txtFistName}"/>
-                            </td>
-                            <td>
-                                <input type="text" name="txtLastName" value="${param.txtLastName}"/>
-                            </td>
-                            <td>
-                                <input type="text" name="txtEmail" value="${param.txtEmail}"/>
-                            </td>
-                            <td>
-                                <input type="text" name="txtPhone" value="${param.txtPhone}"/>
-                            </td>      
-                            <td>
-                                <input type="text" name="txtAddress" value="${param.txtAddress}"/>
-                            </td>      
-                            <td>
-                                <select name="roleId">
-                                    <c:forEach items="${sessionScope.LIST_STAFF_ROLE}" var="r">
-                                        <option value="${r.roleId}">${r.roleName}</option>
-                                    </c:forEach>
-                                </select>
-                            </td>      
 
-                            <td class="actions" style="text-align: center">
-                                <input type="submit" name="btAction" value="Add Account" class="btn btn-secondary"/>
+                    <c:forEach items="${sessionScope.LOCATIONS}" var="location">
+                        <tr>
+                            <td><img src="${location.image}" alt="location image"></td>
+                            <td>${location.id}</td>
+                            <td>${location.name}</td>
+                            <td style="width: 500px">${location.description}</td>
+                            <td>$ ${location.price}</td>                   
+                            <td class="actions" style="width: fit-content">
+                                <button class="button" onclick="openPopupLocation('${location.image}', ${location.id}, '${location.name}', '${location.description}', ${location.price})">Update Location</button>                     
+                                <button class="button button-delete" onclick="openPopupDeleteLocation('${location.id}')">Delete Location</button>                                                                 
                             </td>
                         </tr>
-                    </form>
-                    </tbody>
+                    </c:forEach>
+
+
+                </table>
+            </div>
+
+            <div id="Tab6" class="tabcontent">
+                <h3>Product For Rent Management</h3>
+
+                <table>
+                    <tr>
+                        <th>Image</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>       
+                        <th>Actions</th>
+                    </tr>
+
+                    <c:forEach items="${sessionScope.PRODUCTS}" var="product">
+                        <tr>
+                            <td><img src="${product.image}" alt="product image"></td>
+                            <td>${product.id}</td>
+                            <td>${product.name}</td>
+                            <td style="width: 500px">${product.description}</td>
+                            <td>$ ${product.price}</td>                   
+                            <td class="actions" style="width: fit-content">
+                                <button class="button" onclick="openPopupProduct('${product.image}', ${product.id}, '${product.name}', '${product.description}', ${product.price})">Update Product</button>                     
+                                <button class="button button-delete" onclick="openPopupDeleteProduct('${product.id}')">Delete Product</button>                                                                 
+                            </td>
+                        </tr>
+                    </c:forEach>
+
+
                 </table>
             </div>
         </div>
@@ -478,8 +545,8 @@
                     <input type="hidden" id="accountId" name="accountId">                        
                     <input type="hidden" id="isUser" name="isUser">                        
 
-                    <p for="userName">User Name:</p>
-                    <input type="text" id="userName" name="userName" required="true"/>
+                    <!--<p for="userName">User Name:</p>-->
+                    <input type="hidden" id="userName" name="userName" required="true"/>
 
                     <p for="firstName">First Name:</p>
                     <input type="text" id="firstName" name="firstName" required="true"/>
@@ -565,6 +632,87 @@
             </div>
         </div>
 
+        <div id="popupLocation" class="popup">
+            <div id="popupContent" class="popup-content">
+                <span class="close" onclick="closePopup()">&times;</span>
+                <h2>Update Location</h2>
+                <form action="DispatcherServlet" method="POST">
+                    <input type="hidden" id="locationId" name="txtLocationId">
+
+                    <p for="locationImage">Image Link:</p>
+                    <input type="text" id="locationImage" name="txtLocationImage" required=""/>
+
+                    <p for="locationName">Name:</p>
+                    <input type="text" id="locationName" name="txtLocationName" required=""/>
+
+                    <p for="locationDescription">Description:</p>
+                    <input type="text" id="locationDescription" name="txtLocationDescription" required=""/>
+
+                    <p for="locationPrice">Price:</p>
+                    <input type="text" id="locationPrice" name="txtLocationPrice" required=""/>
+                    <br/> 
+                    <input type="submit" value="UpdateLocation" name="btAction" class="button button-update"/>
+                </form>
+            </div>
+        </div>
+        
+        <div id="popupProduct" class="popup">
+                <div id="popupContent" class="popup-content">
+                    <span class="close" onclick="closePopup()">&times;</span>
+                    <h2>Update Product</h2>
+                    <form action="DispatcherServlet" method="POST">
+                        <input type="hidden" id="productId" name="productId">
+
+                        <p for="locationImage">Image Link:</p>
+                        <input type="text" id="productImage" name="productImage" required="true"/>
+
+                        <p for="locationName">Name:</p>
+                        <input type="text" id="productName" name="productName" required="true" />
+
+                        <p for="locationDescription">Description:</p>
+                        <input type="text" id="productDescription" name="productDescription" required="true"/>
+
+                        <p for="locationPrice">Price:</p>
+                        <input type="text" id="productPrice" name="productPrice" required="true"/>
+                        <br/> 
+                        <input type="submit" value="UpdateProduct" name="btAction" class="button button-update"/>
+                    </form>
+                </div>
+            </div>
+
+        <div id="popupDeleteLocation" class="popup">
+            <div id="popupContent" class="popup-content">
+                <span class="close" onclick="closePopup()">&times;</span>
+
+                <h2>Warning</h2>
+                <p class="warning-message">Are you sure!!!</p>
+                <div class="form-group delete-pop-up-actions">                       
+                    <button class="button button-gap" onclick="closePopup()" >Cancel</button>
+                    <form action="DispatcherServlet" method="POST">
+                        <input type="hidden" id="locationDeleteId" name="txtDeleteId">
+                        <input type="submit" value="DeleteLocation" name="btAction" class="button button-delete" />
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="popupDeleteProduct" class="popup">
+            <div id="popupContent" class="popup-content">
+                <span class="close" onclick="closePopup()">&times;</span>
+
+                <h2>Warning</h2>
+                <p class="warning-message">Are you sure!!!</p>
+                <div class="form-group delete-pop-up-actions">                       
+                    <button class="button button-gap" onclick="closePopup()" >Cancel</button>
+                    <form action="DispatcherServlet" method="POST">
+                        <input type="hidden" id="rentalProductId" name="txtProductId">
+                        <input type="submit" value="DeleteProduct" name="btAction" class="button button-delete" />
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
         <div id="popupDeleteAccount" class="popup">
             <div id="popupContent" class="popup-content">
                 <span class="close" onclick="closePopup()">&times;</span>
@@ -584,6 +732,35 @@
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
+            function openPopupLocation(image, id, name, description, price) {
+                document.getElementById('locationId').value = id;
+                document.getElementById('locationName').value = name;
+                document.getElementById('locationDescription').value = description;
+                document.getElementById('locationPrice').value = price;
+                document.getElementById('locationImage').value = image;
+
+                document.getElementById('popupLocation').style.display = 'block';
+            }
+            
+             function openPopupProduct(image, id, name, description, price) {
+                document.getElementById('productId').value = id;
+                document.getElementById('productName').value = name;
+                document.getElementById('productDescription').value = description;
+                document.getElementById('productPrice').value = price;
+                document.getElementById('productImage').value = image;
+
+                document.getElementById('popupProduct').style.display = 'block';
+            }
+                        function openPopupDeleteProduct(id) {
+                            document.getElementById('rentalProductId').value = id;
+                            document.getElementById('popupDeleteProduct').style.display = 'block';
+                        }
+
+                        function openPopupDeleteLocation(id) {
+                            document.getElementById('locationDeleteId').value = id;
+                            document.getElementById('popupDeleteLocation').style.display = 'block';
+                        }
+
                         if (${requestScope.ERROR_USER_NAME != null}) {
                             swal("Invalid UserName");
                         }
