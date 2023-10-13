@@ -144,12 +144,21 @@ public class LoginServlet extends HttpServlet {
                             for (OrderDetail detail : listOrderDetail) {
                                 //item_id and item_type --> add schedule photo
                                 if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
-                                    detail.setStatus(order.getStatus());
+                                    if (detail.getItemType().equals("confirm")) {
+                                        detail.setStatus("confirm");
+                                    } else {
+                                        detail.setStatus(order.getStatus());
+                                    }
                                     listProduct.add(detail);
                                 }
                             }
 
                         }
+                        List<Location> listLocation = locationDAO.getAllLocation();
+                        session.setAttribute("LOCATIONS", listLocation);
+                        // get all rental to manage
+                        List<RentalProduct> listProductManage = rentalProductDAO.getAllRentalProduct();
+                        session.setAttribute("PRODUCTS", listProductManage);
 
                         session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
                         session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);

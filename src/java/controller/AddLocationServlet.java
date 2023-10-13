@@ -58,7 +58,7 @@ public class AddLocationServlet extends HttpServlet {
                 if (result) {
                     List<Location> listLocation = dao.getAllLocation();
                     session.setAttribute("LOCATIONS", listLocation);
-                    url = PHOTO_HOME_PAGE;
+                    url = "admin.jsp";
                 }
             }
         } catch (NamingException ex) {

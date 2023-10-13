@@ -7,18 +7,17 @@ package controller;
 
 import dao.OrderDAO;
 import dao.OrderDetailDAO;
+import dao.PhotoScheduleDAO;
 import dto.Order;
 import dto.OrderDetail;
+import dto.PhotoSchedule;
 import dto.Profile;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -57,68 +56,109 @@ public class ConfirmProductServlet extends HttpServlet {
         String orderId = request.getParameter("orderId");
         String orderDetailId = request.getParameter("orderDetailId");
 
-        OrderDAO dao = new OrderDAO();
+        OrderDAO orderDAO = new OrderDAO();
         OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
+        PhotoScheduleDAO scheduleDAO = new PhotoScheduleDAO();
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("USER");
 
         try {
             if (!orderId.isEmpty() && session != null) {
                 boolean updateDetail = orderDetailDAO.deleteOrderDetailByIdAdmin(Integer.parseInt(orderDetailId), "confirm");
-                
 
                 if (updateDetail) {
-                    List<OrderDetail> listOrderLeft = orderDetailDAO.getOrderDetailByOrderIdAdminItem(Integer.parseInt(orderId));
+//                    List<OrderDetail> listOrderLeft = orderDetailDAO.getOrderDetailByOrderIdAdminItem(Integer.parseInt(orderId));
+//
+//                    if (listOrderLeft.size() > 0) {
+//                        List<Order> listOrder = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
+//
+//                        if (listOrder.size() > 0) {
+//                            List<OrderDetail> listProduct = new ArrayList<>();
+//
+//                            for (Order order : listOrder) {
+//                                List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
+//
+//                                for (OrderDetail detail : listOrderDetail) {
+//                                    //item_id and item_type --> add schedule photo
+//                                    if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+//                                        detail.setStatus(order.getStatus());
+//                                        listProduct.add(detail);
+//                                    }
+//                                }
+//                            }
+//
+//                            List<Order> listOrderAfterChange = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
+//                            session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
+//
+//                        }
+//
+//                    } else {
+//                        boolean result = dao.setStatusOrderById(Integer.parseInt(orderId), "confirm");
+//                        if (result) {
+//                            List<Order> details = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
+//
+//                            if (details.size() > 0) {
+//                                List<OrderDetail> listProduct = new ArrayList<>();
+//
+//                                for (Order order : details) {
+//                                    List<OrderDetail> listOrderDetail2 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
+//
+//                                    for (OrderDetail detail : listOrderDetail2) {
+//                                        //item_id and item_type --> add schedule photo
+//                                        if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+//                                            detail.setStatus(order.getStatus());
+//                                            listProduct.add(detail);
+//                                        }
+//                                    }
+//                                }
+//
+//                                session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
+//
+//                            }else{
+//                                 session.setAttribute("LIST_CART_PRODUCT_ADMIN", null);
+//                            }
+//                        }
+//                    }
+                    List<Order> listOrder = orderDAO.getAllOrder();
 
-                    if (listOrderLeft.size() > 0) {
-                        List<Order> listOrder = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
+                    if (listOrder.size() > 0) {
+                        List<OrderDetail> listProduct = new ArrayList<>();
+                        Map<String, List<OrderDetail>> listSchedule = new HashMap<>();
 
-                        if (listOrder.size() > 0) {
-                            List<OrderDetail> listProduct = new ArrayList<>();
-
-                            for (Order order : listOrder) {
-                                List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
-
-                                for (OrderDetail detail : listOrderDetail) {
-                                    //item_id and item_type --> add schedule photo
-                                    if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
-                                        detail.setStatus(order.getStatus());
-                                        listProduct.add(detail);
-                                    }
-                                }
-                            }
-
-                            List<Order> listOrderAfterChange = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
-                            session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
-
-                        }
-
-                    } else {
-                        boolean result = dao.setStatusOrderById(Integer.parseInt(orderId), "confirm");
-                        if (result) {
-                            List<Order> details = "admin".equals(profile.getRoleName()) ? dao.getAllOrder() : dao.getAllOrderStaff();
-
-                            if (details.size() > 0) {
-                                List<OrderDetail> listProduct = new ArrayList<>();
-
-                                for (Order order : details) {
-                                    List<OrderDetail> listOrderDetail2 = orderDetailDAO.getOrderDetailByOrderId(order.getOrderId());
-
-                                    for (OrderDetail detail : listOrderDetail2) {
-                                        //item_id and item_type --> add schedule photo
-                                        if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
-                                            detail.setStatus(order.getStatus());
-                                            listProduct.add(detail);
+                        for (Order order : listOrder) {
+                            List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
+                            int photoTmp = 0;
+                            List<PhotoSchedule> photoList = new ArrayList<>();
+                            for (OrderDetail orderDetail : listOrderDetail) {
+                                String arr[] = orderDetail.getItemType().split("-");
+                                if (arr.length > 1) {
+                                    if (photoTmp != orderDetail.getItemId()) {
+                                        PhotoSchedule photo = scheduleDAO.getPhotoScheduleByIdAdmin(orderDetail.getItemId());
+                                        if (photo != null) {
+                                            photoTmp = photo.getScheduleId();
+                                            photoList.add(photo);
                                         }
                                     }
                                 }
-
-                                session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
-
-                            }else{
-                                 session.setAttribute("LIST_CART_PRODUCT_ADMIN", null);
                             }
+                            Utilities.groupOrderDetailsAdminLoaded(listOrderDetail, listSchedule, photoList);
+                            for (OrderDetail detail : listOrderDetail) {
+                                //item_id and item_type --> add schedule photo
+                                if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                    if (detail.getItemType().equals("confirm")) {
+                                        detail.setStatus("confirm");
+                                    } else {
+                                        detail.setStatus(order.getStatus());
+                                    }
+                                    listProduct.add(detail);
+                                }
+                            }
+
                         }
+
+                        session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
+                        session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
+                        url = ADMIN_PAGE;
                     }
                 }
                 url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : PRODUCT_HOME_PAGE;
