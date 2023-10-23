@@ -25,6 +25,7 @@ import javax.servlet.http.HttpSession;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import util.Utilities;
 
 /**
  *
@@ -61,45 +62,50 @@ public class UpdateProfileServlet extends HttpServlet {
         AccountDAO dao = new AccountDAO();
         if (session != null) {
             Profile profile = (Profile) session.getAttribute("USER");
+            if (Utilities.areValidStrings(20, firstName, lastName, password, phoneNumber, address, email)) {
+                // All input strings are valid, proceed with the profile update
+                if (password.equals(profile.getPassword())) {
+                    if (profile != null) {
+                        try {
+                            firstName = request.getParameter("txtFirstName").isEmpty() ? profile.getFirstName() : request.getParameter("txtFirstName");
+                            lastName = request.getParameter("txtLastname").isEmpty() ? profile.getLastName() : request.getParameter("txtLastname");
+                            password = request.getParameter("txtPassword").isEmpty() ? profile.getPassword() : request.getParameter("txtPassword");
+                            phoneNumber = request.getParameter("txtPhoneNumber").isEmpty() ? profile.getPhoneNumber() : request.getParameter("txtPhoneNumber");
+                            address = request.getParameter("txtAddress").isEmpty() ? profile.getAddress() : request.getParameter("txtAddress");
+                            email = request.getParameter("txtEmail").isEmpty() ? profile.getEmail() : request.getParameter("txtEmail");
 
-            if (password.equals(profile.getPassword())) {
-                if (profile != null) {
-                    try {
-                        firstName = request.getParameter("txtFirstName").isEmpty() ? profile.getFirstName() : request.getParameter("txtFirstName");
-                        lastName = request.getParameter("txtLastname").isEmpty() ? profile.getLastName() : request.getParameter("txtLastname");
-                        password = request.getParameter("txtPassword").isEmpty() ? profile.getPassword() : request.getParameter("txtPassword");
-                        phoneNumber = request.getParameter("txtPhoneNumber").isEmpty() ? profile.getPhoneNumber() : request.getParameter("txtPhoneNumber");
-                        address = request.getParameter("txtAddress").isEmpty() ? profile.getAddress() : request.getParameter("txtAddress");
-                        email = request.getParameter("txtEmail").isEmpty() ? profile.getEmail() : request.getParameter("txtEmail");
-
-                        Profile p = new Profile(Integer.parseInt(profileId), firstName, lastName, email, phoneNumber, address, profile.getRoleName(), true, profile.getUserName(), password);
-                        boolean result = dao.updateProfile(p);
-                        if (result) {
-                            session.setAttribute("USER", p);
+                            Profile p = new Profile(Integer.parseInt(profileId), firstName, lastName, email, phoneNumber, address, profile.getRoleName(), true, profile.getUserName(), password);
+                            boolean result = dao.updateProfile(p);
+                            if (result) {
+                                session.setAttribute("USER", p);
+                            }
+                        } catch (NamingException ex) {
+                            log("UpdateProfileServlet_NamingException: " + ex.getMessage());
+                        } catch (SQLException ex) {
+                            log("UpdateProfileServlet_SQLException " + ex.getMessage());
+                        } finally {
+                            RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+                            dispatcher.forward(request, response);
                         }
-                    } catch (NamingException ex) {
-                        log("UpdateProfileServlet_NamingException: " + ex.getMessage());
-                    } catch (SQLException ex) {
-                        log("UpdateProfileServlet_SQLException " + ex.getMessage());
-                    } finally {
-                        RequestDispatcher dispatcher = request.getRequestDispatcher(url);
-                        dispatcher.forward(request, response);
+                    }
+
+                } else {
+                    try {
+                        String otp = generateOTP(6);
+                        session.setAttribute("OTP", otp);
+                        Profile profileTmp = new Profile(profile.getProfileId(), firstName, lastName, email, phoneNumber, address, profile.getUserName(), true, profile.getUserName(), password);
+                        session.setAttribute("USER_TMP", profileTmp);
+                        sendOTPEmail(profile.getEmail(), otp);
+                        response.sendRedirect("otpConfirm.jsp");
+                    } catch (MessagingException ex) {
+                        Logger.getLogger(UpdateProfileServlet.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-
             } else {
-                try {
-                    String otp = generateOTP(6);
-                    session.setAttribute("OTP", otp);
-                    Profile profileTmp = new Profile(profile.getProfileId(),firstName, lastName, email, phoneNumber, address, profile.getUserName(),true, profile.getUserName(), password);
-                    session.setAttribute("USER_TMP", profileTmp);
-                    sendOTPEmail(profile.getEmail(), otp);
-                    response.sendRedirect("otpConfirm.jsp");
-                } catch (MessagingException ex) {
-                    Logger.getLogger(UpdateProfileServlet.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                request.setAttribute("INVALID_FIELD", "Pls double-check, the string should be character and digits, max length is 20");
+                RequestDispatcher dispatcher = request.getRequestDispatcher(url);
+                dispatcher.forward(request, response);
             }
-
         }
 
     }

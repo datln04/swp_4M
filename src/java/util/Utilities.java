@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+
 /**
  *
  * @author ptd
@@ -188,4 +189,23 @@ public class Utilities {
     public static String convertTimeZoneToISO120(String time) {
         return time.replace("T", " ");
     }
+
+
+    public static boolean areValidStrings(int maxLength, String... strings) {
+        // Define a regular expression pattern for alphanumeric characters and a maximum length
+        String regexPattern = "^[a-zA-Z0-9]{1," + maxLength + "}$";
+        // Compile the regular expression pattern
+        Pattern pattern = Pattern.compile(regexPattern);
+        for (String str : strings) {
+            // Create a Matcher to match the input string against the pattern
+            Matcher matcher = pattern.matcher(str);
+            // Check if the input string matches the pattern and its length is within the specified maximum
+            if (!matcher.matches() || str.length() > maxLength) {
+                return false; // Return false if any string is invalid
+            }
+        }
+
+        return true; // All strings are valid
+    }
+
 }

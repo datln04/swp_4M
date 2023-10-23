@@ -24,33 +24,33 @@
                         <h2 class="text-center">Register</h2>
                         <form action="DispatcherServlet" method="POST">
                             <div class="form-group">
-                                <label for="txtUserName">User Name</label>
+                                <label for="txtUserName">User Name<span style="color: red">*</span></label>
                                 <input type="text" id="txtUserName" name="txtUserName" class="form-control" value="${param.txtUserName}" required=""/>
                         </div>
                         <div class="form-group">
-                            <label for="txtPassword">Password</label>
+                            <label for="txtPassword">Password<span style="color: red">*</span></label>
                             <input type="password" id="txtUserName" name="txtPassword" class="form-control" value="${param.txtPassword}" required=""/>
                         </div>
+                        <!--                        <div class="form-group">
+                                                    <label for="txtFirstName">First Name</label>
+                                                    <input type="text" id="txtFirstName" name="txtFirstName" class="form-control" value="${param.txtFirstName}" required=""/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="txtLastName">Last Name</label>
+                                                    <input type="text" id="txtLastName" name="txtLastName" class="form-control" value="${param.txtLastName}" required=""/>
+                                                </div>-->
                         <div class="form-group">
-                            <label for="txtFirstName">First Name</label>
-                            <input type="text" id="txtFirstName" name="txtFirstName" class="form-control" value="${param.txtFirstName}" required=""/>
-                        </div>
-                        <div class="form-group">
-                            <label for="txtLastName">Last Name</label>
-                            <input type="text" id="txtLastName" name="txtLastName" class="form-control" value="${param.txtLastName}" required=""/>
-                        </div>
-                        <div class="form-group">
-                            <label for="txtEmail">Email</label>
+                            <label for="txtEmail">Email<span style="color: red">*</span></label>
                             <input type="text" name="txtEmail" class="form-control" value="${param.txtEmail}" id="emailInput" placeholder="Enter your email" onchange="validateEmail()" oninput="clearError()" required=""/>
                         </div>
-                        <div class="form-group">
-                            <label for="txtPhone">Phone</label>
-                            <input type="text" id="txtPhone" name="txtPhone" class="form-control" value="${param.txtPhone}" required=""/>
-                        </div>
-                        <div class="form-group">
-                            <label for="txtAddress">Address</label>
-                            <input type="text" id="txtAddress" name="txtAddress" class="form-control" value="${param.txtAddress}" required=""/>
-                        </div>
+                        <!--                        <div class="form-group">
+                                                    <label for="txtPhone">Phone</label>
+                                                    <input type="text" id="txtPhone" name="txtPhone" class="form-control" value="${param.txtPhone}" required=""/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="txtAddress">Address</label>
+                                                    <input type="text" id="txtAddress" name="txtAddress" class="form-control" value="${param.txtAddress}" required=""/>
+                                                </div>-->
                         <div class="text-center mt-2 mb-3">
                             <button type="submit" name="btAction" value="Register" class="btn btn-secondary">Add Account</button>
                         </div>
