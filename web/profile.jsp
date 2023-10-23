@@ -180,11 +180,11 @@
                                 <div class="col-md-6"><label class="labels">Last Name</label><input type="text" class="form-control" value="${pro.lastName}" placeholder="enter last name" name="txtLastname"></div>
                             </div>
                             <div class="row mt-3">
-                                <div class="col-md-8"><label class="labels">Password</label><input readonly="true" type="password" class="form-control" placeholder="enter password" value="${pro.password}" name="txtPassword"></div>
+                                <div class="col-md-8"><label class="labels">Password<span style="color: red">*</span></label><input readonly="true" type="password" class="form-control" placeholder="enter password" value="${pro.password}" name="txtPassword"></div>
                                 <div class="col-md-4"><label class="labels">Click to change password</label><button onclick="showPasswordChangePopup()" type="button" class="btn btn-primary" id="passwordChangeButton">Change password</button></div>
                                 <div class="col-md-12"><label class="labels">Mobile Number</label><input type="text" class="form-control" placeholder="enter phone number" value="${pro.phoneNumber}" name="txtPhoneNumber"></div>
                                 <div class="col-md-12"><label class="labels">Address</label><input type="text" class="form-control" placeholder="enter address" value="${pro.address}" name="txtAddress"></div>
-                                <div class="col-md-12"><label class="labels">Email</label><input type="text" class="form-control" placeholder="enter email" value="${pro.email}" name="txtEmail"></div>
+                                <div class="col-md-12"><label class="labels">Email<span style="color: red">*</span></label><input type="text" required="true" class="form-control" placeholder="enter email" value="${pro.email}" name="txtEmail"></div>
 
                             </div>
                             <div class="justify-content-center d-flex">
@@ -234,34 +234,37 @@
 
 
         <jsp:include page="footer.jsp"></jsp:include>
-        <script>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+            <script>
+                    if (${requestScope.INVALID_FIELD  != null}) {
+                        swal("Warning!", '${requestScope.INVALID_FIELD}', "warning");
+                    }
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var deleteProfileLink = document.getElementById('deleteProfileLink');
+                        deleteProfileLink.addEventListener('click', function (event) {
+                            event.preventDefault();
+                            var profileId = this.getAttribute('data-profile-id');
+                            openPopupDeleteProfile(profileId);
+                        });
+                    });
 
-            document.addEventListener('DOMContentLoaded', function () {
-                var deleteProfileLink = document.getElementById('deleteProfileLink');
-                deleteProfileLink.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    var profileId = this.getAttribute('data-profile-id');
-                    openPopupDeleteProfile(profileId);
-                });
-            });
+                    function openPopupDeleteProfile(id) {
 
-            function openPopupDeleteProfile(id) {
+                        document.getElementById('profileIdDelete').value = id;
+                        document.getElementById('popupDeleteProfile').style.display = 'block';
 
-                document.getElementById('profileIdDelete').value = id;
-                document.getElementById('popupDeleteProfile').style.display = 'block';
+                    }
 
-            }
-
-            function closePopup() {
-                document.getElementById('popupDeleteProfile').style.display = 'none';
-                document.getElementById('passwordChangePopup').style.display = 'none';
-            }
+                    function closePopup() {
+                        document.getElementById('popupDeleteProfile').style.display = 'none';
+                        document.getElementById('passwordChangePopup').style.display = 'none';
+                    }
 
 
-            function showPasswordChangePopup() {
-                var popup = document.getElementById("passwordChangePopup");
-                popup.style.display = "block";
-            }
+                    function showPasswordChangePopup() {
+                        var popup = document.getElementById("passwordChangePopup");
+                        popup.style.display = "block";
+                    }
         </script>
     </body>
 </html>

@@ -128,25 +128,31 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                                 </div>
-                                <input type="text" name="userName" class="form-control" placeholder="username">
+                                <input type="text" name="userName" class="form-control" placeholder="username" required="">
 
                             </div>
                             <div class="input-group form-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"><i class="fas fa-key"></i></span>
                                 </div>
-                                <input type="password" name="password" class="form-control" placeholder="password">
+                                <input type="password" name="password" class="form-control" placeholder="password" required="">
                             </div>
-                           
+
                             <div class="form-group">
                                 <input type="submit" value="Login" class="btn float-right login_btn" name="btAction">
                             </div>
                         </form>
-                         <a href="/wedding_photography/forgotPassword.jsp">Quên mật khẩu</a>
+                        <a href="/wedding_photography/forgotPassword.jsp">Quên mật khẩu</a>
                     </div>
-                   
+
                 </div>
             </div>
         </div>
     </body>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        if (${requestScope.INVALID_FIELD != null}) {
+            swal("Warning!", '${requestScope.INVALID_FIELD}', "warning");
+        }
+    </script>
 </html>
