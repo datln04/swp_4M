@@ -155,11 +155,11 @@ public class RegisterAccountServlet extends HttpServlet {
         String url = ERROR_PAGE;
 
         String userName = request.getParameter("txtUserName");
-        String firstName = request.getParameter("txtFirstName");
-        String lastName = request.getParameter("txtLastName");
+//        String firstName = request.getParameter("txtFirstName");
+//        String lastName = request.getParameter("txtLastName");
         String email = request.getParameter("txtEmail");
-        String phone = request.getParameter("txtPhone");
-        String address = request.getParameter("txtAddress");
+//        String phone = request.getParameter("txtPhone");
+//        String address = request.getParameter("txtAddress");
         String roleId = request.getParameter("roleId");
 
         String passwordDefault = request.getParameter("txtPassword");
@@ -173,7 +173,7 @@ public class RegisterAccountServlet extends HttpServlet {
                 String otp = generateOTP(6);
                 session.setAttribute("OTP", otp);
 
-                Profile profileTmp = new Profile(firstName, lastName, email, phone, address, userName, 2, passwordDefault);
+                Profile profileTmp = new Profile("", "", email, "", "", userName, 2, passwordDefault);
                 session.setAttribute("USER_REGISTER", profileTmp);
                 sendOTPEmail(profileTmp.getEmail(), otp);
                 url = "otpConfirm.jsp";
