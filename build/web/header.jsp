@@ -120,8 +120,12 @@
                     <a href="register.jsp">Register</a>
                 </c:if>          
                 <c:if test="${sessionScope.USER != null and sessionScope.USER.roleName eq 'user'}">
-                    <a class="" href="feedback.jsp">
+                    <a class="" href="reject.jsp">
                         Feedback
+                    </a>
+                    <a class="" href="reject.jsp">
+                        <i class="fa fa-history"></i> reject
+                        <span class="badge badge-light">${sessionScope.LIST_REJECT_SCHEDULE.size() + sessionScope.LIST_REJECT_PRODUCT.size()}</span>
                     </a>
                     <a class="" href="cart.jsp">
                         <i class="fa fa-shopping-cart"></i> Cart
@@ -152,19 +156,22 @@
             const inputNumber2 = document.getElementById('txtMaxNumber');
             const filterButton = document.getElementById('filterButton');
 
-            filterButton.addEventListener('click', (event) => {
-                const number1 = parseInt(inputNumber1.value, 10);
-                const number2 = parseInt(inputNumber2.value, 10);
+            if (filterButton) {
+                filterButton.addEventListener('click', (event) => {
+                    const number1 = parseInt(inputNumber1.value, 10);
+                    const number2 = parseInt(inputNumber2.value, 10);
 
-                if (number1 >= 0 && number2 >= 0 && number2 > number1) {
-                    // Filter the numbers or perform some action
-                    console.log('Filtered numbers:', number1, number2);
-                } else {
-                    event.preventDefault();
-                    alert('Please enter valid positive numbers, with the second number being greater than the first number.');
-                }
-            });
+                    if (number1 >= 0 && number2 >= 0 && number2 > number1) {
+                        // Filter the numbers or perform some action
+                        console.log('Filtered numbers:', number1, number2);
+                    } else {
+                        event.preventDefault();
+                        alert('Please enter valid positive numbers, with the second number being greater than the first number.');
+                    }
+                });
+            }
         </script>
+
     </body>
 </html>
 

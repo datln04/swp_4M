@@ -8,6 +8,7 @@ import dao.OrderDAO;
 import dao.OrderDetailDAO;
 import dao.PhotoScheduleDAO;
 import dao.PhotographyStudiosDAO;
+import dao.RejectOrderDAO;
 import dao.RentalProductDAO;
 import dao.RoleDAO;
 import dao.studioStaffDAO;
@@ -20,6 +21,7 @@ import dto.PhotoSchedule;
 import dto.OrderItem;
 import dto.PhotographyStudio;
 import dto.Profile;
+import dto.RejectOrder;
 import dto.RentalProduct;
 import dto.Role;
 import java.io.IOException;
@@ -221,6 +223,21 @@ public class LoginServlet extends HttpServlet {
                                 session.setAttribute("CART_ITEM", (listSchedule.size() + listProduct.size()));
                             }
                         }
+
+                        RejectOrderDAO rejectDAO = new RejectOrderDAO();
+                        List<RejectOrder> listReject = rejectDAO.getListRejectByProfileId(result.getProfileId());
+                        List<RejectOrder> listProduct = new ArrayList<>();
+
+                        Map<String, List<RejectOrder>> listSchedule = Utilities.groupOrderReject(listReject);
+
+                        for (RejectOrder detail : listReject) {
+                            //item_id and item_type --> add schedule photo
+                            if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
+                                listProduct.add(detail);
+                            }
+                        }
+                        session.setAttribute("LIST_REJECT_SCHEDULE", listSchedule);
+                        session.setAttribute("LIST_REJECT_PRODUCT", listProduct);
 
                         List<Location> listLocation = locationDAO.getAllLocation();
                         session.setAttribute("LIST_LOCATION", listLocation);

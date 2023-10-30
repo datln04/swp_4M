@@ -315,6 +315,35 @@ add order_start_date varchar(50)
 alter table photo_schedules
 add order_end_date varchar(50)
 
+create table reject_order (
+	 reject_id INT IDENTITY(1,1) PRIMARY KEY,
+	 name varchar(50),
+	 description varchar(500),
+	 price float,
+	 order_date varchar(50),
+	 order_start_date varchar(50),
+	 order_end_date varchar(50),
+	 item_type varchar(50),
+	 item_id int,
+	 profile_id int,
+	 status varchar(50),
+	 FOREIGN KEY (profile_id) REFERENCES profiles(profile_id)
+)
+
+
+
+
+/*
+select od.order_detail_id, od.name, od.description, od.order_date, od.price
+from order_detail od inner join reject_order ro on od.order_detail_id = ro.order_detail_id
+	inner join orders o on od.order_id = o.order_id
+where o.profile_id = 4 and */ 
+
+
+
+/*insert into dbo.reject_order(reject_id, order_detail_id, status)
+values (?,?,?)
+*/
 
 /*SELECT order_detail_id, order_id, item_id, item_type, order_date, name, description, price, is_active, order_end_date, order_start_date
 FROM order_detail

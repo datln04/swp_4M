@@ -43,6 +43,16 @@ public class OrderDetail implements Serializable {
         this.orderStartDate = orderStartDate;
         this.orderEndDate = orderEndDate;
     }
+    
+    public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate,String orderStartDate, String orderEndDate) {
+        this.orderDetailId = orderDetailId;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.orderDate = orderDate;
+        this.orderStartDate = orderStartDate;
+        this.orderEndDate = orderEndDate;
+    }
 
     public OrderDetail(int orderDetailId, String name, String description, double price, String orderDate, int itemId, String itemType) {
         this.orderDetailId = orderDetailId;

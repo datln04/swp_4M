@@ -7,6 +7,7 @@ package util;
 
 import dto.OrderDetail;
 import dto.PhotoSchedule;
+import dto.RejectOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -100,6 +101,27 @@ public class Utilities {
                     groupedMap.get(key).add(orderDetail);
                 } else {
                     List<OrderDetail> groupedList = new ArrayList<>();
+                    groupedList.add(orderDetail);
+                    groupedMap.put(key, groupedList);
+                }
+            }
+        });
+
+        return groupedMap;
+    }
+    
+    public static Map<String, List<RejectOrder>> groupOrderReject(List<RejectOrder> orderDetails) {
+        Map<String, List<RejectOrder>> groupedMap = new HashMap<>();
+
+        orderDetails.forEach((orderDetail) -> {
+            String[] arr = orderDetail.getItemType().split("-");
+            if (arr.length > 1) {
+                String key = arr[0] + "-" + orderDetail.getItemId();
+
+                if (groupedMap.containsKey(key)) {
+                    groupedMap.get(key).add(orderDetail);
+                } else {
+                    List<RejectOrder> groupedList = new ArrayList<>();
                     groupedList.add(orderDetail);
                     groupedMap.put(key, groupedList);
                 }

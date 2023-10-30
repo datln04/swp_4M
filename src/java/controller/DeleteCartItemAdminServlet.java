@@ -11,6 +11,7 @@ import dao.OrderDAO;
 import dao.OrderDetailDAO;
 import dao.PhotoScheduleDAO;
 import dao.PhotographyStudiosDAO;
+import dao.RejectOrderDAO;
 import dao.RentalProductDAO;
 import dto.DressPhotoCombo;
 import dto.Location;
@@ -20,6 +21,7 @@ import dto.OrderItem;
 import dto.PhotoSchedule;
 import dto.PhotographyStudio;
 import dto.Profile;
+import dto.RejectOrder;
 import dto.RentalProduct;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -76,6 +78,7 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
         PhotographyStudiosDAO studioDAO = new PhotographyStudiosDAO();
         RentalProductDAO productDAO = new RentalProductDAO();
         DressPhotoComboDAO comboDAO = new DressPhotoComboDAO();
+        RejectOrderDAO rejectDAO = new RejectOrderDAO();
 
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("USER");
@@ -96,7 +99,12 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
                             for (OrderDetail orderDetail1 : listRemove) {
                                 boolean removeDetail = orderDetailDAO.deleteOrderDetail(orderDetail1.getOrderDetailId());
                                 if (removeDetail) {
-                                    url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                                    RejectOrder rejectOrder = new RejectOrder("reject", orderDetail.getName(), orderDetail.getDescription(), orderDetail.getPrice(),
+                                            orderDetail.getOrderDate(), orderDetail.getOrderStartDate(), orderDetail.getOrderEndDate(), existOrder.getProfileId(), orderDetail.getItemType(), orderDetail.getItemId());
+                                    boolean addReject = rejectDAO.saveRejectOrder(rejectOrder);
+                                    if (addReject) {
+                                        url = ADMIN_PAGE;
+                                    }
                                 }
                             }
 
@@ -115,7 +123,12 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
                                     boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
 
                                     if (result) {
-                                        url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                                        RejectOrder rejectOrder = new RejectOrder("reject", orderDetail.getName(), orderDetail.getDescription(), orderDetail.getPrice(),
+                                                orderDetail.getOrderDate(), orderDetail.getOrderStartDate(), orderDetail.getOrderEndDate(), existOrder.getProfileId(), orderDetail.getItemType(), orderDetail.getItemId());
+                                        boolean addReject = rejectDAO.saveRejectOrder(rejectOrder);
+                                        if (addReject) {
+                                            url = ADMIN_PAGE;
+                                        }
                                     }
                                 }
                             }
@@ -131,7 +144,12 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
                                     boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
 
                                     if (result) {
-                                        url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                                        RejectOrder rejectOrder = new RejectOrder("reject", orderDetail.getName(), orderDetail.getDescription(), orderDetail.getPrice(),
+                                                orderDetail.getOrderDate(), orderDetail.getOrderStartDate(), orderDetail.getOrderEndDate(), existOrder.getProfileId(), orderDetail.getItemType(), orderDetail.getItemId());
+                                        boolean addReject = rejectDAO.saveRejectOrder(rejectOrder);
+                                        if (addReject) {
+                                            url = ADMIN_PAGE;
+                                        }
                                     }
                                 }
                             }
@@ -141,7 +159,12 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
                             boolean result = orderDetailDAO.deleteOrderDetail(orderDetail.getOrderDetailId());
 
                             if (result) {
-                                url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                                RejectOrder rejectOrder = new RejectOrder("reject", orderDetail.getName(), orderDetail.getDescription(), orderDetail.getPrice(),
+                                        orderDetail.getOrderDate(), orderDetail.getOrderStartDate(), orderDetail.getOrderEndDate(), existOrder.getProfileId(), orderDetail.getItemType(), orderDetail.getItemId());
+                                boolean addReject = rejectDAO.saveRejectOrder(rejectOrder);
+                                if (addReject) {
+                                    url = ADMIN_PAGE;
+                                }
                             }
                         }
                     }
@@ -155,26 +178,45 @@ public class DeleteCartItemAdminServlet extends HttpServlet {
 
                         for (Order order : listOrder) {
                             List<OrderDetail> listOrderDetail = orderDetailDAO.getOrderDetailByOrderIdAdmin(order.getOrderId());
-                            Utilities.groupOrderDetails(listOrderDetail, listSchedule, order.getStatus());
+                            int photoTmp = 0;
+                            List<PhotoSchedule> photoList = new ArrayList<>();
+                            for (OrderDetail od : listOrderDetail) {
+                                String arr1[] = od.getItemType().split("-");
+                                if (arr1.length > 1) {
+                                    if (photoTmp != od.getItemId()) {
+                                        PhotoSchedule photo = scheduleDAO.getPhotoScheduleByIdAdmin(od.getItemId());
+                                        if (photo != null) {
+                                            photoTmp = photo.getScheduleId();
+                                            photoList.add(photo);
+                                        }
+                                    }
+                                }
+                            }
+                            Utilities.groupOrderDetailsAdminLoaded(listOrderDetail, listSchedule, photoList);
                             for (OrderDetail detail : listOrderDetail) {
                                 //item_id and item_type --> add schedule photo
                                 if (!detail.getItemType().equals("photo_schedule-location") && !detail.getItemType().equals("photo_schedule-studio")) {
-                                    detail.setStatus(order.getStatus());
+                                    if (detail.getItemType().equals("confirm")) {
+                                        detail.setStatus("confirm");
+                                    } else {
+                                        detail.setStatus(order.getStatus());
+                                    }
                                     listProduct.add(detail);
                                 }
                             }
+
                         }
 
                         session.setAttribute("LIST_CART_PRODUCT_ADMIN", listProduct);
                         session.setAttribute("LIST_CART_SCHEDULE_ADMIN", listSchedule);
-                        url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                        url = ADMIN_PAGE;
                     } else {
                         // order is empty -> delete order
                         boolean result = orderDAO.removeOrderById(existOrder.getOrderId());
                         if (result) {
                             session.setAttribute("LIST_CART_PRODUCT", null);
                             session.setAttribute("LIST_CART_SCHEDULE", null);
-                            url = profile.getRoleName().equals("admin") ? ADMIN_PAGE : profile.getRoleName().equals("staff") ? PHOTO_HOME_PAGE : RENTAL_PAGE;
+                            url = ADMIN_PAGE;
                         }
                     }
                 }

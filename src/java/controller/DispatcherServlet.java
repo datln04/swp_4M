@@ -43,6 +43,7 @@ public class DispatcherServlet extends HttpServlet {
     public final String DELETE_PROFILE_SERVLET = "DeleteProfileServlet";
     public final String DELETE_ACCOUNT_SERVLET = "DeleteAccountServlet";
     public final String CATEGORY_SERVLET = "CategoryServlet";
+    public final String CATEGORY_SERVLET_ADMIN = "CategoryAdminServlet";
     public final String BOOK_SCHEDULE = "BookScheduleServlet";
     public final String DELETE_CART_ITEM = "DeleteCardItemServlet";
     public final String EDIT_ACCOUNT_SERVLET = "EditAccountServlet";
@@ -71,9 +72,10 @@ public class DispatcherServlet extends HttpServlet {
     public final String ADD_PRODUCT_SERVLET = "AddProductServlet";
     public final String VERIFY_PASSWORD_SERVLET = "VerifyPasswordServlet";
 
-
     public final String CHANGE_ITEM_SERVLET = "ChangeItemServlet";
     public final String FORGOT_PASSWORD_SERVLET = "ForgotPasswordServlet";
+    
+    public final String REJECT_CONFIRM_SERVLET = "RejectConfirmServlet";
 
     public final String HOME_PAGE = "home.jsp";
 
@@ -147,6 +149,8 @@ public class DispatcherServlet extends HttpServlet {
                 url = DELETE_ACCOUNT_SERVLET;
             } else if ("CategoryFilter".equals(action)) {
                 url = CATEGORY_SERVLET;
+            } else if ("CategoryFilterAdmin".equals(action)) {
+                url = CATEGORY_SERVLET_ADMIN;
             } else if ("Book Schedule".equals(action)) {
                 url = BOOK_SCHEDULE;
             } else if ("DeleteItem".equals(action)) {
@@ -185,10 +189,12 @@ public class DispatcherServlet extends HttpServlet {
                 url = CHANGE_ITEM_SERVLET;
             } else if ("ForgotPassword".equals(action)) {
                 url = FORGOT_PASSWORD_SERVLET;
-            }else if("Verify".equals(action)){
+            } else if ("Verify".equals(action)) {
                 url = VERIFY_PASSWORD_SERVLET;
-            }else if("changePassword".equals(action)){
+            } else if ("changePassword".equals(action)) {
                 url = FORGOT_PASSWORD_SERVLET;
+            }else if("Reject Order".equals(action)){
+                url = REJECT_CONFIRM_SERVLET;
             }
         } catch (NamingException ex) {
             log("DispatcherServlet_NamingException: " + ex.getMessage());

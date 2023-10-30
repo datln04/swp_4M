@@ -240,7 +240,7 @@
                             <a class="dropdown-item" href="DispatcherServlet?btAction=CategoryFilter&category=combo">Combos</a>
                         </div>
                     <c:if test="${sessionScope.USER != null}">
-                        <button class="btn btn-secondary btn-booking" onclick="openPopup()">Booking Photography Schedule</button>
+                        <button class="btn btn-secondary btn-booking" onclick="openPopup()" >Booking Photography Schedule</button>
                     </c:if>
                 </div>
 
@@ -340,17 +340,17 @@
                 <span class="close" onclick="closePopup()">&times;</span>
                 <h2>Booking Photography Schedule</h2>
                 <form action="DispatcherServlet" method="POST">
-                    <label for="locationImage">Select location:</label>
-                    <select name="location" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true">
-                        <c:forEach items="${sessionScope.LIST_LOCATION}" var="l">
-                            <option value="${l.id}" data-price="${l.price}">${l.name}</option>
+                    <label for="studioName">Select Studio:</label>
+                    <select name="studio" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true" id="studioSelect">
+                        <c:forEach items="${sessionScope.LIST_STUDIO}" var="s">
+                            <option value="${s.id}" data-price="${s.price}">${s.name}</option>
                         </c:forEach>
                     </select>
                     <br/> 
-                    <label for="studioName">Select Studio:</label>
-                    <select name="studio" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true">
-                        <c:forEach items="${sessionScope.LIST_STUDIO}" var="s">
-                            <option value="${s.id}" data-price="${s.price}">${s.name}</option>
+                    <label for="locationImage">Select location:</label>
+                    <select name="location" class="form-select" aria-label="Default select example" onchange="updateTotalPrice(this)" required="true" id="locationSelect">
+                        <c:forEach items="${sessionScope.LIST_LOCATION}" var="l">
+                            <option value="${l.id}" data-price="${l.price}">${l.name}</option>
                         </c:forEach>
                     </select>
                     <br/> 
@@ -365,7 +365,7 @@
                     <input type="number" name="price" class="ml-5" id="totalPrice" readonly="true"/>
 
                     <br />
-                    <input type="submit" value="Book Schedule" name="btAction" class="button button-update mt-3"/>
+                    <input type="submit" value="Book Schedule" name="btAction" class="button button-update mt-3" id="buttonSchedule"/>
                 </form>
             </div>
         </div>
@@ -451,14 +451,48 @@
                         if (${requestScope.BOOK_NOT_AVAILABLE != null}) {
                             swal("Opps!", '${requestScope.BOOK_NOT_AVAILABLE}', "warning");
                         }
-                        
+
                         if (${requestScope.PAYMENT_SUCCESS != null && requestScope.LIST_ITEM_ERROR != null}) {
                             swal("Congratulation!", '${requestScope.LIST_ITEM_ERROR}', "success");
-                        }else if (${requestScope.PAYMENT_SUCCESS != null}) {
+                        } else if (${requestScope.PAYMENT_SUCCESS != null}) {
                             swal("Congratulation!", '${requestScope.PAYMENT_SUCCESS}', "success");
                         }
-                        
-                        
+
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const studioSelect = document.getElementById("studioSelect");
+                            const locationSelect = document.getElementById("locationSelect");
+                            const timeRangeInput = document.getElementById("timeRangeBooking");
+                            const timeRangeReturn = document.getElementById("timeRangeReturnBooking");
+                            const button = document.getElementById("buttonSchedule");
+
+                            // Disable the location and date inputs initially
+                            locationSelect.disabled = true;
+                            timeRangeInput.disabled = true;
+                            timeRangeReturn.disabled = true;
+                            button.style.display = 'none';
+
+                            // Add an event listener to the studio select element
+                            studioSelect.addEventListener("change", function () {
+                                // Disable the location and date inputs when the studio selection changes
+                                locationSelect.disabled = true;
+                                timeRangeInput.disabled = true;
+                                timeRangeReturn.disabled = true;
+
+
+                                // Enable the location select when a studio is selected
+                                if (studioSelect.value !== "") {
+                                    locationSelect.disabled = false;
+                                }
+                            });
+
+                            // Add an event listener to the location select element
+                            locationSelect.addEventListener("change", function () {
+                                // Enable the date input when a location is selected
+                                timeRangeInput.disabled = false;
+                                timeRangeReturn.disabled = false;
+                                button.style.display = 'block';
+                            });
+                        });
 
 
         </script>

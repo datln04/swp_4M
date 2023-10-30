@@ -202,10 +202,11 @@
                         <!-- Get the key and value from the map entry -->
                         <c:set var="key" value="${entry.key}" />
                         <c:set var="value" value="${entry.value}" />
-
+                        <c:set var="totalSubItemPrice" value="0"/>
                         <!-- Iterate over the list -->
                         <c:forEach var="item" items="${value}" varStatus="count">
                             <!-- Display the list item -->
+                            <c:set var="totalSubItemPrice" value="${totalSubItemPrice + item.price}"/>
                             <c:set var="totalPriceCart" value="${totalPriceCart + item.price}"/>
                             <c:set var="idOrder" value="${item.orderId}"/>
                             <tr>
@@ -224,6 +225,12 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
+                                <td>
+                                    <c:if test="${count.index == 1}" >
+                                        total: ${totalSubItemPrice}
+                                    </c:if>
+                                </td>
                                 <c:if test="${count.index == 1}">
                                     <td style="border-bottom: none; text-align: center">
                                         <button class="button button-delete btn-delete-all-item" onclick="openPopupDelete('${item.orderId}', '${item.orderDetailId}', '${item.itemId}', '${item.itemType}')">Delete Item</button>  
