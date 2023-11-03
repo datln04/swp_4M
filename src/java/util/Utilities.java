@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-
 /**
  *
  * @author ptd
@@ -109,7 +108,7 @@ public class Utilities {
 
         return groupedMap;
     }
-    
+
     public static Map<String, List<RejectOrder>> groupOrderReject(List<RejectOrder> orderDetails) {
         Map<String, List<RejectOrder>> groupedMap = new HashMap<>();
 
@@ -207,15 +206,21 @@ public class Utilities {
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+    public static boolean isValidPhone(String email) {
+        String emailRegex = "^[-0-9]$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+    
 
     public static String convertTimeZoneToISO120(String time) {
         return time.replace("T", " ");
     }
 
-
     public static boolean areValidStrings(int maxLength, String... strings) {
         // Define a regular expression pattern for alphanumeric characters and a maximum length
-        String regexPattern = "^[a-zA-Z0-9]{1," + maxLength + "}$";
+        String regexPattern = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9\\s]{1," +maxLength+"}$|^[a-zA-Z\\s]{1,"+maxLength+"}$";
         // Compile the regular expression pattern
         Pattern pattern = Pattern.compile(regexPattern);
         for (String str : strings) {

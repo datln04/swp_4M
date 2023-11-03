@@ -184,7 +184,7 @@
                                 <div class="col-md-4"><label class="labels">Click to change password</label><button onclick="showPasswordChangePopup()" type="button" class="btn btn-primary" id="passwordChangeButton">Change password</button></div>
                                 <div class="col-md-12"><label class="labels">Mobile Number</label><input type="text" class="form-control" placeholder="enter phone number" value="${pro.phoneNumber}" name="txtPhoneNumber"></div>
                                 <div class="col-md-12"><label class="labels">Address</label><input type="text" class="form-control" placeholder="enter address" value="${pro.address}" name="txtAddress"></div>
-                                <div class="col-md-12"><label class="labels">Email<span style="color: red">*</span></label><input type="text" required="true" class="form-control" placeholder="enter email" value="${pro.email}" name="txtEmail"></div>
+                                <div class="col-md-12"><label class="labels">Email<span style="color: red">*</span></label><input type="email" required="true" class="form-control" placeholder="enter email" value="${pro.email}" name="txtEmail"></div>
 
                             </div>
                             <div class="justify-content-center d-flex">

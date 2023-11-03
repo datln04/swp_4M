@@ -120,7 +120,7 @@
                     <a href="register.jsp">Register</a>
                 </c:if>          
                 <c:if test="${sessionScope.USER != null and sessionScope.USER.roleName eq 'user'}">
-                    <a class="" href="reject.jsp">
+                    <a class="" href="feedback.jsp">
                         Feedback
                     </a>
                     <a class="" href="reject.jsp">

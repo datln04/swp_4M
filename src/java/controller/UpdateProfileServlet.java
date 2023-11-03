@@ -62,7 +62,7 @@ public class UpdateProfileServlet extends HttpServlet {
         AccountDAO dao = new AccountDAO();
         if (session != null) {
             Profile profile = (Profile) session.getAttribute("USER");
-            if (Utilities.areValidStrings(20, firstName, lastName, password, phoneNumber, address, email)) {
+            if (Utilities.areValidStrings(20, firstName, lastName, password, address) || Utilities.isValidEmail(email) || Utilities.isValidPhone(phoneNumber)) {
                 // All input strings are valid, proceed with the profile update
                 if (password.equals(profile.getPassword())) {
                     if (profile != null) {

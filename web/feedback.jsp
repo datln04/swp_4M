@@ -129,6 +129,7 @@
                 display: flex;
                 margin-top: 10px;
                 padding-left: 70px;
+                justify-content: end;
             }
 
             .comment-reply-content {
