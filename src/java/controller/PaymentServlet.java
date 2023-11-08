@@ -172,25 +172,41 @@ public class PaymentServlet extends HttpServlet {
 //            String paymentUrl = Config.vnp_PayUrl + "?" + queryUrl;
 //            System.out.println(paymentUrl);
 //            res.sendRedirect(paymentUrl);
+
+                // Lấy tất cả order-detail trong cart của user hiện tại
                 List<OrderDetail> listOrder = orderDetailDAO.getOrderDetailByOrderId(Integer.parseInt(orderId));
 
+                // bỏ item vào transaction để paypal biết những item nào và id nào
                 Transaction listTransaction = getTransactionInformation(listOrder);
 
+                // api của paypal bao gồm key và secret 
                 APIContext apiContext = new APIContext(Contant.CLIENT_ID, Contant.CLIENT_SECRET, Contant.CLIENT_MODE);
 
+                // tạo payment trên paypal
                 Payment payment = new Payment();
+                // intent này bắt buộc phải có nhưng k nhất thiết phải là sale -> a để sale cho vui thoy
                 payment.setIntent("sale");
 
+                // thông tin của ng thanh toán 
+                // thường cái này sẽ hiển thị lúc e thanh toán nhưng mà e đang xài account test của a nên nó sẽ hiển thị tên của a thay vì payer 
                 Payer payer = getPayerInformation(profile);
                 payment.setPayer(payer);
 
+                // redirect url để paypal biết sau khi cancel thì về page nào của mình or sau khi thanh toán thành công nó sẽ return lại page nào của mình
+                // ctrl + click vào hàm getRedirectUrl để biết thêm chi tiết
                 RedirectUrls redirectUrls = getRedirectURLs();
+                
+                // set redirect url và transaction bên trên vào payment
                 payment.setRedirectUrls(redirectUrls);
                 payment.setTransactions(Collections.singletonList(listTransaction)); // Set a single transaction
 
+                // tạo payment bằng thông qua api của paypal
                 Payment approvedPayment = payment.create(apiContext);
 
+                //trong approvedPayment sau khi khởi tạo sẽ có link để redirect ( nó là trang paypal mà mấy e thao tác )
                 String link = getApprovalLink(approvedPayment);
+                
+                // redirect đi thoy
                 res.sendRedirect(link);
 
             } catch (PayPalRESTException ex) {
@@ -204,6 +220,7 @@ public class PaymentServlet extends HttpServlet {
         }
     }
 
+    // bỏ tất cả item trong cart vào transaction
     private Transaction getTransactionInformation(List<OrderDetail> orderDetails) {
         LocationDAO locationDAO = new LocationDAO();
         DressPhotoComboDAO comboDAO = new DressPhotoComboDAO();

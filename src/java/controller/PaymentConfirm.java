@@ -39,14 +39,17 @@ public class PaymentConfirm extends HttpServlet {
             throws ServletException, IOException {
         try {
             response.setContentType("text/html;charset=UTF-8");
-
+            // Sau khi thanh toán thành công 
+            // servlet này sẽ nhận đc paymentId and payerId của paypal return về
             String paymentId = request.getParameter("paymentId");
             String payerId = request.getParameter("PayerID");
 
+            // những step này cơ bản là lấy lại mấy cái thông tin mình đã taoj bên PaymentServlet để bắt đầu tiến hành insert vào DB
             Payment payment = getPaymentDetails(paymentId);
             PayerInfo payerInfo = payment.getPayer().getPayerInfo();
             Transaction transaction = payment.getTransactions().get(0);
 //            ShippingAddress shippingAddress = transaction.getItemList().getShippingAddress();
+            //set attribute redirect qua review.jsp page
             request.setAttribute("payer", payerInfo);
             request.setAttribute("transaction", transaction);
 //            request.setAttribute("shippingAddress", shippingAddress);
