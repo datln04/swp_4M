@@ -127,7 +127,7 @@ public class RegisterAccountServlet extends HttpServlet {
                 boolean result = dao.insertProfifle(profile);
                 if (result) {
                     session.removeAttribute("OTP");
-                    session.removeAttribute("USER_TMP");
+                    session.removeAttribute("USER_REGISTER");
                     url = HOME_PAGE;
                 }
             }
@@ -167,7 +167,7 @@ public class RegisterAccountServlet extends HttpServlet {
         HttpSession session = request.getSession();
 
         try {
-            boolean checkUserName = dao.checkValidUsername(userName);
+            boolean checkUserName = dao.checkValidUsername(userName, email);
             boolean checkValidEmail = Utilities.isValidEmail(email);
             if (!checkUserName && checkValidEmail) {
                 String otp = generateOTP(6);

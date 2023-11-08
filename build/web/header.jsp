@@ -108,7 +108,7 @@
                 </c:if>
                 <c:if test="${sessionScope.USER != null}">
 
-                    <p href="#">Hello <a href="profile.jsp"><strong>${sessionScope.USER.firstName}</strong></a></p>
+                    <p href="#">Hello <a href="profile.jsp"><strong>${sessionScope.USER.userName}</strong></a></p>
                                 <c:if test="${sessionScope.USER.roleName eq 'admin'}">
                         <a href="admin.jsp">Admin</a>
                         <a href="showFeedback.jsp">Manage Feedback</a>

@@ -63,7 +63,7 @@
             <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
             <script>
                                 if (${requestScope.ERROR_USER_NAME != null}) {
-                                    swal("Invalid UserName");
+                                    swal("Invalid UserName or email exist");
                                 }
                                 function validateEmail() {
                                     var emailInput = document.getElementById("emailInput");

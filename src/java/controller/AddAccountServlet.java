@@ -59,7 +59,7 @@ public class AddAccountServlet extends HttpServlet {
         HttpSession session = request.getSession();
 
         try {
-            boolean checkUserName = dao.checkValidUsername(userName);
+            boolean checkUserName = dao.checkValidUsername(userName, email);
             if (!checkUserName) {
                 Profile profile = new Profile(firstName, lastName, email, phone, address, userName, Integer.parseInt(roleId), passwordDefault);
                 boolean result = dao.insertProfifle(profile);

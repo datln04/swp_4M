@@ -69,14 +69,15 @@ public class AccountDAO implements Serializable {
         return null;
     }
 
-    public boolean checkValidUsername(String userName) throws NamingException, SQLException {
+    public boolean checkValidUsername(String userName, String email) throws NamingException, SQLException {
         try {
             conn = ConnectionConfig.getConnection();
             if (conn != null) {
-                String sql = "select profile_id from profiles where user_name = ?";
+                String sql = "select profile_id from profiles where user_name = ? or email = ?";
 
                 pst = conn.prepareStatement(sql);
                 pst.setString(1, userName);
+                pst.setString(2, email);
 
                 rs = pst.executeQuery();
                 if (rs.next()) {
